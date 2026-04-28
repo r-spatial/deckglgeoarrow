@@ -17,6 +17,11 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
     });
 
+  map.on("projectiontransition", () => {
+    decklayer._updateViewState();
+  });
+
+
 };
 
 

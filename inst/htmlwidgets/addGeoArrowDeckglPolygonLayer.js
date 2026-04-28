@@ -16,7 +16,11 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
       decklayer.setProps({layers: polygonlayer});
 
     });
-debugger;
+
+  map.on("projectiontransition", () => {
+    decklayer._updateViewState();
+  });
+
 };
 
 polygonLayer = function(map, opts, arrow_table) {

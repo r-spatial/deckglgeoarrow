@@ -26,18 +26,7 @@ dat$lineWidth = sample.int(5, nrow(dat), replace = TRUE)
 
 options(viewer = NULL)
 
-m = maplibre(
-  style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-  # , renderWorldCopies = FALSE
-  )
-  # geoarrowDeckglLayers:::add_globe_control()
-
-# m = mapboxgl(
-#   style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-#   , projection = "mercator"
-#   ) |>
-#   add_navigation_control(visualize_pitch = TRUE) |>
-#   add_layers_control(collapsible = TRUE, layers = c("test"))
+m = m = maplibre(style = 'https://tiles.openfreemap.org/styles/liberty')
 
 m |>
   addGeoArrowScatterplotLayer(
@@ -71,7 +60,8 @@ m |>
   ) |>
   # set_projection("mercator") |>
   add_globe_control() |>
-  add_navigation_control(visualize_pitch = TRUE)
+  add_navigation_control(visualize_pitch = TRUE) |>
+  geoarrowDeckglLayers:::addMouseCoordinates()
 
 
 
@@ -112,7 +102,7 @@ m |>
     , layer_id = "deck-layer-group-last"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
-      extruded = TRUE
+      extruded = FALSE
     )
     , data_accessors = dataAccessors(
       getFillColor = "fillColor"
@@ -128,7 +118,8 @@ m |>
   ) |>
   # set_projection("mercator") |>
   add_globe_control() |>
-  add_navigation_control(visualize_pitch = TRUE)
+  add_navigation_control(visualize_pitch = TRUE) |>
+  geoarrowDeckglLayers:::addMouseCoordinates()
 
 
 ### lines ======================================

@@ -29,9 +29,8 @@ options(viewer = NULL)
 m = maplibre(
   style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
   # , renderWorldCopies = FALSE
-  ) |>
-  add_navigation_control(visualize_pitch = TRUE) |>
-  add_globe_control()
+  )
+  # geoarrowDeckglLayers:::add_globe_control()
 
 # m = mapboxgl(
 #   style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
@@ -43,10 +42,9 @@ m = maplibre(
 m |>
   addGeoArrowScatterplotLayer(
     data = dat
-    , layer_id = "test"
+    , layer_id = "deck-layer-group-last"
     , geom_column_name = attr(dat, "sf_column")
-    # , interleaved = FALSE
-    , render_options = renderOptions(beforeId = NULL) #"boundary_county")
+    , render_options = renderOptions()
     , data_accessors = dataAccessors(
       getRadius = "radius"
       , getFillColor = "fillColor"
@@ -67,13 +65,22 @@ m |>
     )
     , interleaved = TRUE
   ) |>
-  add_layers_control(collapsible = TRUE, layers = c("test"))
+  add_layers_control(
+    collapsible = TRUE
+    , layers = list("Deck layer" = "deck-layer-group-last")
+  ) |>
+  # set_projection("mercator") |>
+  add_globe_control() |>
+  add_navigation_control(visualize_pitch = TRUE)
 
 
 
 
 ### polygons ==================================
-dat = st_read("~/Downloads/data.gpkg")
+# dat = st_read("~/Downloads/data.gpkg")
+dat = mapview::franconia
+idx = sapply(dat, is.factor)
+dat[idx] = NULL
 dat$fillColor = color_values(
   rnorm(nrow(dat))
   , alpha = sample.int(255, nrow(dat), replace = TRUE)
@@ -83,15 +90,13 @@ dat$lineColor = color_values(
   , alpha = sample.int(255, nrow(dat), replace = TRUE)
   , palette = "inferno"
 )
-dat$elevation = sample.int(200, nrow(dat), replace = TRUE)
-dat$lineWidth = sample.int(1500, nrow(dat), replace = TRUE)
+dat$elevation = sample.int(2000, nrow(dat), replace = TRUE)
+dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
 
 
 options(viewer = NULL)
 
-m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json') |>
-  add_navigation_control(visualize_pitch = TRUE) |>
-  add_layers_control(collapsible = TRUE, layers = c("test")) |>
+m = maplibre(style = 'https://tiles.openfreemap.org/styles/liberty') |>
   fit_bounds(unname(st_bbox(dat)), animate = FALSE)
 
 # m = mapboxgl(
@@ -102,39 +107,49 @@ m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.j
 #   add_layers_control(collapsible = TRUE, layers = c("test"))
 
 m |>
-  geoarrowDeckgl:::addGeoArrowPolygonLayer(
+  addGeoArrowPolygonLayer(
     data = dat
-    , layerId = "test"
+    , layer_id = "deck-layer-group-last"
     , geom_column_name = attr(dat, "sf_column")
-    , render_options = geoarrowDeckgl:::renderOptions(
-      extruded = FALSE
+    , render_options = renderOptions(
+      extruded = TRUE
     )
-    , data_accessors = geoarrowDeckgl:::dataAccessors(
+    , data_accessors = dataAccessors(
       getFillColor = "fillColor"
       , getLineColor = "lineColor"
-      , getLineWidth = 1 # "lineWidth"
+      , getLineWidth = 2 #"lineWidth"
       , getElevation = "elevation"
     )
     , popup = TRUE
-  )
+  ) |>
+  add_layers_control(
+    collapsible = TRUE
+    , layers = list("Deck layer" = "deck-layer-group-last")
+  ) |>
+  # set_projection("mercator") |>
+  add_globe_control() |>
+  add_navigation_control(visualize_pitch = TRUE)
 
 
 ### lines ======================================
 # dat = st_read("~/Downloads/DLM_4000_GEWAESSER_20211015.gpkg", layer = "GEW_4100_FLIESSEND_L")
-dat = st_read("~/Downloads/rivers_africa.fgb")
+# dat = st_read("~/Downloads/rivers_africa.fgb")
+dat = mapview::trails
+idx = sapply(dat, is.factor)
+dat[idx] = NULL
 dat = st_transform(dat, crs = "EPSG:4326")
 dat$lineColor = color_values(
-  dat$Strahler
+  rnorm(nrow(dat))
+  , alpha = sample.int(255, nrow(dat), replace = TRUE)
   , palette = "inferno"
 )
-dat$lineWidth = sample.int(1500, nrow(dat), replace = TRUE)
+dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
 
 
 options(viewer = NULL)
 
-m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json') |>
-  add_navigation_control(visualize_pitch = TRUE) |>
-  add_layers_control(collapsible = TRUE, layers = c("test"))
+m = maplibre(style = 'https://tiles.openfreemap.org/styles/liberty') |>
+  fit_bounds(unname(st_bbox(dat)), animate = FALSE)
 
 # m = mapboxgl(
 #   style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
@@ -146,15 +161,15 @@ m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.j
 m |>
   addGeoArrowPathLayer(
     data = dat
-    , layerId = "test"
+    , layer_id = "deck-layer-group-last"
     , geom_column_name = attr(dat, "sf_column")
-    , render_options = geoarrowDeckgl:::renderOptions(
+    , render_options = renderOptions(
       widthUnits = "meters"
-      , widthScale = 100
-      , widthMaxPixels = 200
+      , widthScale = 1
+      , widthMaxPixels = 20
     )
-    , data_accessors = geoarrowDeckgl:::dataAccessors(
-      getWidth = "Strahler"
+    , data_accessors = dataAccessors(
+      getWidth = "lineWidth"
       , getColor = "lineColor"
     )
     , popup = TRUE
@@ -162,11 +177,16 @@ m |>
     , parameters = list(
       ## FIXME: neither depthTest:false nor depthCompare:"always" work in globe
       depthTest = FALSE
-      , depthCompare = "never"
+      , depthCompare = "always"
       # , antialias = TRUE
       , cullMode = "back"
     )
-  )
+  ) |>
+  add_navigation_control(visualize_pitch = TRUE) |>
+  add_globe_control() |>
+  add_layers_control(collapsible = TRUE, layers = c("deck-layer-group-last")) |>
+  geoarrowDeckglLayers:::addMouseCoordinates()
+
 
 
 ### point cloud =========================

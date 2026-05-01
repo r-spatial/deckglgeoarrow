@@ -128,20 +128,20 @@ m |>
 # dat = mapview::trails
 url = "/vsizip//vsicurl/https://storage.googleapis.com/fao-maps-catalog-data/geonetwork/aquamaps/rivers_asia_37331.zip"
 dat = st_read(url)
-idx = sapply(dat, is.factor)
-dat[idx] = NULL
-dat = st_transform(dat, crs = "EPSG:4326")
+# idx = sapply(dat, is.factor)
+# dat[idx] = NULL
+# dat = st_transform(dat, crs = "EPSG:4326")
 dat$lineColor = color_values(
   dat$Strahler
   # , alpha = sample.int(255, nrow(dat), replace = TRUE)
-  , palette = "Blues"
+  , palette = "blues"
 )
 # dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
 
 
 options(viewer = NULL)
 
-m = maplibre(style = 'https://tiles.openfreemap.org/styles/liberty') |>
+m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json') |>
   fit_bounds(unname(st_bbox(dat)), animate = FALSE)
 
 m |>

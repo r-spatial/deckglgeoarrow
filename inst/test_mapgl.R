@@ -125,29 +125,24 @@ m |>
 ### lines ======================================
 # dat = st_read("~/Downloads/DLM_4000_GEWAESSER_20211015.gpkg", layer = "GEW_4100_FLIESSEND_L")
 # dat = st_read("~/Downloads/rivers_africa.fgb")
-dat = mapview::trails
+# dat = mapview::trails
+url = "/vsizip//vsicurl/https://storage.googleapis.com/fao-maps-catalog-data/geonetwork/aquamaps/rivers_asia_37331.zip"
+dat = st_read(url)
 idx = sapply(dat, is.factor)
 dat[idx] = NULL
 dat = st_transform(dat, crs = "EPSG:4326")
 dat$lineColor = color_values(
-  rnorm(nrow(dat))
-  , alpha = sample.int(255, nrow(dat), replace = TRUE)
-  , palette = "inferno"
+  dat$Strahler
+  # , alpha = sample.int(255, nrow(dat), replace = TRUE)
+  , palette = "Blues"
 )
-dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
+# dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
 
 
 options(viewer = NULL)
 
 m = maplibre(style = 'https://tiles.openfreemap.org/styles/liberty') |>
   fit_bounds(unname(st_bbox(dat)), animate = FALSE)
-
-# m = mapboxgl(
-#   style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-#   , projection = "mercator"
-#   ) |>
-#   add_navigation_control(visualize_pitch = TRUE) |>
-#   add_layers_control(collapsible = TRUE, layers = c("test"))
 
 m |>
   addGeoArrowPathLayer(
@@ -156,11 +151,11 @@ m |>
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
       widthUnits = "meters"
-      , widthScale = 1
-      , widthMaxPixels = 20
+      , widthScale = 3000
+      # , widthMaxPixels = 20
     )
     , data_accessors = dataAccessors(
-      getWidth = "lineWidth"
+      getWidth = "Strahler"
       , getColor = "lineColor"
     )
     , popup = TRUE

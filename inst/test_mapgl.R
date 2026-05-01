@@ -153,6 +153,7 @@ m |>
       widthUnits = "meters"
       , widthScale = 3000
       # , widthMaxPixels = 20
+      , beforeId = "aeroway-runway"
     )
     , data_accessors = dataAccessors(
       getWidth = "Strahler"
@@ -160,6 +161,7 @@ m |>
     )
     , popup = TRUE
     , tooltip = TRUE
+    , interleaved = TRUE
     , parameters = list(
       ## FIXME: neither depthTest:false nor depthCompare:"always" work in globe
       depthTest = FALSE

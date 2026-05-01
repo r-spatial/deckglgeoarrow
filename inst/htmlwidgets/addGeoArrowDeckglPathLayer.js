@@ -30,6 +30,7 @@ pathLayer = function(map, opts, arrow_table) {
     id: opts.layerId,
     data: arrow_table,
     getPath: arrow_table.getChild(opts.geom_column_name),
+    beforeId: opts.renderOptions.beforeId,
 
     // render options
     widthUnits: opts.renderOptions.widthUnits,

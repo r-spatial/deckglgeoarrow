@@ -1,10 +1,16 @@
 addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
-  let decklayer = new deck.MapboxOverlay({
-    interleaved: opts.interleaved,
-    layers: [],
-  });
-  map.addControl(decklayer);
+  decklayer = map._controls.find((el) => el.hasOwnProperty("_deck"))
+
+  if (decklayer === undefined) {
+    decklayer = new deck.MapboxOverlay({
+      id: "test-deck",
+      interleaved: opts.interleaved,
+      layers: [],
+    });
+    map.addControl(decklayer);
+  }
+
 
   let data_fl = document.getElementById(opts.layerId + '-geoarrowWidget-attachment');
 

@@ -26,12 +26,12 @@ dat$lineWidth = sample.int(5, nrow(dat), replace = TRUE)
 
 options(viewer = NULL)
 
-m = m = maplibre(style = 'https://tiles.openfreemap.org/styles/liberty')
+m = maplibre(style = 'https://tiles.openfreemap.org/styles/liberty')
 
-m |>
+m = m |>
   addGeoArrowScatterplotLayer(
     data = dat
-    , layer_id = "deck-layer-group-last"
+    , layer_id = "scatter"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions()
     , data_accessors = dataAccessors(
@@ -85,14 +85,14 @@ dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
 
 options(viewer = NULL)
 
-m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json') |>
-  fit_bounds(unname(st_bbox(dat)), animate = FALSE)
+# m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json') |>
+#   fit_bounds(unname(st_bbox(dat)), animate = FALSE)
 
 m |>
   addGeoArrowPathLayer(
     data = dat
     # , layer_id = "deck-layer-group-before:aeroway-runway"
-    , layer_id = "deck-layer-group-last"
+    , layer_id = "line"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
       widthUnits = "meters"

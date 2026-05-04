@@ -1,10 +1,16 @@
 addGeoArrowDeckglPathLayer = function(map, opts) {
 
-  let decklayer = new deck.MapboxOverlay({
-    interleaved: opts.interleaved,
-    layers: [],
-  });
-  map.addControl(decklayer);
+  decklayer = map._controls.find((el) => el.hasOwnProperty("_deck"))
+
+  if (decklayer === undefined) {
+    decklayer = new deck.MapboxOverlay({
+      id: "test-deck",
+      interleaved: opts.interleaved,
+      layers: [],
+    });
+    map.addControl(decklayer);
+  }
+
 
   let data_fl = document.getElementById(opts.layerId + '-geoarrowWidget-attachment');
 
@@ -13,7 +19,9 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
     .then(arrow_table => {
 
       let pathlayer = pathLayer(map, opts, arrow_table);
-      decklayer.setProps({layers: pathlayer});
+      //decklayer.setProps({layers: pathlayer});
+      //FIXME here: figure out how to inject another layer!!!
+      decklayer.setProps({layers: decklayer._props.layers, pathlayer})
 
     });
 

@@ -65,6 +65,66 @@ m |>
 
 
 
+### lines ======================================
+# dat = st_read("~/Downloads/DLM_4000_GEWAESSER_20211015.gpkg", layer = "GEW_4100_FLIESSEND_L")
+# dat = st_read("~/Downloads/rivers_africa.fgb")
+# url = "/vsizip//vsicurl/https://storage.googleapis.com/fao-maps-catalog-data/geonetwork/aquamaps/rivers_asia_37331.zip"
+url = "~/Downloads/rivers_asia.gpkg"
+dat = st_read(url)
+# dat = mapview::trails
+# idx = sapply(dat, is.factor)
+# dat[idx] = NULL
+# dat = st_transform(dat, crs = "EPSG:4326")
+dat$lineColor = color_values(
+  dat$Strahler
+  # , alpha = sample.int(255, nrow(dat), replace = TRUE)
+  , palette = "blues"
+)
+dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
+
+
+options(viewer = NULL)
+
+m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json') |>
+  fit_bounds(unname(st_bbox(dat)), animate = FALSE)
+
+m |>
+  addGeoArrowPathLayer(
+    data = dat
+    # , layer_id = "deck-layer-group-before:aeroway-runway"
+    , layer_id = "deck-layer-group-last"
+    , geom_column_name = attr(dat, "sf_column")
+    , render_options = renderOptions(
+      widthUnits = "meters"
+      , widthScale = 3000
+      # , widthMaxPixels = 20
+      # , beforeId = "aeroway-runway"
+    )
+    , data_accessors = dataAccessors(
+      getWidth = "Strahler"
+      , getColor = "lineColor"
+    )
+    , popup = TRUE
+    , tooltip = TRUE
+    , interleaved = TRUE
+    , parameters = list(
+      ## FIXME: neither depthTest:false nor depthCompare:"always" work in globe
+      depthTest = FALSE
+      , depthCompare = "always"
+      # , antialias = TRUE
+      , cullMode = "back"
+    )
+  ) |>
+  add_navigation_control(visualize_pitch = TRUE) |>
+  add_globe_control() |>
+  add_layers_control(
+    collapsible = TRUE
+    # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
+    , layers = list("Deck Layer" = "deck-layer-group-last")
+  ) |>
+  geoarrowDeckglLayers:::addMouseCoordinates()
+
+
 
 ### polygons ==================================
 # dat = st_read("~/Downloads/data.gpkg")
@@ -86,7 +146,7 @@ dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
 
 options(viewer = NULL)
 
-m = maplibre(style = 'https://tiles.openfreemap.org/styles/liberty') |>
+m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json') |>
   fit_bounds(unname(st_bbox(dat)), animate = FALSE)
 
 # m = mapboxgl(
@@ -103,6 +163,7 @@ m |>
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
       extruded = FALSE
+      # , beforeId = "boundary_county"
     )
     , data_accessors = dataAccessors(
       getFillColor = "fillColor"
@@ -111,56 +172,6 @@ m |>
       , getElevation = "elevation"
     )
     , popup = TRUE
-  ) |>
-  add_layers_control(
-    collapsible = TRUE
-    , layers = list("Deck layer" = "deck-layer-group-last")
-  ) |>
-  # set_projection("mercator") |>
-  add_globe_control() |>
-  add_navigation_control(visualize_pitch = TRUE) |>
-  geoarrowDeckglLayers:::addMouseCoordinates()
-
-
-### lines ======================================
-# dat = st_read("~/Downloads/DLM_4000_GEWAESSER_20211015.gpkg", layer = "GEW_4100_FLIESSEND_L")
-# dat = st_read("~/Downloads/rivers_africa.fgb")
-# dat = mapview::trails
-url = "/vsizip//vsicurl/https://storage.googleapis.com/fao-maps-catalog-data/geonetwork/aquamaps/rivers_asia_37331.zip"
-dat = st_read(url)
-# idx = sapply(dat, is.factor)
-# dat[idx] = NULL
-# dat = st_transform(dat, crs = "EPSG:4326")
-dat$lineColor = color_values(
-  dat$Strahler
-  # , alpha = sample.int(255, nrow(dat), replace = TRUE)
-  , palette = "blues"
-)
-# dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
-
-
-options(viewer = NULL)
-
-m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json') |>
-  fit_bounds(unname(st_bbox(dat)), animate = FALSE)
-
-m |>
-  addGeoArrowPathLayer(
-    data = dat
-    , layer_id = "deck-layer-group-last"
-    , geom_column_name = attr(dat, "sf_column")
-    , render_options = renderOptions(
-      widthUnits = "meters"
-      , widthScale = 3000
-      # , widthMaxPixels = 20
-      , beforeId = "aeroway-runway"
-    )
-    , data_accessors = dataAccessors(
-      getWidth = "Strahler"
-      , getColor = "lineColor"
-    )
-    , popup = TRUE
-    , tooltip = TRUE
     , interleaved = TRUE
     , parameters = list(
       ## FIXME: neither depthTest:false nor depthCompare:"always" work in globe
@@ -170,9 +181,13 @@ m |>
       , cullMode = "back"
     )
   ) |>
-  add_navigation_control(visualize_pitch = TRUE) |>
+  # set_projection("mercator") |>
   add_globe_control() |>
-  add_layers_control(collapsible = TRUE, layers = c("deck-layer-group-last")) |>
+  add_navigation_control(visualize_pitch = TRUE) |>
+  add_layers_control(
+    collapsible = TRUE
+    , layers = list("Deck layer" = "deck-layer-group-last")
+  ) |>
   geoarrowDeckglLayers:::addMouseCoordinates()
 
 

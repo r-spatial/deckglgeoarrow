@@ -23,13 +23,14 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
 
 };
 
-polygonLayer = function(map, opts, arrow_table) {
+
+polygonLayer = function(map, opts, table) {
   let gaDeckLayers = window["@geoarrow/deck"]["gl-layers"];
 
   let layer = new gaDeckLayers.GeoArrowPolygonLayer({
     id: opts.layerId,
-    data: arrow_table,
-    getPolygon: arrow_table.getChild(opts.geom_column_name),
+    data: table,
+    getPolygon: table.getChild(opts.geom_column_name),
     beforeId: opts.renderOptions.beforeId,
 
     // render options
@@ -93,76 +94,3 @@ polygonLayer = function(map, opts, arrow_table) {
   return layer;
 
 };
-
-/*
-        onHover: (info, event) => {
-          if (opts.tooltip === null) {
-            return;
-          }
-          if (map.getLayoutProperty(opts.layerId, 'visibility') === 'none') {
-            return;
-          }
-          if (opts.tooltipOptions.length !== 0) {
-            //debugger;
-            let tooltips = document.getElementsByClassName('geoarrow-deckgl-tooltip');
-            for (let i = 0; i < tooltips.length; i++) {
-              tooltips[i].remove();
-            }
-            if (info.picked === false) {
-              return;
-            }
-
-            let tooltip = new maplibregl.Popup(
-              opts.tooltipOptions
-            )
-            .setLngLat(info.coordinate)
-            .setHTML(
-              objectToTable(
-                info.object,
-                className = "",
-                opts.tooltip,
-                opts.geom_column_name
-              )
-            );
-            tooltip.addTo(map);
-          }
-        },
-
-      });
-
-      var decklayer = new deck.MapboxOverlay({
-        interleaved: true,
-        layers: [geoArrowPolygon],
-      });
-      map.addControl(decklayer);
-
-      if (opts.popup !== null) {
-        map.on("click", (e) => {
-          //debugger;
-          if (map.getLayoutProperty(opts.layerId, 'visibility') === 'none') {
-            return;
-          }
-          let info = e.target.__deck.deckPicker.lastPickedInfo.info;
-          if (info === null) {
-            return;
-          } else {
-            let popup = new maplibregl.Popup(
-              opts.popupOptions
-            )
-            .setLngLat(e.lngLat)
-            .setHTML(
-              objectToTable(
-                info.object,
-                className = "",
-                opts.popup,
-                opts.geom_column_name
-              )
-            );
-            popup.addTo(map);
-          }
-        });
-      }
-
-    });
-};
-*/

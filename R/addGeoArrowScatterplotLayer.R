@@ -258,6 +258,7 @@ addGeoArrowScatterplotLayer.maplibregl = function(
     map
     , data
     , ...
+    , map_class = "maplibregl"
   )
 }
 
@@ -266,7 +267,6 @@ addGeoArrowScatterplotLayer.mapboxgl = function(
     map
     , data
     , ...
-    , map_class = "mapboxgl"
   ) {
   .addGeoArrowScatterplotLayer(
     map

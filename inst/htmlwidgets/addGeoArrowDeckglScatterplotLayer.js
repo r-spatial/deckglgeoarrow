@@ -21,7 +21,6 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
     decklayer._updateViewState();
   });
 
-
 };
 
 
@@ -30,8 +29,6 @@ scatterplotLayer = function(map, opts, table) {
 
   let layer = new gaDeckLayers.GeoArrowScatterplotLayer({
     id: opts.layerId,
-    // FIXME: have a look at https://github.com/geoarrow/deck.gl-layers/blob/main/examples/point/app.tsx#L53-L71
-    // for potential update to new batch based rendering in deck.gl-layers
     data: table,
     getPosition: table.getChild(opts.geom_column_name),
     beforeId: opts.renderOptions.beforeId,
@@ -86,21 +83,6 @@ scatterplotLayer = function(map, opts, table) {
         if (popup !== undefined) {
           popup.addTo(map);
         }
-        //console.log(map.getProjection());
-        // unfortunately the following does not switch between globe and mercator
-        // mode for the tooltips. It doesn't expand the pickable area to the
-        // mercator area.
-        /*
-        let globeEnabled = document.getElementsByClassName("maplibregl-ctrl-globe-enabled");
-        if (globeEnabled.length === 1) {
-          Object.assign(info.sourceLayer.props.parameters, {cullMode: 'back'});
-          console.log(info.sourceLayer.props.parameters);
-        }
-        if (globeEnabled.length === 0) {
-          Object.assign(info.sourceLayer.props.parameters, {cullMode: 'none'});
-          console.log(info.sourceLayer.props.parameters);
-        }
-        */
     },
 
   });

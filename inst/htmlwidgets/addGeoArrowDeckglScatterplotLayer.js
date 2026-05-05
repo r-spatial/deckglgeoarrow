@@ -43,6 +43,7 @@ scatterplotLayer = function(map, opts, table) {
     data: table,
     getPosition: table.getChild(opts.geom_column_name),
     beforeId: opts.renderOptions.beforeId,
+    slot: "scatter",
 
     // render options
     radiusUnits: opts.renderOptions.radiusUnits,

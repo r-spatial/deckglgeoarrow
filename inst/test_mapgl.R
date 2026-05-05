@@ -33,7 +33,7 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowScatterplotLayer(
     data = dat
-    , layer_id = "deck-layer-group-last"
+    , layer_id = "deck-layer-group-slot:scatter"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions()
     , data_accessors = dataAccessors(
@@ -94,13 +94,13 @@ m |>
   addGeoArrowPathLayer(
     data = dat
     # , layer_id = "deck-layer-group-before:aeroway-runway"
-    , layer_id = "deck-layer-group-before:housenumber"
+    , layer_id = "deck-layer-group-slot:path"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
       widthUnits = "meters"
       , widthScale = 3000
       # , widthMaxPixels = 20
-      , beforeId = "housenumber"
+      # , beforeId = "housenumber"
     )
     , data_accessors = dataAccessors(
       getWidth = "Strahler"
@@ -123,8 +123,8 @@ m |>
     collapsible = TRUE
     # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
     , layers = list(
-      "Deck Layer1" = "deck-layer-group-last"
-      , "Deck Layer2" = "deck-layer-group-before:housenumber"
+      "Scatter Layer" = "deck-layer-group-slot:scatter"
+      , "Path Layer" = "deck-layer-group-slot:path"
     )
   ) |>
   geoarrowDeckglLayers:::addMouseCoordinates()

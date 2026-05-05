@@ -43,6 +43,7 @@ pathLayer = function(map, opts, arrow_table) {
     data: arrow_table,
     getPath: arrow_table.getChild(opts.geom_column_name),
     beforeId: opts.renderOptions.beforeId,
+    slot: "path",
 
     // render options
     widthUnits: opts.renderOptions.widthUnits,

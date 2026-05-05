@@ -4,7 +4,7 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
   if (decklayer === undefined) {
     decklayer = new deck.MapboxOverlay({
-      id: "test-deck",
+      id: "geoarrow-deck-layer",
       interleaved: opts.interleaved,
       layers: [],
     });
@@ -19,7 +19,12 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
     .then(arrow_table => {
 
       let scatterlayer = scatterplotLayer(map, opts, arrow_table);
-      decklayer.setProps({layers: scatterlayer});
+      // decklayer.setProps({layers: scatterlayer});
+      if (decklayer._props.layers.length === undefined || decklayer._props.layers.length > 0) {
+        decklayer.setProps({ layers: [decklayer._props.layers, scatterlayer] })
+      } else {
+        decklayer.setProps({ layers: scatterlayer })
+      }
 
     });
 

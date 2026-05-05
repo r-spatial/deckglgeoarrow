@@ -4,7 +4,7 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
 
   if (decklayer === undefined) {
     decklayer = new deck.MapboxOverlay({
-      id: "test-deck",
+      id: "geoarrow-deck-layer",
       interleaved: opts.interleaved,
       layers: [],
     });
@@ -21,8 +21,12 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
       let pathlayer = pathLayer(map, opts, arrow_table);
       //decklayer.setProps({layers: pathlayer});
       //FIXME here: figure out how to inject another layer!!!
-      decklayer.setProps({layers: decklayer._props.layers, pathlayer})
-
+      if (decklayer._props.layers.length === undefined || decklayer._props.layers.length > 0) {
+        decklayer.setProps({ layers: [decklayer._props.layers, pathlayer] })
+      } else {
+        decklayer.setProps({ layers: pathlayer })
+      }
+debugger;
     });
 
   map.on("projectiontransition", () => {
@@ -101,78 +105,3 @@ pathLayer = function(map, opts, arrow_table) {
   return layer;
 
 };
-
-
-/*
-    onHover: (info, event) => {
-      if (opts.tooltip === null) {
-        return;
-      }
-      if (map.getLayoutProperty(opts.layerId, 'visibility') === 'none') {
-        return;
-      }
-      if (opts.tooltipOptions.length !== 0) {
-        //debugger;
-        let tooltips = document.getElementsByClassName('geoarrow-deckgl-tooltip');
-        for (let i = 0; i < tooltips.length; i++) {
-          tooltips[i].remove();
-        }
-        if (info.picked === false) {
-          return;
-        }
-
-        let tooltip = new maplibregl.Popup(
-          opts.tooltipOptions
-        )
-        .setLngLat(info.coordinate)
-        .setHTML(
-          objectToTable(
-            info.object,
-            className = "",
-            opts.tooltip,
-            opts.geom_column_name
-          )
-        );
-        tooltip.addTo(map);
-      }
-    },
-
-  });
-
-      var decklayer = new deck.MapboxOverlay({
-        interleaved: true,
-        //views: [new deck.MapView({id: 'maplibregl'})],
-        layers: [geoArrowPathLayer],
-      });
-      map.addControl(decklayer);
-
-      if (opts.popup !== null) {
-        map.on("click", (e) => {
-          //debugger;
-          if (map.getLayoutProperty(opts.layerId, 'visibility') === 'none') {
-            return;
-          }
-          let info = e.target.__deck.deckPicker.lastPickedInfo.info;
-          if (info === null) {
-            return;
-          } else {
-            let popup = new maplibregl.Popup(
-              opts.popupOptions
-            )
-            .setLngLat(e.lngLat)
-            .setHTML(
-              objectToTable(
-                info.object,
-                className = "",
-                opts.popup,
-                opts.geom_column_name
-              )
-            );
-            popup.addTo(map);
-          }
-        });
-      }
-
-    });
-};
-*/

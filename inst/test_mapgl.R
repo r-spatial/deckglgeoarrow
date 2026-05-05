@@ -4,6 +4,8 @@ library(geoarrow)
 library(sf)
 library(colourvalues)
 
+style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'
 
 ### points =========================
 n = 5e3
@@ -26,12 +28,12 @@ dat$lineWidth = sample.int(5, nrow(dat), replace = TRUE)
 
 options(viewer = NULL)
 
-m = maplibre(style = 'https://tiles.openfreemap.org/styles/liberty')
+m = maplibre(style = style_positron)
 
 m = m |>
   addGeoArrowScatterplotLayer(
     data = dat
-    , layer_id = "scatter"
+    , layer_id = "deck-layer-group-last"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions()
     , data_accessors = dataAccessors(
@@ -54,11 +56,11 @@ m = m |>
     )
     , interleaved = TRUE
   ) |>
-  add_layers_control(
-    collapsible = TRUE
-    , layers = list("Deck layer" = "deck-layer-group-last")
-  ) |>
-  # set_projection("mercator") |>
+  # add_layers_control(
+  #   collapsible = TRUE
+  #   , layers = list("Deck layer1" = "deck-layer-group-last")
+  # ) |>
+  # # set_projection("mercator") |>
   add_globe_control() |>
   add_navigation_control(visualize_pitch = TRUE) |>
   geoarrowDeckglLayers:::addMouseCoordinates()
@@ -92,13 +94,13 @@ m |>
   addGeoArrowPathLayer(
     data = dat
     # , layer_id = "deck-layer-group-before:aeroway-runway"
-    , layer_id = "line"
+    , layer_id = "deck-layer-group-before:housenumber"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
       widthUnits = "meters"
       , widthScale = 3000
       # , widthMaxPixels = 20
-      # , beforeId = "aeroway-runway"
+      , beforeId = "housenumber"
     )
     , data_accessors = dataAccessors(
       getWidth = "Strahler"
@@ -120,7 +122,10 @@ m |>
   add_layers_control(
     collapsible = TRUE
     # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
-    , layers = list("Deck Layer" = "deck-layer-group-last")
+    , layers = list(
+      "Deck Layer1" = "deck-layer-group-last"
+      , "Deck Layer2" = "deck-layer-group-before:housenumber"
+    )
   ) |>
   geoarrowDeckglLayers:::addMouseCoordinates()
 

@@ -1,5 +1,11 @@
 addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
+  opts.decklayerId = "deck-layer-group-slot:" + opts.layerId
+
+  if (opts.renderOptions.beforeId !== null) {
+    opts.decklayerId = "deck-layer-group-before:" + opts.renderOptions.beforeId
+  }
+
   decklayer = map._controls.find((el) => el.hasOwnProperty("_deck"))
 
   if (decklayer === undefined) {
@@ -43,7 +49,7 @@ scatterplotLayer = function(map, opts, table) {
     data: table,
     getPosition: table.getChild(opts.geom_column_name),
     beforeId: opts.renderOptions.beforeId,
-    slot: "scatter",
+    slot: opts.layerId,
 
     // render options
     radiusUnits: opts.renderOptions.radiusUnits,

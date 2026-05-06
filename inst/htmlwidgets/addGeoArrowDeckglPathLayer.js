@@ -1,5 +1,11 @@
 addGeoArrowDeckglPathLayer = function(map, opts) {
 
+  opts.decklayerId = "deck-layer-group-slot:" + opts.layerId
+
+  if (opts.renderOptions.beforeId !== null) {
+    opts.decklayerId = "deck-layer-group-before:" + opts.renderOptions.beforeId
+  }
+
   decklayer = map._controls.find((el) => el.hasOwnProperty("_deck"))
 
   if (decklayer === undefined) {
@@ -19,14 +25,13 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
     .then(arrow_table => {
 
       let pathlayer = pathLayer(map, opts, arrow_table);
-      //decklayer.setProps({layers: pathlayer});
-      //FIXME here: figure out how to inject another layer!!!
+
       if (decklayer._props.layers.length === undefined || decklayer._props.layers.length > 0) {
         decklayer.setProps({ layers: [decklayer._props.layers, pathlayer] })
       } else {
         decklayer.setProps({ layers: pathlayer })
       }
-debugger;
+
     });
 
   map.on("projectiontransition", () => {
@@ -43,7 +48,7 @@ pathLayer = function(map, opts, arrow_table) {
     data: arrow_table,
     getPath: arrow_table.getChild(opts.geom_column_name),
     beforeId: opts.renderOptions.beforeId,
-    slot: "path",
+    slot: opts.layerId,
 
     // render options
     widthUnits: opts.renderOptions.widthUnits,

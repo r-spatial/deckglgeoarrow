@@ -33,15 +33,15 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowScatterplotLayer(
     data = dat
-    , layer_id = "deck-layer-group-slot:scatter"
+    , layer_id = "scatter"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions()
-    , data_accessors = dataAccessors(
-      getRadius = "radius"
-      , getFillColor = "fillColor"
-      , getLineWidth = "lineWidth"
-      , getLineColor = "lineColor"
-    )
+    # , data_accessors = dataAccessors(
+    #   getRadius = "radius"
+    #   , getFillColor = "fillColor"
+    #   , getLineWidth = "lineWidth"
+    #   , getLineColor = "lineColor"
+    # )
     , parameters = list(
       depthCompare = "always"
       , cullMode = "back"
@@ -94,13 +94,13 @@ m |>
   addGeoArrowPathLayer(
     data = dat
     # , layer_id = "deck-layer-group-before:aeroway-runway"
-    , layer_id = "deck-layer-group-slot:path"
+    , layer_id = "path"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
       widthUnits = "meters"
       , widthScale = 3000
       # , widthMaxPixels = 20
-      # , beforeId = "housenumber"
+      , beforeId = "housenumber"
     )
     , data_accessors = dataAccessors(
       getWidth = "Strahler"
@@ -124,7 +124,8 @@ m |>
     # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
     , layers = list(
       "Scatter Layer" = "deck-layer-group-slot:scatter"
-      , "Path Layer" = "deck-layer-group-slot:path"
+      # , "Path Layer" = "deck-layer-group-slot:path"
+      , "Path Layer" = "deck-layer-group-before:housenumber"
     )
   ) |>
   geoarrowDeckglLayers:::addMouseCoordinates()

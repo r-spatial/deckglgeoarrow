@@ -90,7 +90,7 @@ function clickFun (info, event, opts, type, map_class) {
   if (opts[type] === null) {
     return;
   }
-  if (map.getLayoutProperty(opts.layerId, 'visibility') === 'none') {
+  if (map.getLayoutProperty(opts.decklayerId, 'visibility') === 'none') {
     return;
   }
   if (info.picked === false) {

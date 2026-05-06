@@ -8,11 +8,11 @@ style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'
 
 ### points =========================
-n = 5e3
+n = 1e6
 dat = data.frame(
   id = 1:n
   , x = runif(n, -180, 180)
-  , y = runif(n, -60, 60)
+  , y = runif(n, -90, 90)
 )
 dat = st_as_sf(
   dat
@@ -35,13 +35,15 @@ m = m |>
     data = dat
     , layer_id = "scatter"
     , geom_column_name = attr(dat, "sf_column")
-    , render_options = renderOptions()
-    # , data_accessors = dataAccessors(
-    #   getRadius = "radius"
-    #   , getFillColor = "fillColor"
-    #   , getLineWidth = "lineWidth"
-    #   , getLineColor = "lineColor"
-    # )
+    , render_options = renderOptions(
+      beforeId = "water"
+    )
+    , data_accessors = dataAccessors(
+      getRadius = "radius"
+      , getFillColor = "fillColor"
+      , getLineWidth = "lineWidth"
+      , getLineColor = "lineColor"
+    )
     , parameters = list(
       depthCompare = "always"
       , cullMode = "back"
@@ -84,13 +86,12 @@ dat$lineColor = color_values(
 )
 dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
 
-
 options(viewer = NULL)
 
 # m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json') |>
 #   fit_bounds(unname(st_bbox(dat)), animate = FALSE)
 
-m |>
+m = m |>
   addGeoArrowPathLayer(
     data = dat
     # , layer_id = "deck-layer-group-before:aeroway-runway"
@@ -119,40 +120,40 @@ m |>
   ) |>
   add_navigation_control(visualize_pitch = TRUE) |>
   add_globe_control() |>
-  add_layers_control(
-    collapsible = TRUE
-    # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
-    , layers = list(
-      "Scatter Layer" = "deck-layer-group-slot:scatter"
-      # , "Path Layer" = "deck-layer-group-slot:path"
-      , "Path Layer" = "deck-layer-group-before:housenumber"
-    )
-  ) |>
+  # add_layers_control(
+  #   collapsible = TRUE
+  #   # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
+  #   , layers = list(
+  #     "Scatter Layer" = "deck-layer-group-slot:scatter"
+  #     # , "Path Layer" = "deck-layer-group-slot:path"
+  #     , "Path Layer" = "deck-layer-group-before:housenumber"
+  #   )
+  # ) |>
   geoarrowDeckglLayers:::addMouseCoordinates()
 
 
 
 ### polygons ==================================
 # dat = st_read("~/Downloads/data.gpkg")
-url = "/vsizip//vsicurl/https://storage.googleapis.com/fao-maps-catalog-data/geonetwork/aquamaps/hydrobasins_europe.zip"
+# url = "/vsizip//vsicurl/https://storage.googleapis.com/fao-maps-catalog-data/geonetwork/aquamaps/hydrobasins_europe.zip"
 url = "~/Downloads/hydrobasins_europe.gpkg"
 dat = st_read(url)
 # dat = mapview::franconia
 # idx = sapply(dat, is.factor)
 # dat[idx] = NULL
-dat$fillColor = color_values(dat$MAJ_BAS)
+dat$fillColor = color_values(dat$MAJ_BAS, palette = "spectral")
 dat$lineColor = color_values(
   rnorm(nrow(dat))
   , alpha = sample.int(255, nrow(dat), replace = TRUE)
-  , palette = "inferno"
+  , palette = "purples"
 )
 # dat$elevation = sample.int(2000, nrow(dat), replace = TRUE)
 # dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
 
 
-options(viewer = NULL)
+# options(viewer = NULL)
 
-m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json')
+# m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json')
 
 m |>
   addGeoArrowPolygonLayer(
@@ -184,7 +185,13 @@ m |>
   add_navigation_control(visualize_pitch = TRUE) |>
   add_layers_control(
     collapsible = TRUE
-    , layers = list("Polygon Layer" = "deck-layer-group-slot:polygon")
+    # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
+    , layers = list(
+      "Scatter Layer" = "deck-layer-group-before:water"
+      # , "Path Layer" = "deck-layer-group-slot:path"
+      , "Path Layer" = "deck-layer-group-before:housenumber"
+      , "Polygon Layer" = "deck-layer-group-slot:polygon"
+    )
   ) |>
   geoarrowDeckglLayers:::addMouseCoordinates()
 

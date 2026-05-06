@@ -1,11 +1,30 @@
 addGeoArrowDeckglPolygonLayer = function(map, opts) {
 
-  let decklayer = new deck.MapboxOverlay({
-    interleaved: opts.interleaved,
-    layers: [],
-  });
-  map.addControl(decklayer);
+  // FIXME: turn into function for re-use across layer types
+  // first we generate the proper internal layer name using the slot parameter
+  opts.decklayerId = "deck-layer-group-slot:" + opts.layerId
 
+  // then, if 'beforeId' is supplied we change accordingly. see
+  // https://github.com/visgl/deck.gl/tree/master/modules/mapbox/src/resolve-layer-groups.ts#L13-L20
+  if (opts.renderOptions.beforeId !== null) {
+    opts.decklayerId = "deck-layer-group-before:" + opts.renderOptions.beforeId
+  }
+
+  // FIXME: turn into function for re-use across layer types
+  // do we already have a deckgl mapboxoverlay on our map?
+  deckoverlay = map._controls.find((el) => el.hasOwnProperty("_deck"))
+
+  if (deckoverlay === undefined) {
+    deckoverlay = new deck.MapboxOverlay({
+      id: "geoarrow-deck-layer",
+      interleaved: opts.interleaved,
+      layers: [],
+      getCursor: ({ isHovering }) => (isHovering ? 'pointer' : 'grab'),
+    });
+    map.addControl(deckoverlay);
+  }
+
+  // find the attached arrow data, fetch and inject into the mapboxoverlay
   let data_fl = document.getElementById(opts.layerId + '-geoarrowWidget-attachment');
 
   fetch(data_fl.href)
@@ -13,12 +32,17 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
     .then(arrow_table => {
 
       let polygonlayer = polygonLayer(map, opts, arrow_table);
-      decklayer.setProps({layers: polygonlayer});
+      // does the mapboxoverlay already have layer(s)?
+      if (deckoverlay._props.layers.length === undefined || deckoverlay._props.layers.length > 0) {
+        deckoverlay.setProps({ layers: [deckoverlay._props.layers, polygonlayer] })
+      } else {
+        deckoverlay.setProps({ layers: polygonlayer })
+      }
 
     });
 
   map.on("projectiontransition", () => {
-    decklayer._updateViewState();
+    deckoverlay._updateViewState();
   });
 
 };
@@ -32,6 +56,7 @@ polygonLayer = function(map, opts, table) {
     data: table,
     getPolygon: table.getChild(opts.geom_column_name),
     beforeId: opts.renderOptions.beforeId,
+    slot: opts.layerId,
 
     // render options
     filled: opts.renderOptions.filled,

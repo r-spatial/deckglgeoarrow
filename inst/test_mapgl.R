@@ -134,38 +134,30 @@ m |>
 
 ### polygons ==================================
 # dat = st_read("~/Downloads/data.gpkg")
-dat = mapview::franconia
-idx = sapply(dat, is.factor)
-dat[idx] = NULL
-dat$fillColor = color_values(
-  rnorm(nrow(dat))
-  , alpha = sample.int(255, nrow(dat), replace = TRUE)
-)
+url = "/vsizip//vsicurl/https://storage.googleapis.com/fao-maps-catalog-data/geonetwork/aquamaps/hydrobasins_europe.zip"
+url = "~/Downloads/hydrobasins_europe.gpkg"
+dat = st_read(url)
+# dat = mapview::franconia
+# idx = sapply(dat, is.factor)
+# dat[idx] = NULL
+dat$fillColor = color_values(dat$MAJ_BAS)
 dat$lineColor = color_values(
   rnorm(nrow(dat))
   , alpha = sample.int(255, nrow(dat), replace = TRUE)
   , palette = "inferno"
 )
-dat$elevation = sample.int(2000, nrow(dat), replace = TRUE)
-dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
+# dat$elevation = sample.int(2000, nrow(dat), replace = TRUE)
+# dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
 
 
 options(viewer = NULL)
 
-m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json') |>
-  fit_bounds(unname(st_bbox(dat)), animate = FALSE)
-
-# m = mapboxgl(
-#   style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-#   , projection = "mercator"
-#   ) |>
-#   add_navigation_control(visualize_pitch = TRUE) |>
-#   add_layers_control(collapsible = TRUE, layers = c("test"))
+m = maplibre(style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json')
 
 m |>
   addGeoArrowPolygonLayer(
     data = dat
-    , layer_id = "deck-layer-group-last"
+    , layer_id = "polygon"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
       extruded = FALSE
@@ -174,8 +166,8 @@ m |>
     , data_accessors = dataAccessors(
       getFillColor = "fillColor"
       , getLineColor = "lineColor"
-      , getLineWidth = 2 #"lineWidth"
-      , getElevation = "elevation"
+      # , getLineWidth = 2 #"lineWidth"
+      # , getElevation = "elevation"
     )
     , popup = TRUE
     , interleaved = TRUE
@@ -192,7 +184,7 @@ m |>
   add_navigation_control(visualize_pitch = TRUE) |>
   add_layers_control(
     collapsible = TRUE
-    , layers = list("Deck layer" = "deck-layer-group-last")
+    , layers = list("Polygon Layer" = "deck-layer-group-slot:polygon")
   ) |>
   geoarrowDeckglLayers:::addMouseCoordinates()
 

@@ -1,23 +1,30 @@
 addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
+  // FIXME: turn into function for re-use across layer types
+  // first we generate the proper internal layer name using the slot parameter
   opts.decklayerId = "deck-layer-group-slot:" + opts.layerId
 
+  // then, if 'beforeId' is supplied we change accordingly. see
+  // https://github.com/visgl/deck.gl/tree/master/modules/mapbox/src/resolve-layer-groups.ts#L13-L20
   if (opts.renderOptions.beforeId !== null) {
     opts.decklayerId = "deck-layer-group-before:" + opts.renderOptions.beforeId
   }
 
-  decklayer = map._controls.find((el) => el.hasOwnProperty("_deck"))
+  // FIXME: turn into function for re-use across layer types
+  // do we already have a deckgl mapboxoverlay on our map?
+  deckoverlay = map._controls.find((el) => el.hasOwnProperty("_deck"))
 
-  if (decklayer === undefined) {
-    decklayer = new deck.MapboxOverlay({
+  if (deckoverlay === undefined) {
+    deckoverlay = new deck.MapboxOverlay({
       id: "geoarrow-deck-layer",
       interleaved: opts.interleaved,
       layers: [],
+      getCursor: ({ isHovering }) => (isHovering ? 'pointer' : 'grab'),
     });
-    map.addControl(decklayer);
+    map.addControl(deckoverlay);
   }
 
-
+  // find the attached arrow data, fetch and inject into the mapboxoverlay
   let data_fl = document.getElementById(opts.layerId + '-geoarrowWidget-attachment');
 
   fetch(data_fl.href)
@@ -25,17 +32,17 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
     .then(arrow_table => {
 
       let scatterlayer = scatterplotLayer(map, opts, arrow_table);
-      // decklayer.setProps({layers: scatterlayer});
-      if (decklayer._props.layers.length === undefined || decklayer._props.layers.length > 0) {
-        decklayer.setProps({ layers: [decklayer._props.layers, scatterlayer] })
+      // does the mapboxoverlay already have layer(s)?
+      if (deckoverlay._props.layers.length === undefined || deckoverlay._props.layers.length > 0) {
+        deckoverlay.setProps({ layers: [deckoverlay._props.layers, scatterlayer] })
       } else {
-        decklayer.setProps({ layers: scatterlayer })
+        deckoverlay.setProps({ layers: scatterlayer })
       }
 
     });
 
   map.on("projectiontransition", () => {
-    decklayer._updateViewState();
+    deckoverlay._updateViewState();
   });
 
 };

@@ -6,15 +6,16 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
     opts.decklayerId = "deck-layer-group-before:" + opts.renderOptions.beforeId
   }
 
-  decklayer = map._controls.find((el) => el.hasOwnProperty("_deck"))
+  deckoverlay = map._controls.find((el) => el.hasOwnProperty("_deck"))
 
-  if (decklayer === undefined) {
-    decklayer = new deck.MapboxOverlay({
+  if (deckoverlay === undefined) {
+    deckoverlay = new deck.MapboxOverlay({
       id: "geoarrow-deck-layer",
       interleaved: opts.interleaved,
       layers: [],
+      getCursor: ({ isHovering }) => (isHovering ? 'pointer' : 'grab'),
     });
-    map.addControl(decklayer);
+    map.addControl(deckoverlay);
   }
 
 
@@ -26,16 +27,16 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
 
       let pathlayer = pathLayer(map, opts, arrow_table);
 
-      if (decklayer._props.layers.length === undefined || decklayer._props.layers.length > 0) {
-        decklayer.setProps({ layers: [decklayer._props.layers, pathlayer] })
+      if (deckoverlay._props.layers.length === undefined || deckoverlay._props.layers.length > 0) {
+        deckoverlay.setProps({ layers: [deckoverlay._props.layers, pathlayer] })
       } else {
-        decklayer.setProps({ layers: pathlayer })
+        deckoverlay.setProps({ layers: pathlayer })
       }
 
     });
 
   map.on("projectiontransition", () => {
-    decklayer._updateViewState();
+    deckoverlay._updateViewState();
   });
 
 };
@@ -47,6 +48,7 @@ pathLayer = function(map, opts, arrow_table) {
     id: opts.layerId,
     data: arrow_table,
     getPath: arrow_table.getChild(opts.geom_column_name),
+    getCursor: () => "inherit",
     beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,
 

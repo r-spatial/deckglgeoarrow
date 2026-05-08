@@ -8,7 +8,7 @@ style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'
 
 ### points =========================
-n = 1e6
+n = 5e3
 dat = data.frame(
   id = 1:n
   , x = runif(n, -180, 180)
@@ -95,11 +95,12 @@ m = m |>
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
       extruded = FALSE
+      , stroked = FALSE
       # , beforeId = "boundary_county"
     )
     , data_accessors = dataAccessors(
       getFillColor = "fillColor"
-      , getLineColor = "lineColor"
+      # , getLineColor = "lineColor"
       # , getLineWidth = 2 #"lineWidth"
       # , getElevation = "elevation"
     )
@@ -165,6 +166,7 @@ m |>
       , cullMode = "back"
     )
   ) |>
+  set_view(c(100, 30), 2) |>
   add_globe_control() |>
   add_navigation_control(visualize_pitch = TRUE) |>
   add_layers_control(

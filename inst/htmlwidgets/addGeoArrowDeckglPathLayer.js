@@ -63,6 +63,7 @@ pathLayer = function(map, opts, arrow_table) {
     miterLimit: opts.renderOptions.miterLimit,
     // _pathType: opts.renderOptions._pathType,
 
+/*
     // data accessros
     getColor: ({ index, data }) => {
       if (typeof(opts.dataAccessors.getColor) === "string") {
@@ -80,6 +81,11 @@ pathLayer = function(map, opts, arrow_table) {
         return opts.dataAccessors.getWidth;
       }
     },
+*/
+    getColor: ({ index, data }) =>
+      colorAccessor(index, data, opts.dataAccessors.getColor),
+    getWidth: ({ index, data }) =>
+      attributeAccessor(index, data, opts.dataAccessors.getWidth),
 
     // interactivity
     pickable: true,

@@ -34,9 +34,9 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
       let scatterlayer = scatterplotLayer(map, opts, arrow_table);
       // does the mapboxoverlay already have layer(s)?
       if (deckoverlay._props.layers.length === undefined || deckoverlay._props.layers.length > 0) {
-        deckoverlay.setProps({ layers: [deckoverlay._props.layers, scatterlayer] })
+        deckoverlay.setProps({ layers: [deckoverlay._props.layers, scatterlayer] });
       } else {
-        deckoverlay.setProps({ layers: scatterlayer })
+        deckoverlay.setProps({ layers: scatterlayer });
       }
 
     });

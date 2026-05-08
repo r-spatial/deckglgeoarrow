@@ -8,7 +8,7 @@ style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'
 
 ### points =========================
-n = 5e3
+n = 1e6
 dat = data.frame(
   id = 1:n
   , x = runif(n, -180, 180)
@@ -36,7 +36,7 @@ m = m |>
     , layer_id = "scatter"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
-      beforeId = "water"
+      # beforeId = "water"
     )
     , data_accessors = dataAccessors(
       getRadius = "radius"
@@ -162,7 +162,7 @@ m |>
       depthTest = FALSE
       , depthCompare = "always"
       # , antialias = TRUE
-      , cullMode = "front"
+      , cullMode = "back"
     )
   ) |>
   add_globe_control() |>
@@ -171,7 +171,7 @@ m |>
     collapsible = TRUE
     # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
     , layers = list(
-      "Scatter Layer" = "deck-layer-group-before:water"
+      "Scatter Layer" = "deck-layer-group-slot:scatter"
       # , "Path Layer" = "deck-layer-group-slot:path"
       , "Polygon Layer" = "deck-layer-group-slot:polygon"
       , "Path Layer" = "deck-layer-group-slot:path"

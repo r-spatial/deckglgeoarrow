@@ -30,7 +30,7 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
       if (deckoverlay._props.layers.length === undefined || deckoverlay._props.layers.length > 0) {
         deckoverlay.setProps({ layers: [deckoverlay._props.layers, pathlayer] })
       } else {
-        deckoverlay.setProps({ layers: pathlayer })
+        deckoverlay.setProps({ layers: [pathlayer] })
       }
 
     });

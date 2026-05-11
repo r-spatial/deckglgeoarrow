@@ -36,7 +36,7 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
       if (deckoverlay._props.layers.length === undefined || deckoverlay._props.layers.length > 0) {
         deckoverlay.setProps({ layers: [deckoverlay._props.layers, scatterlayer] });
       } else {
-        deckoverlay.setProps({ layers: scatterlayer });
+        deckoverlay.setProps({ layers: [scatterlayer] });
       }
 
     });

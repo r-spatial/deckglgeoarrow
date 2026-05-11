@@ -36,7 +36,7 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
       if (deckoverlay._props.layers.length === undefined || deckoverlay._props.layers.length > 0) {
         deckoverlay.setProps({ layers: [deckoverlay._props.layers, polygonlayer] })
       } else {
-        deckoverlay.setProps({ layers: polygonlayer })
+        deckoverlay.setProps({ layers: [polygonlayer] })
       }
 
     });

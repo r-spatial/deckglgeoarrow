@@ -169,16 +169,16 @@ m |>
   set_view(c(100, 30), 2) |>
   add_globe_control() |>
   add_navigation_control(visualize_pitch = TRUE) |>
-  add_layers_control(
-    collapsible = TRUE
-    # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
-    , layers = list(
-      "Scatter Layer" = "deck-layer-group-slot:scatter"
-      # , "Path Layer" = "deck-layer-group-slot:path"
-      , "Polygon Layer" = "deck-layer-group-slot:polygon"
-      , "Path Layer" = "deck-layer-group-slot:path"
-    )
-  ) |>
+  # add_layers_control(
+  #   collapsible = TRUE
+  #   # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
+  #   , layers = list(
+  #     "Scatter Layer" = "deck-layer-group-slot:scatter"
+  #     # , "Path Layer" = "deck-layer-group-slot:path"
+  #     , "Polygon Layer" = "deck-layer-group-slot:polygon"
+  #     , "Path Layer" = "deck-layer-group-slot:path"
+  #   )
+  # ) |>
   geoarrowDeckglLayers:::addMouseCoordinates()
 
 

@@ -33,11 +33,12 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
 
       let polygonlayer = polygonLayer(map, opts, arrow_table);
       // does the mapboxoverlay already have layer(s)?
-      if (deckoverlay._props.layers.length === undefined || deckoverlay._props.layers.length > 0) {
-        deckoverlay.setProps({ layers: [deckoverlay._props.layers, polygonlayer] })
-      } else {
+      /*
+      if (deckoverlay._props.layers.length ===  0) {
         deckoverlay.setProps({ layers: [polygonlayer] })
-      }
+      } else {*/
+        deckoverlay.setProps({ layers: deckoverlay._props.layers.concat(polygonlayer) });
+      //}
 
     });
 

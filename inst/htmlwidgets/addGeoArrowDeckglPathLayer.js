@@ -27,11 +27,13 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
 
       let pathlayer = pathLayer(map, opts, arrow_table);
 
-      if (deckoverlay._props.layers.length === undefined || deckoverlay._props.layers.length > 0) {
-        deckoverlay.setProps({ layers: [deckoverlay._props.layers, pathlayer] })
-      } else {
+     // does the mapboxoverlay already have layer(s)?
+     /*
+      if (deckoverlay._props.layers.length ===  0) {
         deckoverlay.setProps({ layers: [pathlayer] })
-      }
+      } else {*/
+        deckoverlay.setProps({ layers: deckoverlay._props.layers.concat(pathlayer) });
+      //}
 
     });
 

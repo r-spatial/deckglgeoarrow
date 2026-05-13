@@ -33,12 +33,15 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
       let scatterlayer = scatterplotLayer(map, opts, arrow_table);
       // does the mapboxoverlay already have layer(s)?
-      /*
+
       if (deckoverlay._props.layers.length ===  0) {
         deckoverlay.setProps({ layers: [scatterlayer] });
-      } else {*/
-        deckoverlay.setProps({ layers: [deckoverlay._props.layers, scatterlayer] });
-      //}
+      } else {
+        deckoverlay.setProps({ layers: deckoverlay._props.layers.concat(scatterlayer) });
+      }
+
+      // to reorder layers according to opts.renderOptions.position -> rename to zIndex
+      //deckoverlay._props.layers.sort(function(a, b){return a.props.position - b.props.position})
 
     });
 
@@ -53,11 +56,12 @@ scatterplotLayer = function(map, opts, table) {
   let gaDeckLayers = window["@geoarrow/deck"]["gl-layers"];
 
   let layer = new gaDeckLayers.GeoArrowScatterplotLayer({
-    id: opts.layerId,
+    id: opts.decklayerId,
     data: table,
     getPosition: table.getChild(opts.geom_column_name),
     beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,
+    position: opts.renderOptions.position,
 
     // render options
     radiusUnits: opts.renderOptions.radiusUnits,

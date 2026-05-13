@@ -28,12 +28,14 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
       let pathlayer = pathLayer(map, opts, arrow_table);
 
      // does the mapboxoverlay already have layer(s)?
-     /*
+
       if (deckoverlay._props.layers.length ===  0) {
         deckoverlay.setProps({ layers: [pathlayer] })
-      } else {*/
+      } else {
         deckoverlay.setProps({ layers: deckoverlay._props.layers.concat(pathlayer) });
-      //}
+      }
+
+      //deckoverlay._props.layers.sort(function(a, b){return a.props.position - b.props.position})
 
     });
 
@@ -47,12 +49,13 @@ pathLayer = function(map, opts, arrow_table) {
   let gaDeckLayers = window["@geoarrow/deck"]["gl-layers"];
 
   let layer = new gaDeckLayers.GeoArrowPathLayer({
-    id: opts.layerId,
+    id: opts.decklayerId,
     data: arrow_table,
     getPath: arrow_table.getChild(opts.geom_column_name),
     getCursor: () => "inherit",
     beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,
+    position: opts.renderOptions.position,
 
     // render options
     widthUnits: opts.renderOptions.widthUnits,

@@ -33,14 +33,24 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
 
       let polygonlayer = polygonLayer(map, opts, arrow_table);
       // does the mapboxoverlay already have layer(s)?
-      /*
+
       if (deckoverlay._props.layers.length ===  0) {
         deckoverlay.setProps({ layers: [polygonlayer] })
-      } else {*/
+      } else {
         deckoverlay.setProps({ layers: deckoverlay._props.layers.concat(polygonlayer) });
-      //}
+      }
 
+      //deckoverlay._props.layers.sort(function(a, b){return a.props.position - b.props.position})
+      /*
+  deckoverlay._props.layers.sort(function(a, b) {
+    if (a.length === 0) {
+      return;
+    }
+    return a.props.position - b.props.position;
+  })
+*/
     });
+
 
   map.on("projectiontransition", () => {
     deckoverlay._updateViewState();
@@ -53,11 +63,12 @@ polygonLayer = function(map, opts, table) {
   let gaDeckLayers = window["@geoarrow/deck"]["gl-layers"];
 
   let layer = new gaDeckLayers.GeoArrowPolygonLayer({
-    id: opts.layerId,
+    id: opts.decklayerId,
     data: table,
     getPolygon: table.getChild(opts.geom_column_name),
     beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,
+    position: opts.renderOptions.position,
 
     // render options
     filled: opts.renderOptions.filled,

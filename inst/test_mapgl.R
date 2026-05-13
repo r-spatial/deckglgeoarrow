@@ -36,7 +36,8 @@ m = m |>
     , layer_id = "scatter"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
-      # beforeId = "water"
+      position = 2
+      , beforeId = "water"
     )
     , data_accessors = dataAccessors(
       getRadius = "radius"
@@ -78,7 +79,7 @@ dat = st_read(url)
 # dat = mapview::franconia
 # idx = sapply(dat, is.factor)
 # dat[idx] = NULL
-dat$fillColor = color_values(dat$MAJ_BAS, palette = "spectral")
+dat$fillColor = color_values(dat$MAJ_BAS, palette = "spectral", alpha = 180)
 dat$lineColor = dat$fillColor
 # dat$elevation = sample.int(2000, nrow(dat), replace = TRUE)
 # dat$lineWidth = sample.int(150, nrow(dat), replace = TRUE)
@@ -97,6 +98,7 @@ m = m |>
       extruded = FALSE
       , stroked = FALSE
       # , beforeId = "boundary_county"
+      , position = 1
     )
     , data_accessors = dataAccessors(
       getFillColor = "fillColor"
@@ -148,6 +150,7 @@ m |>
     , render_options = renderOptions(
       widthUnits = "meters"
       , widthScale = 3000
+      , position = 3
       # , widthMaxPixels = 20
       # , beforeId = "housenumber"
     )

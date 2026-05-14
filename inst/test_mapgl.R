@@ -107,6 +107,7 @@ m = m |>
       # , getElevation = "elevation"
     )
     , popup = TRUE
+    , tooltip = TRUE
     , interleaved = TRUE
     , parameters = list(
       ## FIXME: neither depthTest:false nor depthCompare:"always" work in globe

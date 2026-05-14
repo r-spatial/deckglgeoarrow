@@ -37,7 +37,9 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
       if (deckoverlay._props.layers.length ===  0) {
         deckoverlay.setProps({ layers: [polygonlayer] })
       } else {
-        deckoverlay.setProps({ layers: deckoverlay._props.layers.concat(polygonlayer) });
+        let lyrs = deckoverlay._props.layers.concat(polygonlayer);
+        lyrs = lyrs.sort(function(a, b){return a.props.position - b.props.position});
+        deckoverlay.setProps({ layers: lyrs });
       }
 
       //deckoverlay._props.layers.sort(function(a, b){return a.props.position - b.props.position})

@@ -32,25 +32,18 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
     .then(arrow_table => {
 
       let polygonlayer = polygonLayer(map, opts, arrow_table);
-      // does the mapboxoverlay already have layer(s)?
 
+      // does the mapboxoverlay already have layer(s)?
       if (deckoverlay._props.layers.length ===  0) {
         deckoverlay.setProps({ layers: [polygonlayer] })
       } else {
-        let lyrs = deckoverlay._props.layers.concat(polygonlayer);
-        lyrs = lyrs.sort(function(a, b){return a.props.position - b.props.position});
-        deckoverlay.setProps({ layers: lyrs });
+        let lrs = deckoverlay._props.layers.concat(polygonlayer);
+        lrs = lrs.sort(function(a, b) {
+          return a.props.zIndex - b.props.zIndex;
+        });
+        deckoverlay.setProps({ layers: lrs });
       }
 
-      //deckoverlay._props.layers.sort(function(a, b){return a.props.position - b.props.position})
-      /*
-  deckoverlay._props.layers.sort(function(a, b) {
-    if (a.length === 0) {
-      return;
-    }
-    return a.props.position - b.props.position;
-  })
-*/
     });
 
 
@@ -70,7 +63,7 @@ polygonLayer = function(map, opts, table) {
     getPolygon: table.getChild(opts.geom_column_name),
     beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,
-    position: opts.renderOptions.position,
+    zIndex: opts.renderOptions.zIndex,
 
     // render options
     filled: opts.renderOptions.filled,

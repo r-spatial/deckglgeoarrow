@@ -36,7 +36,7 @@ m = m |>
     , layer_id = "scatter"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
-      position = 2
+      zIndex = 0
       , beforeId = "water"
     )
     , data_accessors = dataAccessors(
@@ -98,7 +98,7 @@ m = m |>
       extruded = FALSE
       , stroked = FALSE
       # , beforeId = "boundary_county"
-      , position = 1
+      , zIndex = 1
     )
     , data_accessors = dataAccessors(
       getFillColor = "fillColor"
@@ -151,7 +151,7 @@ m |>
     , render_options = renderOptions(
       widthUnits = "meters"
       , widthScale = 3000
-      , position = 3
+      , zIndex = 3
       # , widthMaxPixels = 20
       # , beforeId = "housenumber"
     )
@@ -177,7 +177,8 @@ m |>
     collapsible = TRUE
     # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
     , layers = list(
-      "Scatter Layer" = "deck-layer-group-slot:scatter"
+      "Scatter Layer" = "deck-layer-group-before:water"
+      # "Scatter Layer" = "deck-layer-group-slot:scatter"
       # , "Path Layer" = "deck-layer-group-slot:path"
       , "Polygon Layer" = "deck-layer-group-slot:polygon"
       , "Path Layer" = "deck-layer-group-slot:path"

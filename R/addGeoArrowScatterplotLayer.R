@@ -233,7 +233,7 @@ addGeoArrowScatterplotLayer = function(
     , popupOptions = popup_options
     , tooltipOptions = tooltip_options
     , map_class = map_class
-    , interleaved = FALSE
+    , interleaved = TRUE
   )
 
   dot_lst = list(...)

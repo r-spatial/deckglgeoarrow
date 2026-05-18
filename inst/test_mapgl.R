@@ -5,6 +5,7 @@ library(sf)
 library(colourvalues)
 
 style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+style_darkmatter = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
 style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'
 
 ### points =========================
@@ -28,7 +29,7 @@ dat$lineWidth = sample.int(5, nrow(dat), replace = TRUE)
 
 options(viewer = NULL)
 
-m = maplibre(style = style_positron)
+m = maplibre(style = style_darkmatter)
 
 m = m |>
   addGeoArrowScatterplotLayer(

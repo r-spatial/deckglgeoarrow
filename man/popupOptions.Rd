@@ -29,7 +29,7 @@ respective defaults. These are:
 For \code{popupOptions}
 \itemize{
 \item anchor = "bottom"
-\item className = ""
+\item className = "geoarrow-deckgl-popup"
 \item closeButton = TRUE
 \item closeOnClick = TRUE
 \item closeOnMove = FALSE

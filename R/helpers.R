@@ -179,7 +179,7 @@ dataAccessors = function(...) {
 #' For `popupOptions`
 #'
 #' * anchor = "bottom"
-#' * className = ""
+#' * className = "geoarrow-deckgl-popup"
 #' * closeButton = TRUE
 #' * closeOnClick = TRUE
 #' * closeOnMove = FALSE

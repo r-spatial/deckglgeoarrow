@@ -2,17 +2,17 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
   // FIXME: turn into function for re-use across layer types
   // first we generate the proper internal layer name using the slot parameter
-  opts.decklayerId = "deck-layer-group-slot:" + opts.layerId
+  opts.decklayerId = "deck-layer-group-slot:" + opts.layerId;
 
   // then, if 'beforeId' is supplied we change accordingly. see
   // https://github.com/visgl/deck.gl/tree/master/modules/mapbox/src/resolve-layer-groups.ts#L13-L20
   if (opts.renderOptions.beforeId !== null) {
-    opts.decklayerId = "deck-layer-group-before:" + opts.renderOptions.beforeId
+    opts.decklayerId = "deck-layer-group-before:" + opts.renderOptions.beforeId;
   }
 
   // FIXME: turn into function for re-use across layer types
   // do we already have a deckgl mapboxoverlay on our map?
-  deckoverlay = map._controls.find((el) => el.hasOwnProperty("_deck"))
+  deckoverlay = map._controls.find((el) => el.hasOwnProperty("_deck"));
 
   if (deckoverlay === undefined) {
     deckoverlay = new deck.MapboxOverlay({
@@ -28,7 +28,15 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
   let data_fl = document.getElementById(opts.layerId + '-geoarrowWidget-attachment');
 
   fetch(data_fl.href)
-    .then(result => Arrow.tableFromIPC(result))
+    .then(result => {
+      if (opts.extension_type === "arrow") {
+        return Arrow.tableFromIPC(result);
+      } else if (opts.extension_type === "parquet") {
+        return window.parquet2arrow(result);
+      } else {
+        console.log("extension type not supported, need 'geoarrow' or 'geoparquet'");
+      }
+    })
     .then(arrow_table => {
 
       let scatterlayer = scatterplotLayer(map, opts, arrow_table);

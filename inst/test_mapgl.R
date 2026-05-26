@@ -29,22 +29,23 @@ dat$lineWidth = sample.int(5, nrow(dat), replace = TRUE)
 
 options(viewer = NULL)
 
-m = maplibre(style = style_darkmatter)
+m = maplibre(style = style_positron)
 
 m = m |>
   addGeoArrowScatterplotLayer(
-    data = dat
-    , layer_id = "scatter"
-    , geom_column_name = attr(dat, "sf_column")
+    # data = dat
+    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
+    , layer_id = "natural-earth_cities_native"
+    , geom_column_name = "geometry" # attr(dat, "sf_column")
     , render_options = renderOptions(
       zIndex = 0
-      , beforeId = "water"
+      # , beforeId = "water"
     )
     , data_accessors = dataAccessors(
-      getRadius = "radius"
-      , getFillColor = "fillColor"
-      , getLineWidth = "lineWidth"
-      , getLineColor = "lineColor"
+      # getRadius = "radius"
+      # , getFillColor = "fillColor"
+      # , getLineWidth = "lineWidth"
+      # , getLineColor = "lineColor"
     )
     , parameters = list(
       depthCompare = "always"
@@ -54,11 +55,12 @@ m = m |>
     , popup_options = popupOptions(
       anchor = "bottom-right"
     )
-    , tooltip = FALSE
+    , tooltip = TRUE
     , tooltip_options = tooltipOptions(
       anchor = "top-left"
     )
     , interleaved = TRUE
+    , extension_type = "parquet"
   )
   # add_layers_control(
   #   collapsible = TRUE

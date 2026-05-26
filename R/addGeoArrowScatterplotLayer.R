@@ -3,6 +3,8 @@
 #'
 #' @param map the [mapgl::maplibre()] or [mapgl::mapboxgl()] map to add the layer to.
 #' @param data a sf `(MULTI)POINT` object.
+#' @param url a URL to a remotely hosted `geoarrow` or `geoparquet` file to be
+#' added to the map. Ignored if `data` is supplied.
 #' @param layer_id the layer id.
 #' @param geom_column_name the name of the geometry column of the sf object.
 #' It is inferred automatically if only one is present.
@@ -33,8 +35,8 @@
 #' By default, all deck.gl layers passed to a `maplibre()` map will be drawn on
 #' top of existing ones. It is, however, possible to inject layers into existing
 #' `maplibre` layers by passing `interleaved = TRUE` via `...`. In combination
-#' with a `render_options = renderOptions(beforeId = "<some existing layer-id>")`
-#' this will plot the current layer underneath "<some existing layer-id>".
+#' with a `render_options = renderOptions(beforeId = "<some-existing-layer-id>")`
+#' this will plot the current layer underneath `"<some-existing-layer-id>"`.
 #'
 #'
 #' @examples
@@ -115,8 +117,9 @@
 #' @export
 addGeoArrowScatterplotLayer = function(
     map
-    , data
-    , layer_id
+    , data = NULL
+    , url = NULL
+    , layer_id = "scatter"
     , geom_column_name = attr(data, "sf_column")
     , popup = NULL
     , tooltip = NULL
@@ -135,8 +138,9 @@ addGeoArrowScatterplotLayer = function(
 
 .addGeoArrowScatterplotLayer = function(
     map
-    , data
-    , layer_id
+    , data = NULL
+    , url = NULL
+    , layer_id = "scatter"
     , geom_column_name = attr(data, "sf_column")
     , popup = NULL
     , tooltip = NULL
@@ -162,31 +166,6 @@ addGeoArrowScatterplotLayer = function(
   #   )
   # }
 
-  if (isTRUE(popup)) {
-    popup = names(data)
-  } else if (isFALSE(popup)) {
-    popup = NULL
-  }
-
-  if (isTRUE(tooltip)) {
-    tooltip = names(data)
-  } else if (isFALSE(tooltip)) {
-    tooltip = NULL
-  }
-
-  path_layer = writeGeoarrow(
-    data = data
-    , path = tempfile()
-    , layerId = layer_id
-    , geom_column_name
-    , interleaved = TRUE
-  )
-
-  map$dependencies = c(
-    map$dependencies
-    , if (!inherits(map, "mapdeck")) deckglDependencies()
-  )
-
   map$dependencies = c(
     map$dependencies
     , list(
@@ -199,19 +178,49 @@ addGeoArrowScatterplotLayer = function(
     )
   )
 
-  map = geoarrowWidget::attachGeoarrowDependencies(
-    widget = map
+  map$dependencies = c(
+    map$dependencies
+    , if (!inherits(map, "mapdeck")) deckglDependencies()
   )
+
+  if (!is.null(data)) {
+
+    path_layer = writeGeoarrow(
+      data = data
+      , path = tempfile()
+      , layerId = layer_id
+      , geom_column_name
+      , interleaved = TRUE
+    )
+
+    map = geoarrowWidget::attachGeoarrowDependencies(
+      widget = map
+    )
+
+    map = geoarrowWidget::attachData(
+      widget = map
+      , file = path_layer
+    )
+
+  }
+
+  if (is.null(data) & !is.null(url)) {
+
+    map = geoarrowWidget::attachParquetWasmDependencies(
+      widget = map
+    )
+
+    map = geoarrowWidget::attachData(
+      widget = map
+      , url = url
+    )
+
+  }
 
   map$dependencies = c(
     map$dependencies
     , geoarrowDeckglLayersDependencies()
     , helpersDependency()
-  )
-
-  map = geoarrowWidget::attachData(
-    widget = map
-    , file = path_layer
   )
 
   if (missing(js_code)) {
@@ -221,6 +230,19 @@ addGeoArrowScatterplotLayer = function(
         addGeoArrowDeckglScatterplotLayer(map, data);
       }"
     )
+  }
+
+  ## FIXME: popup needs to be handled on JS side, because of remote data via url
+  if (isTRUE(popup)) {
+    popup = names(data)
+  } else if (isFALSE(popup)) {
+    popup = FALSE
+  }
+
+  if (isTRUE(tooltip)) {
+    tooltip = names(data)
+  } else if (isFALSE(tooltip)) {
+    tooltip = FALSE
   }
 
   default_lst = list(
@@ -234,6 +256,7 @@ addGeoArrowScatterplotLayer = function(
     , tooltipOptions = tooltip_options
     , map_class = map_class
     , interleaved = TRUE
+    , extension_type = "arrow"
   )
 
   dot_lst = list(...)
@@ -251,12 +274,10 @@ addGeoArrowScatterplotLayer = function(
 #' @export
 addGeoArrowScatterplotLayer.maplibregl = function(
     map
-    , data
     , ...
 ) {
   .addGeoArrowScatterplotLayer(
     map
-    , data
     , ...
     , map_class = "maplibregl"
   )
@@ -265,12 +286,10 @@ addGeoArrowScatterplotLayer.maplibregl = function(
 #' @export
 addGeoArrowScatterplotLayer.mapboxgl = function(
     map
-    , data
     , ...
   ) {
   .addGeoArrowScatterplotLayer(
     map
-    , data
     , ...
     , map_class = "mapboxgl"
   )

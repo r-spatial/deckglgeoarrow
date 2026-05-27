@@ -7,8 +7,9 @@ using blazing fast \code{\link[nanoarrow:read_nanoarrow]{nanoarrow::write_nanoar
 \usage{
 addGeoArrowPathLayer(
   map,
-  data,
-  layer_id,
+  data = NULL,
+  url = NULL,
+  layer_id = "path",
   geom_column_name = attr(data, "sf_column"),
   popup = NULL,
   tooltip = NULL,
@@ -23,6 +24,9 @@ addGeoArrowPathLayer(
 \item{map}{the \code{\link[mapgl:maplibre]{mapgl::maplibre()}} or \code{\link[mapgl:mapboxgl]{mapgl::mapboxgl()}} map to add the layer to.}
 
 \item{data}{a sf \verb{(MULTI)LINESTRING} object.}
+
+\item{url}{a URL to a remotely hosted \code{geoarrow} or \code{geoparquet} file to be
+added to the map. Ignored if \code{data} is supplied.}
 
 \item{layer_id}{the layer id.}
 

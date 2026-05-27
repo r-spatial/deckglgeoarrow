@@ -3,6 +3,8 @@
 #'
 #' @param map the [mapgl::maplibre()] or [mapgl::mapboxgl()] map to add the layer to.
 #' @param data a sf `(MULTI)LINESTRING` object.
+#' @param url a URL to a remotely hosted `geoarrow` or `geoparquet` file to be
+#' added to the map. Ignored if `data` is supplied.
 #' @param layer_id the layer id.
 #' @param geom_column_name the name of the geometry column of the sf object.
 #' It is inferred automatically if only one is present.
@@ -25,8 +27,9 @@
 #' @export
 addGeoArrowPathLayer = function(
     map
-    , data
-    , layer_id
+    , data = NULL
+    , url = NULL
+    , layer_id = "path"
     , geom_column_name = attr(data, "sf_column")
     , popup = NULL
     , tooltip = NULL
@@ -44,8 +47,9 @@ addGeoArrowPathLayer = function(
 
 .addGeoArrowPathLayer = function(
     map
-    , data
-    , layer_id
+    , data = NULL
+    , url = NULL
+    , layer_id = "path"
     , geom_column_name = attr(data, "sf_column")
     , popup = NULL
     , tooltip = NULL
@@ -57,31 +61,6 @@ addGeoArrowPathLayer = function(
     , js_code
     , ...
 ) {
-
-  if (isTRUE(popup)) {
-    popup = names(data)
-  } else if (isFALSE(popup)) {
-    popup = NULL
-  }
-
-  if (isTRUE(tooltip)) {
-    tooltip = names(data)
-  } else if (isFALSE(tooltip)) {
-    tooltip = NULL
-  }
-
-  path_layer = writeGeoarrow(
-    data = data
-    , path = tempfile()
-    , layerId = layer_id
-    , geom_column_name
-    , interleaved = TRUE
-  )
-
-  map$dependencies = c(
-    map$dependencies
-    , if (!inherits(map, "mapdeck")) deckglDependencies()
-  )
 
   map$dependencies = c(
     map$dependencies
@@ -95,19 +74,55 @@ addGeoArrowPathLayer = function(
     )
   )
 
-  map = geoarrowWidget::attachGeoarrowDependencies(
-    widget = map
+  map$dependencies = c(
+    map$dependencies
+    , if (!inherits(map, "mapdeck")) deckglDependencies()
   )
+
+  if (!is.null(data)) {
+
+    path_layer = writeGeoarrow(
+      data = data
+      , path = tempfile()
+      , layerId = layer_id
+      , geom_column_name
+      , interleaved = TRUE
+    )
+
+    map = geoarrowWidget::attachGeoarrowDependencies(
+      widget = map
+    )
+
+    map = geoarrowWidget::attachData(
+      widget = map
+      , file = path_layer
+      , name = layer_id
+    )
+
+    extension_type = guessFileExtension(path_layer)
+
+  }
+
+  if (is.null(data) & !is.null(url)) {
+
+    map = geoarrowWidget::attachParquetWasmDependencies(
+      widget = map
+    )
+
+    map = geoarrowWidget::attachData(
+      widget = map
+      , url = url
+      , name = layer_id
+    )
+
+    extension_type = guessFileExtension(url)
+
+  }
 
   map$dependencies = c(
     map$dependencies
     , geoarrowDeckglLayersDependencies()
     , helpersDependency()
-  )
-
-  map = geoarrowWidget::attachData(
-    widget = map
-    , file = path_layer
   )
 
   if (missing(js_code)) {
@@ -117,6 +132,14 @@ addGeoArrowPathLayer = function(
         addGeoArrowDeckglPathLayer(map, data);
       }"
     )
+  }
+
+  if (isFALSE(popup)) {
+    popup = NULL
+  }
+
+  if (isFALSE(tooltip)) {
+    tooltip = NULL
   }
 
   default_lst = list(
@@ -130,6 +153,7 @@ addGeoArrowPathLayer = function(
     , tooltipOptions = tooltip_options
     , map_class = map_class
     , interleaved = TRUE
+    , extension_type = extension_type
   )
 
   dot_lst = list(...)
@@ -147,12 +171,10 @@ addGeoArrowPathLayer = function(
 #' @export
 addGeoArrowPathLayer.maplibregl = function(
     map
-    , data
     , ...
 ) {
   .addGeoArrowPathLayer(
     map
-    , data
     , ...
     , map_class = "maplibregl"
   )
@@ -161,12 +183,10 @@ addGeoArrowPathLayer.maplibregl = function(
 #' @export
 addGeoArrowPathLayer.mapboxgl = function(
     map
-    , data
     , ...
 ) {
   .addGeoArrowPathLayer(
     map
-    , data
     , ...
     , map_class = "mapboxgl"
   )

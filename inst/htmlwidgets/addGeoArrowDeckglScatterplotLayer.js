@@ -64,6 +64,16 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 scatterplotLayer = function(map, opts, table) {
   let gaDeckLayers = window["@geoarrow/deck"]["gl-layers"];
 
+  let table_names = table.schema.fields.map(obj => obj.name);
+
+  if (opts.popup === true) {
+    opts.popup = table_names;
+  }
+
+  if (opts.tooltip === true) {
+    opts.tooltip = table_names;
+  }
+
   let layer = new gaDeckLayers.GeoArrowScatterplotLayer({
     id: opts.decklayerId,
     data: table,

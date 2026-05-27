@@ -28,7 +28,15 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
   let data_fl = document.getElementById(opts.layerId + '-geoarrowWidget-attachment');
 
   fetch(data_fl.href)
-    .then(result => Arrow.tableFromIPC(result))
+    .then(result => {
+      if (opts.extension_type === "arrow") {
+        return Arrow.tableFromIPC(result);
+      } else if (opts.extension_type === "parquet") {
+        return window.parquet2arrow(result);
+      } else {
+        console.log("extension type not supported, need 'geoarrow' or 'geoparquet'");
+      }
+    })
     .then(arrow_table => {
 
       let polygonlayer = polygonLayer(map, opts, arrow_table);
@@ -56,6 +64,16 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
 
 polygonLayer = function(map, opts, table) {
   let gaDeckLayers = window["@geoarrow/deck"]["gl-layers"];
+
+  let table_names = table.schema.fields.map(obj => obj.name);
+
+  if (opts.popup === true) {
+    opts.popup = table_names;
+  }
+
+  if (opts.tooltip === true) {
+    opts.tooltip = table_names;
+  }
 
   let layer = new gaDeckLayers.GeoArrowPolygonLayer({
     id: opts.decklayerId,

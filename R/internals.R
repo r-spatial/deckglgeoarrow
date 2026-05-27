@@ -1,3 +1,4 @@
+## helper to write nanoarrow IPC stream to tempfile
 writeGeoarrow = function(
     data
     , path = tempfile()
@@ -28,3 +29,16 @@ writeGeoarrow = function(
   return(path)
 
 }
+
+## helper to guess remote url file extension
+guessFileExtension = function(url) {
+  file_extension_map[[tools::file_ext(url)]]
+}
+
+file_extension_map = list(
+  "arrow" = "arrow"
+  , "geoarrow" = "arrow"
+  , "arrows" = "arrow"
+  , "parquet" = "parquet"
+  , "geoparquet" = "parquet"
+)

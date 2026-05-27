@@ -200,7 +200,10 @@ addGeoArrowScatterplotLayer = function(
     map = geoarrowWidget::attachData(
       widget = map
       , file = path_layer
+      , name = layer_id
     )
+
+    extension_type = guessFileExtension(path_layer)
 
   }
 
@@ -213,7 +216,10 @@ addGeoArrowScatterplotLayer = function(
     map = geoarrowWidget::attachData(
       widget = map
       , url = url
+      , name = layer_id
     )
+
+    extension_type = guessFileExtension(url)
 
   }
 
@@ -232,17 +238,12 @@ addGeoArrowScatterplotLayer = function(
     )
   }
 
-  ## FIXME: popup needs to be handled on JS side, because of remote data via url
-  if (isTRUE(popup)) {
-    popup = names(data)
-  } else if (isFALSE(popup)) {
-    popup = FALSE
+  if (isFALSE(popup)) {
+    popup = NULL
   }
 
-  if (isTRUE(tooltip)) {
-    tooltip = names(data)
-  } else if (isFALSE(tooltip)) {
-    tooltip = FALSE
+  if (isFALSE(tooltip)) {
+    tooltip = NULL
   }
 
   default_lst = list(
@@ -256,7 +257,7 @@ addGeoArrowScatterplotLayer = function(
     , tooltipOptions = tooltip_options
     , map_class = map_class
     , interleaved = TRUE
-    , extension_type = "arrow"
+    , extension_type = extension_type
   )
 
   dot_lst = list(...)

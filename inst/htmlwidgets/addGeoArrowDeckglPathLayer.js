@@ -22,7 +22,15 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
   let data_fl = document.getElementById(opts.layerId + '-geoarrowWidget-attachment');
 
   fetch(data_fl.href)
-    .then(result => Arrow.tableFromIPC(result))
+    .then(result => {
+      if (opts.extension_type === "arrow") {
+        return Arrow.tableFromIPC(result);
+      } else if (opts.extension_type === "parquet") {
+        return window.parquet2arrow(result);
+      } else {
+        console.log("extension type not supported, need 'geoarrow' or 'geoparquet'");
+      }
+    })
     .then(arrow_table => {
 
       let pathlayer = pathLayer(map, opts, arrow_table);
@@ -46,13 +54,23 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
 
 };
 
-pathLayer = function(map, opts, arrow_table) {
+pathLayer = function(map, opts, table) {
   let gaDeckLayers = window["@geoarrow/deck"]["gl-layers"];
+
+  let table_names = table.schema.fields.map(obj => obj.name);
+
+  if (opts.popup === true) {
+    opts.popup = table_names;
+  }
+
+  if (opts.tooltip === true) {
+    opts.tooltip = table_names;
+  }
 
   let layer = new gaDeckLayers.GeoArrowPathLayer({
     id: opts.decklayerId,
-    data: arrow_table,
-    getPath: arrow_table.getChild(opts.geom_column_name),
+    data: table,
+    getPath: table.getChild(opts.geom_column_name),
     getCursor: () => "inherit",
     beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,

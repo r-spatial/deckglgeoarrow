@@ -251,3 +251,12 @@ tooltipOptions = function(...) {
 
   utils::modifyList(default_lst, dot_lst)
 }
+
+
+
+generateLayersId = function(layer_id, beforeId = NULL) {
+  if (is.null(beforeId)) {
+    return(sprintf("deck-layer-group-slot:%s", layer_id))
+  }
+  return(sprintf("deck-layer-group-before:%s", beforeId))
+}

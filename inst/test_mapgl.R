@@ -33,19 +33,24 @@ m = maplibre(style = style_positron)
 
 m = m |>
   addGeoArrowScatterplotLayer(
-    # data = dat
-    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
-    , layer_id = "natural-earth_cities_native"
+    data = dat
+    # url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
+    # url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_interleaved.arrows"
+    , layer_id = "scatter1"
     , geom_column_name = "geometry" # attr(dat, "sf_column")
     , render_options = renderOptions(
       zIndex = 0
-      # , beforeId = "water"
+      , beforeId = "water"
     )
     , data_accessors = dataAccessors(
-      # getRadius = "radius"
-      # , getFillColor = "fillColor"
-      # , getLineWidth = "lineWidth"
-      # , getLineColor = "lineColor"
+      getRadius = "radius"
+      , getFillColor = "fillColor"
+      , getLineWidth = "lineWidth"
+      , getLineColor = "lineColor"
+      # getRadius = 10
+      # , getFillColor = "#ff00ff80"
+      # , getLineColor = "#00ffffff"
+      # , getLineWidth = 5
     )
     , parameters = list(
       depthCompare = "always"
@@ -59,9 +64,43 @@ m = m |>
     , tooltip_options = tooltipOptions(
       anchor = "top-left"
     )
-    , interleaved = TRUE
-    , extension_type = "parquet"
   )
+  # ) |>
+  # addGeoArrowScatterplotLayer(
+  #   # data = dat
+  #   url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
+  #   # url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_interleaved.arrows"
+  #   , layer_id = "scatter2"
+  #   , geom_column_name = "geometry" # attr(dat, "sf_column")
+  #   , render_options = renderOptions(
+  #     zIndex = 0
+  #     # , beforeId = "water"
+  #   )
+  #   , data_accessors = dataAccessors(
+  #     # getRadius = "radius"
+  #     # , getFillColor = "fillColor"
+  #     # , getLineWidth = "lineWidth"
+  #     # , getLineColor = "lineColor"
+  #     getRadius = 10
+  #     , getFillColor = "#ff00ff80"
+  #     , getLineColor = "#00ffffff"
+  #     , getLineWidth = 5
+  #   )
+  #   , parameters = list(
+  #     depthCompare = "always"
+  #     , cullMode = "back"
+  #   )
+  #   , popup = TRUE
+  #   , popup_options = popupOptions(
+  #     anchor = "bottom-right"
+  #   )
+  #   , tooltip = TRUE
+  #   , tooltip_options = tooltipOptions(
+  #     anchor = "top-left"
+  #   )
+  #   # , interleaved = TRUE
+  #   # , extension_type = "parquet"
+  # )
   # add_layers_control(
   #   collapsible = TRUE
   #   , layers = list("Deck layer1" = "deck-layer-group-last")
@@ -180,11 +219,11 @@ m |>
     collapsible = TRUE
     # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
     , layers = list(
-      "Scatter Layer" = "deck-layer-group-before:water"
+      "Scatter Layer" = geoarrowDeckglLayers:::generateLayersId("scatter", beforeId = "water")
       # "Scatter Layer" = "deck-layer-group-slot:scatter"
       # , "Path Layer" = "deck-layer-group-slot:path"
-      , "Polygon Layer" = "deck-layer-group-slot:polygon"
-      , "Path Layer" = "deck-layer-group-slot:path"
+      , "Polygon Layer" = geoarrowDeckglLayers:::generateLayersId("polygon")
+      , "Path Layer" = geoarrowDeckglLayers:::generateLayersId("path")
     )
   ) |>
   geoarrowDeckglLayers:::addMouseCoordinates()

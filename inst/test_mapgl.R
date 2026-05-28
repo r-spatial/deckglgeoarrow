@@ -219,11 +219,11 @@ m |>
     collapsible = TRUE
     # , layers = list("Deck Layer" = "deck-layer-group-before:aeroway-runway")
     , layers = list(
-      "Scatter Layer" = geoarrowDeckglLayers:::generateLayersId("scatter", beforeId = "water")
+      "Scatter Layer" = generateDeckglLayerId("scatter", beforeId = "water")
       # "Scatter Layer" = "deck-layer-group-slot:scatter"
       # , "Path Layer" = "deck-layer-group-slot:path"
-      , "Polygon Layer" = geoarrowDeckglLayers:::generateLayersId("polygon")
-      , "Path Layer" = geoarrowDeckglLayers:::generateLayersId("path")
+      , "Polygon Layer" = generateDeckglLayerId("polygon")
+      , "Path Layer" = generateDeckglLayerId("path")
     )
   ) |>
   geoarrowDeckglLayers:::addMouseCoordinates()

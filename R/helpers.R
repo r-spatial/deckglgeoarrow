@@ -252,9 +252,25 @@ tooltipOptions = function(...) {
   utils::modifyList(default_lst, dot_lst)
 }
 
-
-
-generateLayersId = function(layer_id, beforeId = NULL) {
+#' Generate proper internal layer ids
+#'
+#' Deck.gl injects layers into maplibre's canvas if `interleaved = TRUE` (the
+#' default in all layer functions provided here). To do so, it generates specific
+#' layer ids from the `layer_id` provided. This function generates these deck.gl
+#' specific layer ids on the R side, so they can be used in other controls, such
+#' as `mapgl::ad_layers_control()`.
+#'
+#' @param layer_id the layer id provided to the respective `addGeoArrowDeckgl*`
+#' layer function used.
+#' @param beforeId the `beforeId` used in the respective `addGeoArrowDeckgl*`
+#' layer function used.
+#'
+#' @examples
+#' generateDeckglLayerId("my_scatterplot_layer")
+#' generateDeckglLayerId("my_scatterplot_layer", beforeId = "water")
+#'
+#' @export
+generateDeckglLayerId = function(layer_id, beforeId = NULL) {
   if (is.null(beforeId)) {
     return(sprintf("deck-layer-group-slot:%s", layer_id))
   }

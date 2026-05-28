@@ -12,7 +12,7 @@ and \code{geoarrow-deckgl-layers} JavaScript libraries shipped with this package
 }
 \description{
 Names and versions of the external JavaScript libraries used in
-\code{geoarrowDeckglLayers}.
+\code{deckglgeoarrow}.
 }
 \details{
 See e.g. \url{https://cdn.jsdelivr.net/npm/deck.gl/package.json}

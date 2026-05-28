@@ -1,5 +1,5 @@
 library(mapgl)
-library(geoarrowDeckglLayers)
+library(deckglgeoarrow)
 library(geoarrow)
 
 style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"

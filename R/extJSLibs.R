@@ -1,7 +1,7 @@
 #' Names and versions of external JavaScript libraries.
 #'
 #' Names and versions of the external JavaScript libraries used in
-#' `geoarrowDeckglLayers`.
+#' `deckglgeoarrow`.
 #'
 #' See e.g. \url{https://cdn.jsdelivr.net/npm/deck.gl/package.json}
 #' or \url{https://cdn.jsdelivr.net/npm/@geoarrow/deck.gl-layers/package.json}
@@ -23,11 +23,11 @@ extJSLibs = function() {
 
   structure(
     c(
-      geoarrowDeckglLayersDependencies()[[1]]$version
+      deckglgeoarrowDependencies()[[1]]$version
       , deckglDependencies()[[1]]$version
     )
     , names = c(
-      geoarrowDeckglLayersDependencies()[[1]]$name
+      deckglgeoarrowDependencies()[[1]]$name
       , deckglDependencies()[[1]]$name
     )
   )

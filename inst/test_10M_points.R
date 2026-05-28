@@ -1,5 +1,5 @@
 library(mapgl)
-library(geoarrowDeckglLayers)
+library(deckglgeoarrow)
 library(geoarrow)
 library(sf)
 library(colourvalues)
@@ -90,4 +90,4 @@ m |>
       , "Scatter Layer 2" = "deck-layer-group-slot:scatter2"
     )
   ) |>
-  geoarrowDeckglLayers:::addMouseCoordinates()
+  addMouseCoordinates()

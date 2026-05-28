@@ -68,7 +68,7 @@ addGeoArrowPolygonLayer = function(
       htmltools::htmlDependency(
         name = "deckglPolygonLayer"
         , version = "0.0.1"
-        , src = system.file("htmlwidgets", package = "geoarrowDeckglLayers")
+        , src = system.file("htmlwidgets", package = "deckglgeoarrow")
         , script = "addGeoArrowDeckglPolygonLayer.js"
       )
     )
@@ -121,7 +121,7 @@ addGeoArrowPolygonLayer = function(
 
   map$dependencies = c(
     map$dependencies
-    , geoarrowDeckglLayersDependencies()
+    , deckglgeoarrowDependencies()
     , helpersDependency()
   )
 

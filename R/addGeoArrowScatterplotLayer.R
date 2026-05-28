@@ -172,7 +172,7 @@ addGeoArrowScatterplotLayer = function(
       htmltools::htmlDependency(
         name = "deckglScatterplot"
         , version = "0.0.1"
-        , src = system.file("htmlwidgets", package = "geoarrowDeckglLayers")
+        , src = system.file("htmlwidgets", package = "deckglgeoarrow")
         , script = "addGeoArrowDeckglScatterplotLayer.js"
       )
     )
@@ -225,7 +225,7 @@ addGeoArrowScatterplotLayer = function(
 
   map$dependencies = c(
     map$dependencies
-    , geoarrowDeckglLayersDependencies()
+    , deckglgeoarrowDependencies()
     , helpersDependency()
   )
 

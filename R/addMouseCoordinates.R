@@ -6,7 +6,7 @@ addMouseCoordinates <- function(map, css = list()) {
       htmltools::htmlDependency(
         name = "mousecoords"
         , version = "0.0.1"
-        , src = system.file("htmlwidgets", package = "geoarrowDeckglLayers")
+        , src = system.file("htmlwidgets", package = "deckglgeoarrow")
         , script = "mousecoords.js"
       )
     )

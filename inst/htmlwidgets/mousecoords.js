@@ -2,7 +2,7 @@ addMouseCoordinates = function(el, map, css) {
 
   function addMCStrip () {
     var newDiv = document.createElement('div');
-    // append at end of leaflet htmlwidget container
+    // append at end of htmlwidget container
     el.append(newDiv);
     //provide ID and style
     newDiv.class = '.lnlt';

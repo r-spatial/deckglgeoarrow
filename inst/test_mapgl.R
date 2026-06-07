@@ -39,7 +39,7 @@ m = m |>
     , layer_id = "scatter1"
     , geom_column_name = "geometry" # attr(dat, "sf_column")
     , render_options = renderOptions(
-      zIndex = 0
+      zIndex = 1
       , beforeId = "water"
     )
     , data_accessors = dataAccessors(
@@ -139,8 +139,8 @@ m = m |>
     , render_options = renderOptions(
       extruded = FALSE
       , stroked = FALSE
-      , beforeId = "boundary_county"
-      , zIndex = 1
+      # , beforeId = "boundary_county"
+      , zIndex = 2
     )
     , data_accessors = dataAccessors(
       getFillColor = "fillColor"
@@ -226,5 +226,5 @@ m |>
       , "Path Layer" = generateDeckglLayerId("path")
     )
   ) |>
-  addMouseCoordinates()
+  deckglgeoarrow:::addMouseCoordinates()
 

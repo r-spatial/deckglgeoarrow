@@ -1,6 +1,6 @@
 Package: deckglgeoarrow
 Title: Use GeoArrow to add Layers to a 'maplibregl'/'mapboxgl' Map
-Version: 0.0.0.9064
+Version: 0.0.0.9065
 Authors@R: 
     c(person(given = "Tim",
              family = "Appelhans",

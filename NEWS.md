@@ -2,13 +2,10 @@
 
 #### ✨ features and improvements
 
+  * initial release
+
 #### 🐛 bug fixes
 
 #### 💬 documentation etc
 
 #### 🍬 miscellaneous
-
-
-# deckglgeoarrow (development version)
-
-* Initial CRAN submission.

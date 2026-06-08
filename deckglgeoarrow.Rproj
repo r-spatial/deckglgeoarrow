@@ -21,4 +21,4 @@ BuildType: Package
 PackageInstallArgs: --no-multiarch --with-keep.source
 PackageBuildArgs: --no-manual
 PackageCheckArgs: --as-cran --no-manual
-PackageRoxygenize: rd,collate,namespace
+PackageRoxygenize: rd,collate,namespace,roxut::tests_roclet

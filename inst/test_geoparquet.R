@@ -18,8 +18,8 @@ m = m |>
     , layer_id = "scatter2"
     , geom_column_name = "geometry" # attr(dat, "sf_column")
     , render_options = renderOptions(
-      zIndex = 0
-      # , beforeId = "water"
+      zIndex = 2
+      # , beforeId = "place_town"
     )
     , data_accessors = dataAccessors(
       # getRadius = "radius"
@@ -27,13 +27,19 @@ m = m |>
       # , getLineWidth = "lineWidth"
       # , getLineColor = "lineColor"
       getRadius = 10
-      , getFillColor = "#ff00ff80"
-      , getLineColor = "#00ffffff"
-      , getLineWidth = 5
+      , getFillColor = '#ff000090'
+      , getLineColor = '#000000ff'
     )
     , parameters = list(
       depthCompare = "always"
       , cullMode = "back"
+      # , depthWriteEnabled = FALSE
+      # , blendColorSrcFactor = 'one'
+      # , blendAlphaSrcFactor = 'one'
+      # , blendColorDstFactor = 'src-alpha'
+      # , blendAlphaDstFactor = 'src-alpha'
+      # , blendColorOperation = 'add'
+      # , blendAlphaOperation = 'add'
     )
     , popup = TRUE
     , popup_options = popupOptions(
@@ -90,7 +96,7 @@ m = m |>
       , cullMode = "back"
     )
     , data_accessors = dataAccessors(
-      getColor = "#00ffffff"
+      getColor = "#00ffff90"
       , getWidth = 5
     )
     , render_options = renderOptions(

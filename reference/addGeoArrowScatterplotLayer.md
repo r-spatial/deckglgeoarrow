@@ -16,7 +16,7 @@ addGeoArrowScatterplotLayer(
   data = NULL,
   url = NULL,
   layer_id = "scatter",
-  geom_column_name = attr(data, "sf_column"),
+  geom_column_name = "geometry",
   popup = NULL,
   tooltip = NULL,
   render_options = renderOptions(),
@@ -109,11 +109,10 @@ available prarmeters.
 By default, all deck.gl layers passed to a
 [`maplibre()`](https://walker-data.com/mapgl/reference/maplibre.html)
 map will be drawn on top of existing ones. It is, however, possible to
-inject layers into existing `maplibre` layers by passing
-`interleaved = TRUE` via `...`. In combination with a
+inject layers into the existing `maplibre` (base) layer stack by using
 `render_options = renderOptions(beforeId = "<some-existing-layer-id>")`
-this will plot the current layer underneath
-`"<some-existing-layer-id>"`.
+which will plot the current layer underneath
+`"<some-existing-layer-id>"`. See below for an example.
 
 ## Examples
 
@@ -126,7 +125,7 @@ n = 5e3
 dat = data.frame(
   id = 1:n
   , x = runif(n, -180, 180)
-  , y = runif(n, -60, 60)
+  , y = runif(n, -90, 90)
 )
 dat = st_as_sf(
   dat
@@ -170,13 +169,12 @@ m |>
 #> Loading required namespace: geoarrow
 
 {"x":{"style":"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[],"navigation_control":{"show_compass":true,"show_zoom":true,"visualize_pitch":true,"position":"top-right","orientation":"vertical"},"globe_control":{"position":"top-right"}},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglScatterplotLayer(map, data);\n      }","data":{"geom_column_name":"geometry","layerId":"test","popup":true,"tooltip":true,"renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":false,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":null},"dataAccessors":{"getRadius":"radius","getColor":[0,0,0,255],"getFillColor":"fillColor","getLineColor":"lineColor","getLineWidth":"lineWidth","getElevation":1000,"getWidth":1},"popupOptions":{"anchor":"bottom-right","className":"geoarrow-deckgl-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"geoarrow-deckgl-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"map_class":"maplibregl","interleaved":true,"extension_type":"arrow","parameters":{"depthCompare":"always","cullMode":"back"}}}]}}
-## interleaved example
+## using beforeId to inject into base layer stack
 m |>
   addGeoArrowScatterplotLayer(
     data = dat
     , layer_id = "test"
     , geom_column_name = attr(dat, "sf_column")
-    , interleaved = TRUE
     , render_options = renderOptions(beforeId = "boundary_county")
     , data_accessors = dataAccessors(
       getRadius = "radius"
@@ -190,9 +188,9 @@ m |>
     )
     , popup = TRUE
     , popup_options = popupOptions(anchor = "bottom-right")
-    , tooltip = TRUE
+    , tooltip = FALSE
     , tooltip_options = tooltipOptions(anchor = "top-left")
   )
 
-{"x":{"style":"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[],"navigation_control":{"show_compass":true,"show_zoom":true,"visualize_pitch":true,"position":"top-right","orientation":"vertical"},"globe_control":{"position":"top-right"}},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglScatterplotLayer(map, data);\n      }","data":{"geom_column_name":"geometry","layerId":"test","popup":true,"tooltip":true,"renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":false,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":"boundary_county"},"dataAccessors":{"getRadius":"radius","getColor":[0,0,0,255],"getFillColor":"fillColor","getLineColor":"lineColor","getLineWidth":"lineWidth","getElevation":1000,"getWidth":1},"popupOptions":{"anchor":"bottom-right","className":"geoarrow-deckgl-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"geoarrow-deckgl-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"map_class":"maplibregl","interleaved":true,"extension_type":"arrow","parameters":{"depthCompare":"always","cullMode":"back"}}}]}}
+{"x":{"style":"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[],"navigation_control":{"show_compass":true,"show_zoom":true,"visualize_pitch":true,"position":"top-right","orientation":"vertical"},"globe_control":{"position":"top-right"}},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglScatterplotLayer(map, data);\n      }","data":{"geom_column_name":"geometry","layerId":"test","popup":true,"tooltip":null,"renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":false,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":"boundary_county"},"dataAccessors":{"getRadius":"radius","getColor":[0,0,0,255],"getFillColor":"fillColor","getLineColor":"lineColor","getLineWidth":"lineWidth","getElevation":1000,"getWidth":1},"popupOptions":{"anchor":"bottom-right","className":"geoarrow-deckgl-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"geoarrow-deckgl-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"map_class":"maplibregl","interleaved":true,"extension_type":"arrow","parameters":{"depthCompare":"always","cullMode":"back"}}}]}}
 ```

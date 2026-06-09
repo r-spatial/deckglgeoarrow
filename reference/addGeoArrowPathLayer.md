@@ -16,7 +16,7 @@ addGeoArrowPathLayer(
   data = NULL,
   url = NULL,
   layer_id = "path",
-  geom_column_name = attr(data, "sf_column"),
+  geom_column_name = "geometry",
   popup = NULL,
   tooltip = NULL,
   render_options = renderOptions(),

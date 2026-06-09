@@ -10,7 +10,7 @@ addGeoArrowScatterplotLayer(
   data = NULL,
   url = NULL,
   layer_id = "scatter",
-  geom_column_name = attr(data, "sf_column"),
+  geom_column_name = "geometry",
   popup = NULL,
   tooltip = NULL,
   render_options = renderOptions(),
@@ -68,10 +68,11 @@ See \url{https://luma.gl/docs/api-reference/core/parameters} for a list of
 available prarmeters.
 
 By default, all deck.gl layers passed to a \code{maplibre()} map will be drawn on
-top of existing ones. It is, however, possible to inject layers into existing
-\code{maplibre} layers by passing \code{interleaved = TRUE} via \code{...}. In combination
-with a \code{render_options = renderOptions(beforeId = "<some-existing-layer-id>")}
-this will plot the current layer underneath \code{"<some-existing-layer-id>"}.
+top of existing ones. It is, however, possible to inject layers into the
+existing \code{maplibre} (base) layer stack by using
+\code{render_options = renderOptions(beforeId = "<some-existing-layer-id>")}
+which will plot the current layer underneath \code{"<some-existing-layer-id>"}.
+See below for an example.
 }
 \examples{
 library(mapgl)
@@ -81,7 +82,7 @@ n = 5e3
 dat = data.frame(
   id = 1:n
   , x = runif(n, -180, 180)
-  , y = runif(n, -60, 60)
+  , y = runif(n, -90, 90)
 )
 dat = st_as_sf(
   dat
@@ -123,13 +124,12 @@ m |>
     , tooltip_options = tooltipOptions(anchor = "top-left")
   )
 
-## interleaved example
+## using beforeId to inject into base layer stack
 m |>
   addGeoArrowScatterplotLayer(
     data = dat
     , layer_id = "test"
     , geom_column_name = attr(dat, "sf_column")
-    , interleaved = TRUE
     , render_options = renderOptions(beforeId = "boundary_county")
     , data_accessors = dataAccessors(
       getRadius = "radius"
@@ -143,7 +143,7 @@ m |>
     )
     , popup = TRUE
     , popup_options = popupOptions(anchor = "bottom-right")
-    , tooltip = TRUE
+    , tooltip = FALSE
     , tooltip_options = tooltipOptions(anchor = "top-left")
   )
 

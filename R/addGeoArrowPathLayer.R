@@ -30,7 +30,7 @@ addGeoArrowPathLayer = function(
     , data = NULL
     , url = NULL
     , layer_id = "path"
-    , geom_column_name = attr(data, "sf_column")
+    , geom_column_name = "geometry"
     , popup = NULL
     , tooltip = NULL
     , render_options = renderOptions()
@@ -50,7 +50,7 @@ addGeoArrowPathLayer = function(
     , data = NULL
     , url = NULL
     , layer_id = "path"
-    , geom_column_name = attr(data, "sf_column")
+    , geom_column_name = "geometry"
     , popup = NULL
     , tooltip = NULL
     , render_options = renderOptions()
@@ -85,7 +85,7 @@ addGeoArrowPathLayer = function(
       data = data
       , path = tempfile()
       , layerId = layer_id
-      , geom_column_name
+      , geom_column_name = geom_column_name
       , interleaved = TRUE
     )
 

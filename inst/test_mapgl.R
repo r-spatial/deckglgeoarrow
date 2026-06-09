@@ -34,8 +34,6 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowScatterplotLayer(
     data = dat
-    # url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
-    # url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_interleaved.arrows"
     , layer_id = "scatter1"
     , geom_column_name = "geometry" # attr(dat, "sf_column")
     , render_options = renderOptions(
@@ -65,52 +63,6 @@ m = m |>
       anchor = "top-left"
     )
   )
-  # ) |>
-  # addGeoArrowScatterplotLayer(
-  #   # data = dat
-  #   url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
-  #   # url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_interleaved.arrows"
-  #   , layer_id = "scatter2"
-  #   , geom_column_name = "geometry" # attr(dat, "sf_column")
-  #   , render_options = renderOptions(
-  #     zIndex = 0
-  #     # , beforeId = "water"
-  #   )
-  #   , data_accessors = dataAccessors(
-  #     # getRadius = "radius"
-  #     # , getFillColor = "fillColor"
-  #     # , getLineWidth = "lineWidth"
-  #     # , getLineColor = "lineColor"
-  #     getRadius = 10
-  #     , getFillColor = "#ff00ff80"
-  #     , getLineColor = "#00ffffff"
-  #     , getLineWidth = 5
-  #   )
-  #   , parameters = list(
-  #     depthCompare = "always"
-  #     , cullMode = "back"
-  #   )
-  #   , popup = TRUE
-  #   , popup_options = popupOptions(
-  #     anchor = "bottom-right"
-  #   )
-  #   , tooltip = TRUE
-  #   , tooltip_options = tooltipOptions(
-  #     anchor = "top-left"
-  #   )
-  #   # , interleaved = TRUE
-  #   # , extension_type = "parquet"
-  # )
-  # add_layers_control(
-  #   collapsible = TRUE
-  #   , layers = list("Deck layer1" = "deck-layer-group-last")
-  # ) |>
-  # # set_projection("mercator") |>
-  # add_globe_control() |>
-  # add_navigation_control(visualize_pitch = TRUE) |>
-  # addMouseCoordinates()
-
-
 
 
 ### polygons ==================================

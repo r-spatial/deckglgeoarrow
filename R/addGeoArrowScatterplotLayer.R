@@ -33,11 +33,11 @@
 #' available prarmeters.
 #'
 #' By default, all deck.gl layers passed to a `maplibre()` map will be drawn on
-#' top of existing ones. It is, however, possible to inject layers into existing
-#' `maplibre` layers by passing `interleaved = TRUE` via `...`. In combination
-#' with a `render_options = renderOptions(beforeId = "<some-existing-layer-id>")`
-#' this will plot the current layer underneath `"<some-existing-layer-id>"`.
-#'
+#' top of existing ones. It is, however, possible to inject layers into the
+#' existing `maplibre` (base) layer stack by using
+#' `render_options = renderOptions(beforeId = "<some-existing-layer-id>")`
+#' which will plot the current layer underneath `"<some-existing-layer-id>"`.
+#' See below for an example.
 #'
 #' @examples
 #' library(mapgl)
@@ -47,7 +47,7 @@
 #' dat = data.frame(
 #'   id = 1:n
 #'   , x = runif(n, -180, 180)
-#'   , y = runif(n, -60, 60)
+#'   , y = runif(n, -90, 90)
 #' )
 #' dat = st_as_sf(
 #'   dat
@@ -89,13 +89,12 @@
 #'     , tooltip_options = tooltipOptions(anchor = "top-left")
 #'   )
 #'
-#' ## interleaved example
+#' ## using beforeId to inject into base layer stack
 #' m |>
 #'   addGeoArrowScatterplotLayer(
 #'     data = dat
 #'     , layer_id = "test"
 #'     , geom_column_name = attr(dat, "sf_column")
-#'     , interleaved = TRUE
 #'     , render_options = renderOptions(beforeId = "boundary_county")
 #'     , data_accessors = dataAccessors(
 #'       getRadius = "radius"
@@ -109,7 +108,7 @@
 #'     )
 #'     , popup = TRUE
 #'     , popup_options = popupOptions(anchor = "bottom-right")
-#'     , tooltip = TRUE
+#'     , tooltip = FALSE
 #'     , tooltip_options = tooltipOptions(anchor = "top-left")
 #'   )
 #'
@@ -120,7 +119,7 @@ addGeoArrowScatterplotLayer = function(
     , data = NULL
     , url = NULL
     , layer_id = "scatter"
-    , geom_column_name = attr(data, "sf_column")
+    , geom_column_name = "geometry"
     , popup = NULL
     , tooltip = NULL
     , render_options = renderOptions()
@@ -141,7 +140,7 @@ addGeoArrowScatterplotLayer = function(
     , data = NULL
     , url = NULL
     , layer_id = "scatter"
-    , geom_column_name = attr(data, "sf_column")
+    , geom_column_name = "geometry"
     , popup = NULL
     , tooltip = NULL
     , render_options = renderOptions()
@@ -189,7 +188,7 @@ addGeoArrowScatterplotLayer = function(
       data = data
       , path = tempfile()
       , layerId = layer_id
-      , geom_column_name
+      , geom_column_name = geom_column_name
       , interleaved = TRUE
     )
 

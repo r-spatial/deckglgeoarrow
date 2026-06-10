@@ -7,8 +7,9 @@ using blazing fast \code{\link[nanoarrow:read_nanoarrow]{nanoarrow::write_nanoar
 \usage{
 addGeoArrowPolygonLayer(
   map,
-  data = NULL,
-  url = NULL,
+  data,
+  file,
+  url,
   layer_id = "polygon",
   geom_column_name = "geometry",
   popup = NULL,
@@ -25,8 +26,11 @@ addGeoArrowPolygonLayer(
 
 \item{data}{a sf \verb{(MULTI)POLYGON} object.}
 
-\item{url}{a URL to a remotely hosted \code{geoarrow} or \code{geoparquet} file to be
+\item{file}{a valid local file path to a \code{geoarrow} or \code{geoparquet} file to be
 added to the map. Ignored if \code{data} is supplied.}
+
+\item{url}{a URL to a remotely hosted \code{geoarrow} or \code{geoparquet} file to be
+added to the map. Ignored if \code{data} or \code{file} is supplied.}
 
 \item{layer_id}{the layer id.}
 

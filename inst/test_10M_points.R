@@ -90,4 +90,4 @@ m |>
       , "Scatter Layer 2" = "deck-layer-group-slot:scatter2"
     )
   ) |>
-  addMouseCoordinates()
+  deckglgeoarrow:::addMouseCoordinates()

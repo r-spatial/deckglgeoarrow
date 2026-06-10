@@ -9,6 +9,8 @@ style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 style_darkmatter = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
 style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'
 
+options(viewer = NULL)
+
 ### point =========================
 pt = wkt("POINT (0 0)")
 
@@ -17,11 +19,6 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowScatterplotLayer(
     data = pt
-    , layer_id = "path"
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
-    )
   )
 
 m
@@ -35,11 +32,6 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowPathLayer(
     data = ln
-    , layer_id = "path"
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
-    )
   )
 
 m
@@ -53,17 +45,12 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowPolygonLayer(
     data = pl
-    , layer_id = "path"
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
-    )
   )
 
 m
 
 ## points
-n = 1e5
+n = 1e6
 
 pts = xy(
   x = runif(n, -180, 180)
@@ -71,18 +58,13 @@ pts = xy(
   , crs = 4326
 )
 
-
-options(viewer = NULL)
-
 m = maplibre(style = style_positron)
 
 m = m |>
   addGeoArrowScatterplotLayer(
     data = pts
-    , layer_id = "scatter"
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
+    , render_options = renderOptions(
+      beforeId = "water"
     )
   )
 

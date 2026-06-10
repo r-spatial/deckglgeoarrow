@@ -3,8 +3,10 @@
 #'
 #' @param map the [mapgl::maplibre()] or [mapgl::mapboxgl()] map to add the layer to.
 #' @param data a sf `(MULTI)POLYGON` object.
-#' @param url a URL to a remotely hosted `geoarrow` or `geoparquet` file to be
+#' @param file a valid local file path to a `geoarrow` or `geoparquet` file to be
 #' added to the map. Ignored if `data` is supplied.
+#' @param url a URL to a remotely hosted `geoarrow` or `geoparquet` file to be
+#' added to the map. Ignored if `data` or `file` is supplied.
 #' @param layer_id the layer id.
 #' @param geom_column_name the name of the geometry column of the sf object.
 #' It is inferred automatically if only one is present.
@@ -27,8 +29,9 @@
 #' @export
 addGeoArrowPolygonLayer = function(
     map
-    , data = NULL
-    , url = NULL
+    , data
+    , file
+    , url
     , layer_id = "polygon"
     , geom_column_name = "geometry"
     , popup = NULL
@@ -47,8 +50,9 @@ addGeoArrowPolygonLayer = function(
 
 .addGeoArrowPolygonLayer = function(
     map
-    , data = NULL
-    , url = NULL
+    , data
+    , file
+    , url
     , layer_id = "polygon"
     , geom_column_name = "geometry"
     , popup = NULL
@@ -79,45 +83,33 @@ addGeoArrowPolygonLayer = function(
     , if (!inherits(map, "mapdeck")) deckglDependencies()
   )
 
-  if (!is.null(data)) {
+  map = geoarrowWidget::attachParquetWasmDependencies(
+    widget = map
+  )
 
-    path_layer = writeGeoarrow(
+  if (!missing(data)) {
+
+    data = parseGeoarrow(
       data = data
-      , path = tempfile()
-      , layerId = layer_id
       , geom_column_name = geom_column_name
       , interleaved = TRUE
     )
 
-    map = geoarrowWidget::attachGeoarrowDependencies(
-      widget = map
-    )
-
-    map = geoarrowWidget::attachData(
-      widget = map
-      , file = path_layer
-      , name = layer_id
-    )
-
-    extension_type = guessFileExtension(path_layer)
-
   }
 
-  if (is.null(data) & !is.null(url)) {
+  map = geoarrowWidget::attachData(
+    widget = map
+    , data = data
+    , file = file
+    , url = url
+    , name = layer_id
+  )
 
-    map = geoarrowWidget::attachParquetWasmDependencies(
-      widget = map
-    )
-
-    map = geoarrowWidget::attachData(
-      widget = map
-      , url = url
-      , name = layer_id
-    )
-
-    extension_type = guessFileExtension(url)
-
-  }
+  extension_type = guessFileExtension(
+    data = data
+    , file = file
+    , url = url
+  )
 
   map$dependencies = c(
     map$dependencies
@@ -151,6 +143,10 @@ addGeoArrowPolygonLayer = function(
     , dataAccessors = data_accessors
     , popupOptions = popup_options
     , tooltipOptions = tooltip_options
+    , parameters = list(
+      depthCompare = "always"
+      , cullMode = "back"
+    )
     , map_class = map_class
     , interleaved = TRUE
     , extension_type = extension_type

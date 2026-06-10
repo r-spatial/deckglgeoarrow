@@ -13,8 +13,9 @@ data transfer.
 ``` r
 addGeoArrowPathLayer(
   map,
-  data = NULL,
-  url = NULL,
+  data,
+  file,
+  url,
   layer_id = "path",
   geom_column_name = "geometry",
   popup = NULL,
@@ -41,10 +42,15 @@ addGeoArrowPathLayer(
 
   a sf `(MULTI)LINESTRING` object.
 
+- file:
+
+  a valid local file path to a `geoarrow` or `geoparquet` file to be
+  added to the map. Ignored if `data` is supplied.
+
 - url:
 
   a URL to a remotely hosted `geoarrow` or `geoparquet` file to be added
-  to the map. Ignored if `data` is supplied.
+  to the map. Ignored if `data` or `file` is supplied.
 
 - layer_id:
 

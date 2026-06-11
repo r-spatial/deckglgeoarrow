@@ -5,13 +5,14 @@ library(wk)
 library(colourvalues)
 library(arrow)
 
+
 style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 style_darkmatter = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
 style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'
 
 options(viewer = NULL)
 
-### point =========================
+## point =======================================================================
 pt = wkt("POINT (0 0)")
 
 m = maplibre(style = style_positron)
@@ -24,7 +25,41 @@ m = m |>
 m
 
 
-## line
+## as sfc
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowScatterplotLayer(
+    data = st_as_sfc(pt)
+  )
+
+m
+
+## multipoint ==================================================================
+mpt = wkt("MULTIPOINT (0 0, 1 1)")
+
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowScatterplotLayer(
+    data = mpt
+    , tooltip = TRUE
+  )
+
+m
+
+
+## as sfc
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowScatterplotLayer(
+    data = st_as_sfc(mpt)
+  )
+
+m
+
+## line ========================================================================
 ln = wkt("LINESTRING (30 10, 10 30, 40 40)")
 
 m = maplibre(style = style_positron)
@@ -36,8 +71,40 @@ m = m |>
 
 m
 
+## as sfc
+m = maplibre(style = style_positron)
 
-## polygon
+m = m |>
+  addGeoArrowPathLayer(
+    data = st_as_sfc(ln)
+  )
+
+m
+
+## multiline ===================================================================
+mln = wkt("MULTILINESTRING ((30 10, 10 30, 40 40), (20 0, 0 20, 30 30))")
+
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowPathLayer(
+    data = mln
+  )
+
+m
+
+## as sfc
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowPathLayer(
+    data = st_as_sfc(mln)
+  )
+
+m
+
+
+## polygon =====================================================================
 pl = wkt("POLYGON ((30 10, 10 30, 40 40, 30 10))")
 
 m = maplibre(style = style_positron)
@@ -45,11 +112,47 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowPolygonLayer(
     data = pl
+    , render_options = renderOptions(
+      beforeId = "water"
+    )
   )
 
 m
 
-## points
+## as sfc
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowPolygonLayer(
+    data = st_as_sfc(pl)
+  )
+
+m
+
+## multipolygon ================================================================
+mpl = wkt("MULTIPOLYGON (((30 10, 10 30, 40 40, 30 10)), ((-30 10, -10 30, -40 40, -30 10)))")
+
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowPolygonLayer(
+    data = mpl
+  )
+
+m
+
+## as sfc
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowPolygonLayer(
+    data = st_as_sfc(mpl)
+  )
+
+m
+
+
+## points ======================================================================
 n = 1e6
 
 pts = xy(
@@ -70,58 +173,14 @@ m = m |>
 
 m
 
-
-
-
-
-
-
-dat = data.frame(
-  id = 1:n
-  , geometry = geom
-)
-
-dat$fillColor = sample(hcl.colors(n, alpha = sample(seq(0, 1, length.out = n))))
-dat$lineColor = sample(
-  hcl.colors(n, alpha = sample(seq(0, 1, length.out = n)), palette = "inferno")
-)
-dat$radius = sample.int(15, nrow(dat), replace = TRUE)
-dat$lineWidth = sample.int(5, nrow(dat), replace = TRUE)
-
-options(viewer = NULL)
-
+## as sfc
 m = maplibre(style = style_positron)
 
 m = m |>
   addGeoArrowScatterplotLayer(
-    data = dat
-    , layer_id = "scatter1"
-    , geom_column_name = "geometry" # attr(dat, "sf_column")
+    data = st_as_sfc(pts)
     , render_options = renderOptions(
-      zIndex = 1
-      # , beforeId = "water"
-    )
-    , data_accessors = dataAccessors(
-      # getRadius = "radius"
-      # , getFillColor = "fillColor"
-      # , getLineWidth = "lineWidth"
-      # , getLineColor = "lineColor"
-      getRadius = 4
-      , getFillColor = "#ff00ff80"
-      , getLineColor = "#00ffffff"
-      , getLineWidth = 1
-    )
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
-    )
-    , popup = "id"
-    , popup_options = popupOptions(
-      anchor = "bottom-right"
-    )
-    , tooltip = "id"
-    , tooltip_options = tooltipOptions(
-      anchor = "top-left"
+      beforeId = "water"
     )
   )
 

@@ -28,58 +28,86 @@ list with named options, possibly modified via `...` argument.
 
 ## Details
 
-Currently, the following options are automatically set to he following
+Currently, the following options are automatically set to the following
 defaults:
 
-- radiusUnits = "pixels" (ScatterplotLayer)
+**ScatterplotLayer**
 
-- radiusScale = 1 (ScatterplotLayer)
+- radiusUnits = "pixels"
 
-- lineWidthUnits = "pixels" (ScatterplotLayer, PolygonLayer)
+- radiusScale = 1
 
-- lineWidthScale = 1 (ScatterplotLayer, PolygonLayer)
+- lineWidthUnits = "pixels"
 
-- stroked = TRUE (ScatterplotLayer, PolygonLayer)
+- lineWidthScale = 1
 
-- filled = TRUE (ScatterplotLayer, PolygonLayer)
+- stroked = TRUE
 
-- radiusMinPixels = 3 (ScatterplotLayer)
+- filled = TRUE
 
-- radiusMaxPixels = 15 (ScatterplotLayer)
+- radiusMinPixels = 3
 
-- lineWidthMinPixels = 0 (ScatterplotLayer, PolygonLayer)
+- radiusMaxPixels = 15
 
-- lineWidthMaxPixels = 15 (ScatterplotLayer, PolygonLayer)
+- lineWidthMinPixels = 0
 
-- billboard = FALSE (ScatterplotLayer, PathLayer)
+- lineWidthMaxPixels = 15
 
-- antialiasing = FALSE (ScatterplotLayer)
+- billboard = FALSE
 
-- extruded = FALSE (PolygonLayer)
+- antialiasing = FALSE
 
-- wireframe = TRUE (PolygonLayer)
+**PathLayer**
 
-- elevationScale = 1 (PolygonLayer)
+- widthUnits = "pixels"
 
-- lineJointRounded = FALSE (PolygonLayer)
+- widthScale = 1
 
-- lineMiterLimit = 4 (PolygonLayer)
+- widthMinPixels = 1
 
-- widthUnits = "pixels" (PathLayer)
+- widthMaxPixels = 5
 
-- widthScale = 1 (PathLayer)
+- capRounded = TRUE
 
-- widthMinPixels = 1 (PathLayer)
+- jointRounded = FALSE
 
-- widthMaxPixels = 5 (PathLayer)
+- miterLimit = 4
 
-- capRounded = TRUE (PathLayer)
+- billboard = FALSE
 
-- jointRounded = FALSE (PathLayer)
+**PolygonLayer**
 
-- miterLimit = 4 (PathLayer)
+- lineMiterLimit = 4
 
-- beforeId = NULL (all Layer types)
+- extruded = FALSE
+
+- wireframe = TRUE
+
+- elevationScale = 1
+
+- lineJointRounded = FALSE
+
+- lineWidthUnits = "pixels"
+
+- lineWidthScale = 1
+
+- stroked = TRUE
+
+- filled = TRUE
+
+- lineWidthMinPixels = 0
+
+- lineWidthMaxPixels = 15
+
+**All layers**
+
+- beforeId = NULL
+
+- zIndex = 1
+
+`zIndex` can be used to set layers order if multiple layers are added to
+a map. Higher values will be plotted on top of lower values. It is
+ignored, if `beforeId` is supplied.
 
 ## Examples
 
@@ -161,6 +189,9 @@ renderOptions()
 #> $beforeId
 #> NULL
 #> 
+#> $zIndex
+#> [1] 1
+#> 
 
 # modify selected options
 renderOptions(radiusUnits = "meters", radiusScale = 10)
@@ -238,6 +269,9 @@ renderOptions(radiusUnits = "meters", radiusScale = 10)
 #> 
 #> $beforeId
 #> NULL
+#> 
+#> $zIndex
+#> [1] 1
 #> 
 
 ```

@@ -15,13 +15,13 @@ Source:
 [`DESCRIPTION`](https://github.com/r-spatial/deckglgeoarrow/blob/main/DESCRIPTION)
 
 Appelhans T (2026). *deckglgeoarrow: Use 'GeoArrow' to add 'Deck.gl'
-Layers to a 'maplibregl'/'mapboxgl' Map*. R package version 0.0.0.9070,
+Layers to a 'maplibregl'/'mapboxgl' Map*. R package version 0.0.0.9071,
 <https://github.com/r-spatial/deckglgeoarrow>.
 
     @Manual{,
       title = {deckglgeoarrow: Use 'GeoArrow' to add 'Deck.gl' Layers to a 'maplibregl'/'mapboxgl' Map},
       author = {Tim Appelhans},
       year = {2026},
-      note = {R package version 0.0.0.9070},
+      note = {R package version 0.0.0.9071},
       url = {https://github.com/r-spatial/deckglgeoarrow},
     }

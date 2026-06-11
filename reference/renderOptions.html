@@ -21,7 +21,7 @@ layer types they apply to."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">deckglgeoarrow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9070</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9071</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,32 +77,44 @@ layer types they apply to.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Currently, the following options are automatically set to he following defaults:</p><ul><li><p>radiusUnits = "pixels" (ScatterplotLayer)</p></li>
-<li><p>radiusScale = 1 (ScatterplotLayer)</p></li>
-<li><p>lineWidthUnits = "pixels" (ScatterplotLayer, PolygonLayer)</p></li>
-<li><p>lineWidthScale = 1 (ScatterplotLayer, PolygonLayer)</p></li>
-<li><p>stroked = TRUE (ScatterplotLayer, PolygonLayer)</p></li>
-<li><p>filled = TRUE (ScatterplotLayer, PolygonLayer)</p></li>
-<li><p>radiusMinPixels = 3 (ScatterplotLayer)</p></li>
-<li><p>radiusMaxPixels = 15 (ScatterplotLayer)</p></li>
-<li><p>lineWidthMinPixels = 0 (ScatterplotLayer, PolygonLayer)</p></li>
-<li><p>lineWidthMaxPixels = 15 (ScatterplotLayer, PolygonLayer)</p></li>
-<li><p>billboard = FALSE (ScatterplotLayer, PathLayer)</p></li>
-<li><p>antialiasing = FALSE (ScatterplotLayer)</p></li>
-<li><p>extruded = FALSE (PolygonLayer)</p></li>
-<li><p>wireframe = TRUE (PolygonLayer)</p></li>
-<li><p>elevationScale = 1 (PolygonLayer)</p></li>
-<li><p>lineJointRounded = FALSE (PolygonLayer)</p></li>
-<li><p>lineMiterLimit = 4 (PolygonLayer)</p></li>
-<li><p>widthUnits = "pixels" (PathLayer)</p></li>
-<li><p>widthScale = 1 (PathLayer)</p></li>
-<li><p>widthMinPixels = 1 (PathLayer)</p></li>
-<li><p>widthMaxPixels = 5 (PathLayer)</p></li>
-<li><p>capRounded = TRUE (PathLayer)</p></li>
-<li><p>jointRounded = FALSE (PathLayer)</p></li>
-<li><p>miterLimit = 4 (PathLayer)</p></li>
-<li><p>beforeId = NULL (all Layer types)</p></li>
-</ul></div>
+    <p>Currently, the following options are automatically set to the following defaults:</p>
+<p><strong>ScatterplotLayer</strong></p><ul><li><p>radiusUnits = "pixels"</p></li>
+<li><p>radiusScale = 1</p></li>
+<li><p>lineWidthUnits = "pixels"</p></li>
+<li><p>lineWidthScale = 1</p></li>
+<li><p>stroked = TRUE</p></li>
+<li><p>filled = TRUE</p></li>
+<li><p>radiusMinPixels = 3</p></li>
+<li><p>radiusMaxPixels = 15</p></li>
+<li><p>lineWidthMinPixels = 0</p></li>
+<li><p>lineWidthMaxPixels = 15</p></li>
+<li><p>billboard = FALSE</p></li>
+<li><p>antialiasing = FALSE</p></li>
+</ul><p><strong>PathLayer</strong></p><ul><li><p>widthUnits = "pixels"</p></li>
+<li><p>widthScale = 1</p></li>
+<li><p>widthMinPixels = 1</p></li>
+<li><p>widthMaxPixels = 5</p></li>
+<li><p>capRounded = TRUE</p></li>
+<li><p>jointRounded = FALSE</p></li>
+<li><p>miterLimit = 4</p></li>
+<li><p>billboard = FALSE</p></li>
+</ul><p><strong>PolygonLayer</strong></p><ul><li><p>lineMiterLimit = 4</p></li>
+<li><p>extruded = FALSE</p></li>
+<li><p>wireframe = TRUE</p></li>
+<li><p>elevationScale = 1</p></li>
+<li><p>lineJointRounded = FALSE</p></li>
+<li><p>lineWidthUnits = "pixels"</p></li>
+<li><p>lineWidthScale = 1</p></li>
+<li><p>stroked = TRUE</p></li>
+<li><p>filled = TRUE</p></li>
+<li><p>lineWidthMinPixels = 0</p></li>
+<li><p>lineWidthMaxPixels = 15</p></li>
+</ul><p><strong>All layers</strong></p><ul><li><p>beforeId = NULL</p></li>
+<li><p>zIndex = 1</p></li>
+</ul><p><code>zIndex</code> can be used to set layers order if multiple layers are added to a map.
+Higher values will be plotted on top of lower values.
+It is ignored, if <code>beforeId</code> is supplied.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -183,6 +195,9 @@ layer types they apply to.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $beforeId</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $zIndex</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># modify selected options</span></span></span>
 <span class="r-in"><span><span class="fu">renderOptions</span><span class="op">(</span>radiusUnits <span class="op">=</span> <span class="st">"meters"</span>, radiusScale <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
@@ -260,6 +275,9 @@ layer types they apply to.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $beforeId</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $zIndex</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>

@@ -57,9 +57,58 @@ is supplied, then this will be shown for all features. If \code{NULL} (deafult) 
 
 \item{tooltip_options}{a list of \link{tooltipOptions}}
 
-\item{...}{currently not used.}
+\item{...}{can be used to pass additional props and parameters to the deck.gl
+instance. See Details for more info.}
 }
 \description{
 Add Deck.gl PathLayer to a \code{\link[mapgl:maplibre]{mapgl::maplibre()}} or \code{\link[mapgl:mapboxgl]{mapgl::mapboxgl()}} map
 using blazing fast \code{\link[nanoarrow:read_nanoarrow]{nanoarrow::write_nanoarrow()}} data transfer.
+}
+\details{
+\code{...} can be used to pass additional props and parameters to the deck.gl instance
+for fine-tuning rendering behaviour. For example, we can pass a list called
+\code{parameters} with settings that control the GPU pipeline of the deck.gl instance.
+See \url{https://luma.gl/docs/api-reference/core/parameters} for a list of
+available prarmeters.
+
+By default, all deck.gl layers passed to a \code{maplibre()} map will be drawn on
+top of existing ones. It is, however, possible to inject layers into the
+existing \code{maplibre} (base) layer stack by using
+\code{render_options = renderOptions(beforeId = "<some-existing-layer-id>")}
+which will plot the current layer underneath \code{"<some-existing-layer-id>"}.
+See below for an example.
+}
+\examples{
+library(wk)
+library(mapgl)
+
+style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+
+m = maplibre(style = style_positron)
+
+## single wk LINESTRING
+ln = wkt("LINESTRING (30 10, 10 30, 40 40)")
+
+m |>
+  addGeoArrowPathLayer(
+    data = ln
+    , data_accessors = dataAccessors(
+      getColor = "#ff000080"
+      , getWidth = 3
+    )
+  )
+
+## remote parquet file
+m |>
+  addGeoArrowPathLayer(
+    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/example/files/example_linestring_native.parquet"
+    , geom_column_name = "geometry"
+    , data_accessors = dataAccessors(
+      getColor = "#0000ff90"
+      , getWidth = 5
+    )
+    , popup = TRUE
+    , tooltip = TRUE
+  )
+
 }

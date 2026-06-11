@@ -24,7 +24,55 @@
 #' @param data_accessors a list of [dataAccessors]
 #' @param popup_options a list of [popupOptions]
 #' @param tooltip_options a list of [tooltipOptions]
-#' @param ... currently not used.
+#' @param ... can be used to pass additional props and parameters to the deck.gl
+#' instance. See Details for more info.
+#'
+#' @details
+#' `...` can be used to pass additional props and parameters to the deck.gl instance
+#' for fine-tuning rendering behaviour. For example, we can pass a list called
+#' `parameters` with settings that control the GPU pipeline of the deck.gl instance.
+#' See \url{https://luma.gl/docs/api-reference/core/parameters} for a list of
+#' available prarmeters.
+#'
+#' By default, all deck.gl layers passed to a `maplibre()` map will be drawn on
+#' top of existing ones. It is, however, possible to inject layers into the
+#' existing `maplibre` (base) layer stack by using
+#' `render_options = renderOptions(beforeId = "<some-existing-layer-id>")`
+#' which will plot the current layer underneath `"<some-existing-layer-id>"`.
+#' See below for an example.
+#'
+#' @examples
+#' library(wk)
+#' library(mapgl)
+#'
+#' style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+#'
+#' m = maplibre(style = style_positron)
+#'
+#' ## single wk LINESTRING
+#' ln = wkt("LINESTRING (30 10, 10 30, 40 40)")
+#'
+#' m |>
+#'   addGeoArrowPathLayer(
+#'     data = ln
+#'     , data_accessors = dataAccessors(
+#'       getColor = "#ff000080"
+#'       , getWidth = 3
+#'     )
+#'   )
+#'
+#' ## remote parquet file
+#' m |>
+#'   addGeoArrowPathLayer(
+#'     url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/example/files/example_linestring_native.parquet"
+#'     , geom_column_name = "geometry"
+#'     , data_accessors = dataAccessors(
+#'       getColor = "#0000ff90"
+#'       , getWidth = 5
+#'     )
+#'     , popup = TRUE
+#'     , tooltip = TRUE
+#'   )
 #'
 #' @export
 addGeoArrowPathLayer = function(
@@ -91,7 +139,6 @@ addGeoArrowPathLayer = function(
 
     data = parseGeoarrow(
       data = data
-      , geom_column_name = geom_column_name
       , interleaved = TRUE
     )
 

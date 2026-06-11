@@ -79,20 +79,35 @@ which will plot the current layer underneath \code{"<some-existing-layer-id>"}.
 See below for an example.
 }
 \examples{
+library(wk)
 library(mapgl)
-library(sf)
 
+style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+
+m = maplibre(style = style_positron)
+
+## single wk POINT
+pt = wkt("POINT (0 0)")
+
+m |>
+  addGeoArrowScatterplotLayer(
+    data = pt
+  )
+
+## wk POINT data frame
 n = 5e3
+
+pts = xy(
+x = runif(n, -180, 180)
+, y = runif(n, -50, 50)
+, crs = 4326
+)
+
 dat = data.frame(
-  id = 1:n
-  , x = runif(n, -180, 180)
-  , y = runif(n, -90, 90)
+  id = 1:length(pts)
+  , geometry = pts
 )
-dat = st_as_sf(
-  dat
-  , coords = c("x", "y")
-  , crs = 4326
-)
+
 dat$fillColor = sample(hcl.colors(n, alpha = sample(seq(0, 1, length.out = n))))
 dat$lineColor = sample(
   hcl.colors(n, alpha = sample(seq(0, 1, length.out = n)), palette = "inferno")
@@ -101,7 +116,7 @@ dat$radius = sample.int(15, nrow(dat), replace = TRUE)
 dat$lineWidth = sample.int(5, nrow(dat), replace = TRUE)
 
 m = maplibre(
-  style = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+  style = style_positron
 ) |>
   add_navigation_control(visualize_pitch = TRUE) |>
   add_globe_control()
@@ -109,8 +124,8 @@ m = maplibre(
 m |>
   addGeoArrowScatterplotLayer(
     data = dat
-    , layer_id = "test"
-    , geom_column_name = attr(dat, "sf_column")
+    , layer_id = "my-scatter-layer"
+    , geom_column_name = "geometry"
     , render_options = renderOptions()
     , data_accessors = dataAccessors(
       getRadius = "radius"
@@ -118,32 +133,24 @@ m |>
       , getLineWidth = "lineWidth"
       , getLineColor = "lineColor"
     )
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
-    )
     , popup = TRUE
     , popup_options = popupOptions(anchor = "bottom-right")
     , tooltip = TRUE
     , tooltip_options = tooltipOptions(anchor = "top-left")
   )
 
-## using beforeId to inject into base layer stack
+## same as above, but using `beforeId` to inject layer into base layer stack
 m |>
   addGeoArrowScatterplotLayer(
     data = dat
-    , layer_id = "test"
-    , geom_column_name = attr(dat, "sf_column")
-    , render_options = renderOptions(beforeId = "boundary_county")
+    , layer_id = "my-scatter-layer"
+    , geom_column_name = "geometry"
+    , render_options = renderOptions(beforeId = "water")
     , data_accessors = dataAccessors(
       getRadius = "radius"
       , getFillColor = "fillColor"
       , getLineWidth = "lineWidth"
       , getLineColor = "lineColor"
-    )
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
     )
     , popup = TRUE
     , popup_options = popupOptions(anchor = "bottom-right")
@@ -151,5 +158,18 @@ m |>
     , tooltip_options = tooltipOptions(anchor = "top-left")
   )
 
+## remote parquet file
+m |>
+  addGeoArrowScatterplotLayer(
+    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
+    , layer_id = "parquet-layer"
+    , geom_column_name = "geometry"
+    , data_accessors = dataAccessors(
+      getRadius = 10
+      , getFillColor = '#ff000090'
+      , getLineColor = '#000000ff'
+    )
+    , tooltip = TRUE
+  )
 
 }

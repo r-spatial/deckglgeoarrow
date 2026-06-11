@@ -12,33 +12,56 @@
 #' @param ... named options to be passed to the relevant deck.gl JavaScript Method.
 #'
 #' @details
-#' Currently, the following options are automatically set to he following defaults:
+#' Currently, the following options are automatically set to the following defaults:
 #'
-#' * radiusUnits = "pixels" (ScatterplotLayer)
-#' * radiusScale = 1 (ScatterplotLayer)
-#' * lineWidthUnits = "pixels" (ScatterplotLayer, PolygonLayer)
-#' * lineWidthScale = 1 (ScatterplotLayer, PolygonLayer)
-#' * stroked = TRUE (ScatterplotLayer, PolygonLayer)
-#' * filled = TRUE (ScatterplotLayer, PolygonLayer)
-#' * radiusMinPixels = 3 (ScatterplotLayer)
-#' * radiusMaxPixels = 15 (ScatterplotLayer)
-#' * lineWidthMinPixels = 0 (ScatterplotLayer, PolygonLayer)
-#' * lineWidthMaxPixels = 15 (ScatterplotLayer, PolygonLayer)
-#' * billboard = FALSE (ScatterplotLayer, PathLayer)
-#' * antialiasing = FALSE (ScatterplotLayer)
-#' * extruded = FALSE (PolygonLayer)
-#' * wireframe = TRUE (PolygonLayer)
-#' * elevationScale = 1 (PolygonLayer)
-#' * lineJointRounded = FALSE (PolygonLayer)
-#' * lineMiterLimit = 4 (PolygonLayer)
-#' * widthUnits = "pixels" (PathLayer)
-#' * widthScale = 1 (PathLayer)
-#' * widthMinPixels = 1 (PathLayer)
-#' * widthMaxPixels = 5 (PathLayer)
-#' * capRounded = TRUE (PathLayer)
-#' * jointRounded = FALSE (PathLayer)
-#' * miterLimit = 4 (PathLayer)
-#' * beforeId = NULL (all Layer types)
+#' \strong{ScatterplotLayer}
+#'
+#' * radiusUnits = "pixels"
+#' * radiusScale = 1
+#' * lineWidthUnits = "pixels"
+#' * lineWidthScale = 1
+#' * stroked = TRUE
+#' * filled = TRUE
+#' * radiusMinPixels = 3
+#' * radiusMaxPixels = 15
+#' * lineWidthMinPixels = 0
+#' * lineWidthMaxPixels = 15
+#' * billboard = FALSE
+#' * antialiasing = FALSE
+#'
+#' \strong{PathLayer}
+#'
+#' * widthUnits = "pixels"
+#' * widthScale = 1
+#' * widthMinPixels = 1
+#' * widthMaxPixels = 5
+#' * capRounded = TRUE
+#' * jointRounded = FALSE
+#' * miterLimit = 4
+#' * billboard = FALSE
+#'
+#' \strong{PolygonLayer}
+#'
+#' * lineMiterLimit = 4
+#' * extruded = FALSE
+#' * wireframe = TRUE
+#' * elevationScale = 1
+#' * lineJointRounded = FALSE
+#' * lineWidthUnits = "pixels"
+#' * lineWidthScale = 1
+#' * stroked = TRUE
+#' * filled = TRUE
+#' * lineWidthMinPixels = 0
+#' * lineWidthMaxPixels = 15
+#'
+#' \strong{All layers}
+#'
+#' * beforeId = NULL
+#' * zIndex = 1
+#'
+#' `zIndex` can be used to set layers order if multiple layers are added to a map.
+#' Higher values will be plotted on top of lower values.
+#' It is ignored, if `beforeId` is supplied.
 #'
 #' @return list with named options, possibly modified via `...` argument.
 #'
@@ -91,6 +114,7 @@ renderOptions = function(...) {
     , jointRounded = FALSE
     , miterLimit = 4
     , beforeId = NULL
+    , zIndex = 1
   )
 
   dot_lst = list(...)

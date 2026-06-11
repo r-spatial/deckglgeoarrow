@@ -23,34 +23,60 @@ See Details for a list of currently available options, their defaults and the
 layer types they apply to.
 }
 \details{
-Currently, the following options are automatically set to he following defaults:
+Currently, the following options are automatically set to the following defaults:
+
+\strong{ScatterplotLayer}
 \itemize{
-\item radiusUnits = "pixels" (ScatterplotLayer)
-\item radiusScale = 1 (ScatterplotLayer)
-\item lineWidthUnits = "pixels" (ScatterplotLayer, PolygonLayer)
-\item lineWidthScale = 1 (ScatterplotLayer, PolygonLayer)
-\item stroked = TRUE (ScatterplotLayer, PolygonLayer)
-\item filled = TRUE (ScatterplotLayer, PolygonLayer)
-\item radiusMinPixels = 3 (ScatterplotLayer)
-\item radiusMaxPixels = 15 (ScatterplotLayer)
-\item lineWidthMinPixels = 0 (ScatterplotLayer, PolygonLayer)
-\item lineWidthMaxPixels = 15 (ScatterplotLayer, PolygonLayer)
-\item billboard = FALSE (ScatterplotLayer, PathLayer)
-\item antialiasing = FALSE (ScatterplotLayer)
-\item extruded = FALSE (PolygonLayer)
-\item wireframe = TRUE (PolygonLayer)
-\item elevationScale = 1 (PolygonLayer)
-\item lineJointRounded = FALSE (PolygonLayer)
-\item lineMiterLimit = 4 (PolygonLayer)
-\item widthUnits = "pixels" (PathLayer)
-\item widthScale = 1 (PathLayer)
-\item widthMinPixels = 1 (PathLayer)
-\item widthMaxPixels = 5 (PathLayer)
-\item capRounded = TRUE (PathLayer)
-\item jointRounded = FALSE (PathLayer)
-\item miterLimit = 4 (PathLayer)
-\item beforeId = NULL (all Layer types)
+\item radiusUnits = "pixels"
+\item radiusScale = 1
+\item lineWidthUnits = "pixels"
+\item lineWidthScale = 1
+\item stroked = TRUE
+\item filled = TRUE
+\item radiusMinPixels = 3
+\item radiusMaxPixels = 15
+\item lineWidthMinPixels = 0
+\item lineWidthMaxPixels = 15
+\item billboard = FALSE
+\item antialiasing = FALSE
 }
+
+\strong{PathLayer}
+\itemize{
+\item widthUnits = "pixels"
+\item widthScale = 1
+\item widthMinPixels = 1
+\item widthMaxPixels = 5
+\item capRounded = TRUE
+\item jointRounded = FALSE
+\item miterLimit = 4
+\item billboard = FALSE
+}
+
+\strong{PolygonLayer}
+\itemize{
+\item lineMiterLimit = 4
+\item extruded = FALSE
+\item wireframe = TRUE
+\item elevationScale = 1
+\item lineJointRounded = FALSE
+\item lineWidthUnits = "pixels"
+\item lineWidthScale = 1
+\item stroked = TRUE
+\item filled = TRUE
+\item lineWidthMinPixels = 0
+\item lineWidthMaxPixels = 15
+}
+
+\strong{All layers}
+\itemize{
+\item beforeId = NULL
+\item zIndex = 1
+}
+
+\code{zIndex} can be used to set layers order if multiple layers are added to a map.
+Higher values will be plotted on top of lower values.
+It is ignored, if \code{beforeId} is supplied.
 }
 \examples{
 # default settings

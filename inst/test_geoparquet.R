@@ -22,24 +22,9 @@ m = m |>
       # , beforeId = "place_town"
     )
     , data_accessors = dataAccessors(
-      # getRadius = "radius"
-      # , getFillColor = "fillColor"
-      # , getLineWidth = "lineWidth"
-      # , getLineColor = "lineColor"
       getRadius = 10
       , getFillColor = '#ff000090'
       , getLineColor = '#000000ff'
-    )
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
-      # , depthWriteEnabled = FALSE
-      # , blendColorSrcFactor = 'one'
-      # , blendAlphaSrcFactor = 'one'
-      # , blendColorDstFactor = 'src-alpha'
-      # , blendAlphaDstFactor = 'src-alpha'
-      # , blendColorOperation = 'add'
-      # , blendAlphaOperation = 'add'
     )
     , popup = TRUE
     , popup_options = popupOptions(
@@ -49,8 +34,6 @@ m = m |>
     , tooltip_options = tooltipOptions(
       anchor = "top-left"
     )
-    # , interleaved = TRUE
-    # , extension_type = "parquet"
   )
 
 m |>
@@ -65,10 +48,6 @@ m = m |>
   addGeoArrowPolygonLayer(
     url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries_native.parquet"
     , geom_column_name = "geometry"
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
-    )
     , render_options = renderOptions(
       extruded = FALSE
       , stroked = TRUE
@@ -91,10 +70,6 @@ m = m |>
   addGeoArrowPathLayer(
     url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/example/files/example_linestring_native.parquet"
     , geom_column_name = "geometry"
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
-    )
     , data_accessors = dataAccessors(
       getColor = "#00ffff90"
       , getWidth = 5

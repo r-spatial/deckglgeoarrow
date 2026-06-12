@@ -92,6 +92,7 @@ pt = wkt("POINT (0 0)")
 m |>
   addGeoArrowScatterplotLayer(
     data = pt
+    , layer_id = "wk_point"
   )
 
 ## wk POINT data frame
@@ -124,7 +125,7 @@ m = maplibre(
 m |>
   addGeoArrowScatterplotLayer(
     data = dat
-    , layer_id = "my-scatter-layer"
+    , layer_id = "wk-points-layer"
     , geom_column_name = "geometry"
     , render_options = renderOptions()
     , data_accessors = dataAccessors(
@@ -143,7 +144,7 @@ m |>
 m |>
   addGeoArrowScatterplotLayer(
     data = dat
-    , layer_id = "my-scatter-layer"
+    , layer_id = "wk-points-layer-before-water"
     , geom_column_name = "geometry"
     , render_options = renderOptions(beforeId = "water")
     , data_accessors = dataAccessors(

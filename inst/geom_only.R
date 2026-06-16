@@ -4,6 +4,7 @@ library(geoarrow)
 library(wk)
 library(colourvalues)
 library(arrow)
+library(sf)
 
 
 style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"

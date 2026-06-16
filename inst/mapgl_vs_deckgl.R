@@ -82,4 +82,4 @@ m1
 
 m2
 
-compare(m1, m2, mode = "sync")
+# compare(m1, m2, mode = "sync")

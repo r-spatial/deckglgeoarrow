@@ -90,4 +90,11 @@ m |>
       , "Scatter Layer 2" = "deck-layer-group-slot:scatter2"
     )
   ) |>
+  add_layers_control(
+    collapsible = TRUE
+    , layers = list(
+      "Scatter Layer Colors" = generateDeckglLayerId("scatter", beforeId = "water")
+      , "Scatter Layer Blue" = generateDeckglLayerId("scatter2")
+    )
+  ) |>
   deckglgeoarrow:::addMouseCoordinates()

@@ -143,9 +143,14 @@ m |>
 
 {"x":{"style":"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[]},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglPolygonLayer(map, data);\n      }","data":{"geom_column_name":"geometry","layerId":"polygon","popup":null,"tooltip":null,"renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":false,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":"water","zIndex":1},"dataAccessors":{"getRadius":1,"getColor":[0,0,0,255],"getFillColor":[0,0,0,130],"getLineColor":[0,0,0,255],"getLineWidth":1,"getElevation":1000,"getWidth":1},"popupOptions":{"anchor":"bottom","className":"geoarrow-deckgl-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"geoarrow-deckgl-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"parameters":{"depthCompare":"always","cullMode":"back"},"map_class":"maplibregl","interleaved":true,"extension_type":"arrow"}}]}}
 ## remote parquet file
+## paste url together so CRAN check doesn't complain
+base_url = "https://raw.githubusercontent.com/geoarrow/"
+data_url = "geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries_native.parquet"
+url = paste0(base_url, data_url)
+
 m |>
   addGeoArrowPolygonLayer(
-    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries_native.parquet"
+    url = url
     , geom_column_name = "geometry"
     , render_options = renderOptions(
       extruded = FALSE

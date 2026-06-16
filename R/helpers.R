@@ -119,7 +119,7 @@ renderOptions = function(...) {
 
   dot_lst = list(...)
 
-  utils::modifyList(default_lst, dot_lst)
+  utils::modifyList(default_lst, dot_lst, keep.null = TRUE)
 }
 
 
@@ -182,7 +182,7 @@ dataAccessors = function(...) {
 
   dot_lst = list(...)
 
-  utils::modifyList(default_lst, dot_lst)
+  utils::modifyList(default_lst, dot_lst, keep.null = TRUE)
 }
 
 #' Options for popups and tooltips
@@ -251,7 +251,7 @@ popupOptions = function(...) {
 
   dot_lst = list(...)
 
-  utils::modifyList(default_lst, dot_lst)
+  utils::modifyList(default_lst, dot_lst, keep.null = TRUE)
 }
 
 #' @describeIn popupOptions options for tooltips
@@ -273,7 +273,7 @@ tooltipOptions = function(...) {
 
   dot_lst = list(...)
 
-  utils::modifyList(default_lst, dot_lst)
+  utils::modifyList(default_lst, dot_lst, keep.null = TRUE)
 }
 
 #' Generate proper internal layer ids

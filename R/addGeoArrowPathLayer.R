@@ -91,7 +91,6 @@ addGeoArrowPathLayer = function(
     , ...
 ) {
 
-  stopifnot(requireNamespace("geoarrow"))
   UseMethod("addGeoArrowPathLayer")
 
 }
@@ -113,6 +112,8 @@ addGeoArrowPathLayer = function(
     , js_code
     , ...
 ) {
+
+  stopifnot(requireNamespace("geoarrow"))
 
   map$dependencies = c(
     map$dependencies
@@ -204,7 +205,7 @@ addGeoArrowPathLayer = function(
   map = htmlwidgets::onRender(
     map
     , htmlwidgets::JS(js_code)
-    , data = utils::modifyList(default_lst, dot_lst)
+    , data = utils::modifyList(default_lst, dot_lst, keep.null = TRUE)
   )
 
   return(map)

@@ -267,7 +267,7 @@ addGeoArrowScatterplotLayer = function(
   map = htmlwidgets::onRender(
     map
     , htmlwidgets::JS(js_code)
-    , data = utils::modifyList(default_lst, dot_lst)
+    , data = utils::modifyList(default_lst, dot_lst, keep.null = TRUE)
   )
 
   return(map)

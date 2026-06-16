@@ -29,7 +29,7 @@ addMouseCoordinates <- function(map, css = list()) {
     , 'z-index' = '700'
   )
 
-  css = utils::modifyList(css_dflt, css)
+  css = utils::modifyList(css_dflt, css, keep.null = TRUE)
 
   js_code = htmlwidgets::JS(
     "function(el, x, data) {

@@ -22,11 +22,10 @@ Imports:
     htmlwidgets,
     nanoarrow,
 Suggests:
+    mapgl,
     quarto,
     tinytest,
     wk
-Enhances:
-    mapgl
 VignetteBuilder: 
     quarto
 Encoding: UTF-8

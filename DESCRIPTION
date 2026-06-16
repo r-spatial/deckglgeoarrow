@@ -11,7 +11,15 @@ Authors@R:
              role = "fnd",
              comment = c("https://r-consortium.org/", ROR = "01z833950")))
 Description: Leverages the very performant 'GeoArrow' memory layout to render
-    large data layers on a 'maplibregl'/'mapboxgl' map. (<https://github.com/geoarrow/deck.gl-geoarrow/>)
+    potentially very large data layers on a 'maplibregl'/'mapboxgl' map created 
+    with R package 'mapgl'. The heavy lifting is done on the 'JavaScript' side 
+    in the browser using 'deck.gl-geoarrow' (<https://github.com/geoarrow/deck.gl-geoarrow/>). 
+    Convenience functions for styling data, tooltips and popups, as well as layer 
+    management are provided. Furthermore, remotely hosted 'GeoParquet' and
+    'GeoArrow' files can be visualised directly in the browser, without the need 
+    to first read them into R memory. Only the styling instructions are prepared
+    by the user in R and are then transferred to and applied in the browser 
+    as the data arrives.
 License: MIT + file LICENSE
 Depends:
     R (>= 4.1.0)

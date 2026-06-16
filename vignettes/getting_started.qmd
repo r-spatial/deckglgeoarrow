@@ -1,0 +1,26 @@
+---
+title: "Getting started with deckglgeoarrow"
+format: html
+vignette: >
+  %\VignetteIndexEntry{Getting started with deckglgeoarrow}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+The simplest use-case is 
+
+```{r, message=FALSE}
+library(mapgl)
+library(deckglgeoarrow)
+library(wk)
+
+style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+
+pt = wkt("POINT (0 0)")
+
+maplibre(style = style_positron) |>
+  addGeoArrowScatterplotLayer(
+    data = pt
+  )
+```
+

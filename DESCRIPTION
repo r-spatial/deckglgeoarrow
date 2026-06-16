@@ -25,7 +25,8 @@ Imports:
 Suggests:
     quarto,
     sf,
-    tinytest
+    tinytest,
+    wk
 VignetteBuilder: 
     quarto
 Encoding: UTF-8

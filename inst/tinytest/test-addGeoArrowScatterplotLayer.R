@@ -1,6 +1,6 @@
 # File created by roxut; edit the function definition file, not this file
 
-# Test found in addGeoArrowScatterplotLayer.R:139 (file:line)
+# Test found in addGeoArrowScatterplotLayer.R:144 (file:line)
   
 
 dummy_map <- structure(

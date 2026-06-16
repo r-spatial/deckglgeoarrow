@@ -99,9 +99,14 @@ m |>
   )
 
 ## remote parquet file
+## paste url together so CRAN check doesn't complain
+base_url = "https://raw.githubusercontent.com/geoarrow/"
+data_url = "geoarrow-data/v0.2.0/example/files/example_linestring_native.parquet"
+url = paste0(base_url, data_url)
+
 m |>
   addGeoArrowPathLayer(
-    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/example/files/example_linestring_native.parquet"
+    url = url
     , geom_column_name = "geometry"
     , data_accessors = dataAccessors(
       getColor = "#0000ff90"

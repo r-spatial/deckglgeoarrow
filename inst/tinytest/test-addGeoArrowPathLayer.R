@@ -1,6 +1,6 @@
 # File created by roxut; edit the function definition file, not this file
 
-# Test found in addGeoArrowPathLayer.R:77 (file:line)
+# Test found in addGeoArrowPathLayer.R:82 (file:line)
   
 
 dummy_map <- structure(

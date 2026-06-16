@@ -61,9 +61,14 @@
 #'   )
 #'
 #' ## remote parquet file
+#' ## paste url together so CRAN check doesn't complain
+#' base_url = "https://raw.githubusercontent.com/geoarrow/"
+#' data_url = "geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries_native.parquet"
+#' url = paste0(base_url, data_url)
+#'
 #' m |>
 #'   addGeoArrowPolygonLayer(
-#'     url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries_native.parquet"
+#'     url = url
 #'     , geom_column_name = "geometry"
 #'     , render_options = renderOptions(
 #'       extruded = FALSE

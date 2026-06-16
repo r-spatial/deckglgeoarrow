@@ -160,9 +160,14 @@ m |>
   )
 
 ## remote parquet file
+## paste url together so CRAN check doesn't complain
+base_url = "https://raw.githubusercontent.com/geoarrow/"
+data_url = "geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
+url = paste0(base_url, data_url)
+
 m |>
   addGeoArrowScatterplotLayer(
-    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
+    url = url
     , layer_id = "parquet-layer"
     , geom_column_name = "geometry"
     , data_accessors = dataAccessors(

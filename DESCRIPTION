@@ -1,5 +1,5 @@
 Package: deckglgeoarrow
-Title: Use 'GeoArrow' to add 'Deck.gl' Layers to a 'maplibregl'/'mapboxgl' Map
+Title: Use 'GeoArrow' to Add 'Deck.gl' Layers to a 'maplibregl'/'mapboxgl' Map
 Version: 0.0.0.9077
 Authors@R:
     c(person(given = "Tim",

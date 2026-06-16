@@ -9,6 +9,10 @@ parseGeoarrow = function(
     return()
   }
 
+  if (inherits(data, "nanoarrow_array_stream")) {
+    return(data)
+  }
+
   if (is.null(dim(data))) {
     data = data.frame(
       id = 1:length(data)

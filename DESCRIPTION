@@ -20,13 +20,13 @@ Imports:
     geoarrowWidget,
     htmltools,
     htmlwidgets,
-    mapgl,
     nanoarrow,
 Suggests:
     quarto,
-    sf,
     tinytest,
     wk
+Enhances:
+    mapgl
 VignetteBuilder: 
     quarto
 Encoding: UTF-8

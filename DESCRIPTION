@@ -23,6 +23,7 @@ Imports:
     mapgl,
     nanoarrow,
 Suggests:
+    quarto,
     sf,
     tinytest
 VignetteBuilder: 

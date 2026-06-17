@@ -1,11 +1,64 @@
 # deckglgeoarrow
 
-The goal of deckglgeoarrow is to …
+## About
+
+Easy and efficient rendering of very large geospatial data in the
+browser.
+
+`deckglgeoarrow` provides functionality to efficiently visualise
+potentially very large geospatial data as [`Deck.gl`](https://deck.gl/)
+layers on top of a
+[`maplibre`](https://maplibre.org/projects/gl-js/)/[`mapbox`](https://www.mapbox.com/)
+map created with package [`mapgl`](https://walker-data.com/mapgl/).
+
+For very quick and efficient data transfer from R memory to the browser,
+[`geoarrowWidget`](https://r-spatial.github.io/geoarrowWidget/) is used.
+Layer creation is done in ‘JavaScript’ using
+[`geoarrow/deck.gl-geoarrow`](https://github.com/geoarrow/deck.gl-geoarrow)
+(see [Features](https://github.com/geoarrow/deck.gl-geoarrow#features)
+section for details on how and why layer creation is efficient).
+
+## Features
+
+Currently, `(MULTI)POINT`, `(MULTI)LINESTRING` and `(MULTI)POLYGON`
+features are supported by the following layer functions:
+
+- [`addGeoarrowScatterplotLayer`](https://r-spatial.github.io/deckglgeoarrow/reference/addGeoArrowScatterplotLayer.html)
+  for point data
+- [`addGeoarrowPathLayer`](https://r-spatial.github.io/deckglgeoarrow/reference/addGeoArrowPathLayer.html)
+  for linestring data
+- [`addGeoarrowPolygonLayer`](https://r-spatial.github.io/deckglgeoarrow/reference/addGeoArrowPolygonLayer.html)
+  for polygon data
+
+Support for other layers, such as `discrete global grid` layers (`S2`,
+`A5`, `H3`), `origin-destination` layers (`Arc`, `trips`) and
+`point-cloud` layers, among others, will follow.
+
+## Supported data sources
+
+#### R
+
+Spatial classes from the following R packages are supported (via `data`
+argument):
+
+- [`wk`](https://paleolimbot.r-universe.dev/wk)
+- [`sf`](https://r-spatial.r-universe.dev/sf)
+
+#### Others
+
+The following local or remotely hosted files types are supported (via
+`file`/`url` argument):
+
+- [`GeoArrow`](https://geoarrow.org/)
+- [`GeoParquet`](https://geoparquet.org/)
+
+In addition, [`nanoarrow`](https://apache.r-universe.dev/nanoarrow)
+`array_streams` (as files) are supported.
 
 ## Installation
 
-You can install the development version of deckglgeoarrow from
-[GitHub](https://github.com/) with:
+The development version of deckglgeoarrow can be installed from
+[GitHub](https://github.com/r-spatial/deckglgeoarrow) with:
 
 ``` r
 
@@ -15,13 +68,25 @@ pak::pak("r-spatial/deckglgeoarrow")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+To showcase what the package can do, consider
+[this](https://raw.githubusercontent.com/r-spatial/deckglgeoarrow/refs/heads/main/inst/experiments/mapgl.R)
+example.
 
-``` r
+Here, we visualise
 
-library(deckglgeoarrow)
-## basic example code
-```
+- 1M random points with random sizes and colors +
+- ~11k polygons colored by river basin +
+- ~155k lines colored and sized according to their [Strahler
+  number](https://en.wikipedia.org/wiki/Strahler_number)
+
+in one map.
+
+Here’s how quickly this renders:
+
+![](reference/figures/deckglgeoarrow_demo.gif)
+
+More examples can be found
+[here](https://github.com/r-spatial/deckglgeoarrow/tree/main/inst/experiments)
 
 ### Acknowledgment
 

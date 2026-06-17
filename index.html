@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Use GeoArrow to Add Deck.gl Layers to a maplibregl/mapboxgl Map">
-<meta name="description" content="Leverages the very performant GeoArrow memory layout to render potentially very large data layers on a maplibregl/mapboxgl map created with R package mapgl. The heavy lifting is done on the JavaScript side in the browser using deck.gl-geoarrow (&lt;https://github.com/geoarrow/deck.gl-geoarrow/&gt;). Convenience functions for styling data, tooltips and popups, as well as layer management are provided. Furthermore, remotely hosted GeoParquet and GeoArrow files can be visualised directly in the browser, without the need to first read them into R memory. Only the styling instructions are prepared by the user in R and are then transferred to and applied in the browser as the data arrives.">
-<meta property="og:description" content="Leverages the very performant GeoArrow memory layout to render potentially very large data layers on a maplibregl/mapboxgl map created with R package mapgl. The heavy lifting is done on the JavaScript side in the browser using deck.gl-geoarrow (&lt;https://github.com/geoarrow/deck.gl-geoarrow/&gt;). Convenience functions for styling data, tooltips and popups, as well as layer management are provided. Furthermore, remotely hosted GeoParquet and GeoArrow files can be visualised directly in the browser, without the need to first read them into R memory. Only the styling instructions are prepared by the user in R and are then transferred to and applied in the browser as the data arrives.">
+<meta name="description" content="Leverages the very performant GeoArrow memory layout to render potentially very large Deck.gl data layers on a maplibregl/mapboxgl map created with R package mapgl. The heavy lifting is done on the JavaScript side in the browser using deck.gl-geoarrow (&lt;https://github.com/geoarrow/deck.gl-geoarrow/&gt;). Currently provides functions for adding Scatterplot (points), Path (lines) and Polygon (polygons) layers. Has support for data classes from R packages wk and sf. In addition, convenience functions for styling data, tooltips and popups, as well as layer management are provided. Furthermore, remotely hosted GeoParquet and GeoArrow files can be visualised directly in the browser, without the need to first read them into R memory. Only the styling instructions are prepared by the user in R and are then transferred to and applied in the browser as the data arrives.">
+<meta property="og:description" content="Leverages the very performant GeoArrow memory layout to render potentially very large Deck.gl data layers on a maplibregl/mapboxgl map created with R package mapgl. The heavy lifting is done on the JavaScript side in the browser using deck.gl-geoarrow (&lt;https://github.com/geoarrow/deck.gl-geoarrow/&gt;). Currently provides functions for adding Scatterplot (points), Path (lines) and Polygon (polygons) layers. Has support for data classes from R packages wk and sf. In addition, convenience functions for styling data, tooltips and popups, as well as layer management are provided. Furthermore, remotely hosted GeoParquet and GeoArrow files can be visualised directly in the browser, without the need to first read them into R memory. Only the styling instructions are prepared by the user in R and are then transferred to and applied in the browser as the data arrives.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">deckglgeoarrow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9084</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9085</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,11 +57,54 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>The goal of deckglgeoarrow is to …</p>
+<div class="section level2">
+<h2 id="about">About<a class="anchor" aria-label="anchor" href="#about"></a>
+</h2>
+<p>Easy and efficient rendering of very large geospatial data in the browser.</p>
+<p><code>deckglgeoarrow</code> provides functionality to efficiently visualise potentially very large geospatial data as <a href="https://deck.gl/" class="external-link"><code>Deck.gl</code></a> layers on top of a <a href="https://maplibre.org/projects/gl-js/" class="external-link"><code>maplibre</code></a>/<a href="https://www.mapbox.com/" class="external-link"><code>mapbox</code></a> map created with package <a href="https://walker-data.com/mapgl/" class="external-link"><code>mapgl</code></a>.</p>
+<p>For very quick and efficient data transfer from R memory to the browser, <a href="https://r-spatial.github.io/geoarrowWidget/" class="external-link"><code>geoarrowWidget</code></a> is used. Layer creation is done in ‘JavaScript’ using <a href="https://github.com/geoarrow/deck.gl-geoarrow" class="external-link"><code>geoarrow/deck.gl-geoarrow</code></a> (see <a href="https://github.com/geoarrow/deck.gl-geoarrow#features" class="external-link">Features</a> section for details on how and why layer creation is efficient).</p>
+</div>
+<div class="section level2">
+<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+</h2>
+<p>Currently, <code>(MULTI)POINT</code>, <code>(MULTI)LINESTRING</code> and <code>(MULTI)POLYGON</code> features are supported by the following layer functions:</p>
+<ul>
+<li>
+<a href="https://r-spatial.github.io/deckglgeoarrow/reference/addGeoArrowScatterplotLayer.html"><code>addGeoarrowScatterplotLayer</code></a> for point data</li>
+<li>
+<a href="https://r-spatial.github.io/deckglgeoarrow/reference/addGeoArrowPathLayer.html"><code>addGeoarrowPathLayer</code></a> for linestring data</li>
+<li>
+<a href="https://r-spatial.github.io/deckglgeoarrow/reference/addGeoArrowPolygonLayer.html"><code>addGeoarrowPolygonLayer</code></a> for polygon data</li>
+</ul>
+<p>Support for other layers, such as <code>discrete global grid</code> layers (<code>S2</code>, <code>A5</code>, <code>H3</code>), <code>origin-destination</code> layers (<code>Arc</code>, <code>trips</code>) and <code>point-cloud</code> layers, among others, will follow.</p>
+</div>
+<div class="section level2">
+<h2 id="supported-data-sources">Supported data sources<a class="anchor" aria-label="anchor" href="#supported-data-sources"></a>
+</h2>
+<div class="section level4">
+<h4 id="r">R<a class="anchor" aria-label="anchor" href="#r"></a>
+</h4>
+<p>Spatial classes from the following R packages are supported (via <code>data</code> argument):</p>
+<ul>
+<li><a href="https://paleolimbot.r-universe.dev/wk" class="external-link"><code>wk</code></a></li>
+<li><a href="https://r-spatial.r-universe.dev/sf" class="external-link"><code>sf</code></a></li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="others">Others<a class="anchor" aria-label="anchor" href="#others"></a>
+</h4>
+<p>The following local or remotely hosted files types are supported (via <code>file</code>/<code>url</code> argument):</p>
+<ul>
+<li><a href="https://geoarrow.org/" class="external-link"><code>GeoArrow</code></a></li>
+<li><a href="https://geoparquet.org/" class="external-link"><code>GeoParquet</code></a></li>
+</ul>
+<p>In addition, <a href="https://apache.r-universe.dev/nanoarrow" class="external-link"><code>nanoarrow</code></a> <code>array_streams</code> (as files) are supported.</p>
+</div>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of deckglgeoarrow from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>The development version of deckglgeoarrow can be installed from <a href="https://github.com/r-spatial/deckglgeoarrow" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"r-spatial/deckglgeoarrow"</span><span class="op">)</span></span></code></pre></div>
@@ -69,10 +112,18 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/deckglgeoarrow" class="external-link">deckglgeoarrow</a></span><span class="op">)</span></span>
-<span><span class="co">## basic example code</span></span></code></pre></div>
+<p>To showcase what the package can do, consider <a href="https://raw.githubusercontent.com/r-spatial/deckglgeoarrow/refs/heads/main/inst/experiments/mapgl.R" class="external-link">this</a> example.</p>
+<p>Here, we visualise</p>
+<ul>
+<li>1M random points with random sizes and colors +</li>
+<li>~11k polygons colored by river basin +</li>
+<li>~155k lines colored and sized according to their <a href="https://en.wikipedia.org/wiki/Strahler_number" class="external-link">Strahler number</a>
+</li>
+</ul>
+<p>in one map.</p>
+<p>Here’s how quickly this renders:</p>
+<p><img src="reference/figures/deckglgeoarrow_demo.gif"></p>
+<p>More examples can be found <a href="https://github.com/r-spatial/deckglgeoarrow/tree/main/inst/experiments" class="external-link">here</a></p>
 <div class="section level3">
 <h3 id="acknowledgment">Acknowledgment<a class="anchor" aria-label="anchor" href="#acknowledgment"></a>
 </h3>

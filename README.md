@@ -60,6 +60,12 @@ The following local or remotely hosted files types are supported (via
 - [`GeoArrow`](https://geoarrow.org/)
 - [`GeoParquet`](https://geoparquet.org/)
 
+Note, that due to a
+[restriction](https://github.com/geoarrow/deck.gl-geoarrow/issues/170)
+in the upstream JavaScript dependency, only files with native `GeoArrow`
+geometry encoding are supported. `WKB` encoded geometries will not
+render!
+
 In addition, [`nanoarrow`](https://apache.r-universe.dev/nanoarrow)
 `array_streams` (as files) are supported.
 

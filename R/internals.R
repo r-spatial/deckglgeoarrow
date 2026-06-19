@@ -33,8 +33,6 @@ parseGeoarrow = function(
     data
   )
 
-  # }
-
   return(data_stream)
 
 }

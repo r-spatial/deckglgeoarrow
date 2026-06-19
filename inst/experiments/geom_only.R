@@ -6,6 +6,7 @@ library(geos)
 library(colourvalues)
 library(arrow)
 library(sf)
+library(terra)
 
 
 style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
@@ -46,7 +47,6 @@ m = m |>
   )
 
 m
-
 
 ## multipoint ==================================================================
 mpt = wkt("MULTIPOINT (0 0, 1 1)")
@@ -255,6 +255,32 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowScatterplotLayer(
     data = as_geos_geometry(pts)
+  )
+
+m
+
+## terra =======================================================================
+f <- system.file("ex/lux.shp", package="terra")
+v <- vect(f)
+
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowPolygonLayer(
+    data = v
+    , popup = TRUE
+  )
+
+m
+
+## terra vect
+pt = vect(cbind(0, 0))
+
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowScatterplotLayer(
+    data = as_geos_geometry(pt)
   )
 
 m

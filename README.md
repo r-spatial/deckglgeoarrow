@@ -51,6 +51,8 @@ argument):
 
 - [`wk`](https://paleolimbot.r-universe.dev/wk)
 - [`sf`](https://r-spatial.r-universe.dev/sf)
+- [`geos`](https://paleolimbot.github.io/geos/)
+- [`terra`](https://rspatial.r-universe.dev/terra)
 
 #### Others
 

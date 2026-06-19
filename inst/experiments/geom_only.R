@@ -2,6 +2,7 @@ library(mapgl)
 library(deckglgeoarrow)
 library(geoarrow)
 library(wk)
+library(geos)
 library(colourvalues)
 library(arrow)
 library(sf)
@@ -36,6 +37,17 @@ m = m |>
 
 m
 
+## as geos
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowScatterplotLayer(
+    data = as_geos_geometry(pt)
+  )
+
+m
+
+
 ## multipoint ==================================================================
 mpt = wkt("MULTIPOINT (0 0, 1 1)")
 
@@ -56,6 +68,16 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowScatterplotLayer(
     data = st_as_sfc(mpt)
+  )
+
+m
+
+## as geos
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowScatterplotLayer(
+    data = as_geos_geometry(mpt)
   )
 
 m
@@ -82,6 +104,16 @@ m = m |>
 
 m
 
+## as geos
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowPathLayer(
+    data = as_geos_geometry(ln)
+  )
+
+m
+
 ## multiline ===================================================================
 mln = wkt("MULTILINESTRING ((30 10, 10 30, 40 40), (20 0, 0 20, 30 30))")
 
@@ -100,6 +132,16 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowPathLayer(
     data = st_as_sfc(mln)
+  )
+
+m
+
+## as geos
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowPathLayer(
+    data = as_geos_geometry(mln)
   )
 
 m
@@ -130,6 +172,16 @@ m = m |>
 
 m
 
+## as geos
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowPolygonLayer(
+    data = as_geos_geometry(pl)
+  )
+
+m
+
 ## multipolygon ================================================================
 mpl = wkt("MULTIPOLYGON (((30 10, 10 30, 40 40, 30 10)), ((-30 10, -10 30, -40 40, -30 10)))")
 
@@ -148,6 +200,16 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowPolygonLayer(
     data = st_as_sfc(mpl)
+  )
+
+m
+
+## as geos
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowPolygonLayer(
+    data = as_geos_geometry(mpl)
   )
 
 m
@@ -183,6 +245,16 @@ m = m |>
     , render_options = renderOptions(
       beforeId = "water"
     )
+  )
+
+m
+
+## as geos
+m = maplibre(style = style_positron)
+
+m = m |>
+  addGeoArrowScatterplotLayer(
+    data = as_geos_geometry(pts)
   )
 
 m

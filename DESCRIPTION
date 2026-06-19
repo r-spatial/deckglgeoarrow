@@ -33,6 +33,7 @@ Imports:
     htmlwidgets,
     nanoarrow,
 Suggests:
+    geos,
     mapgl,
     quarto,
     tinytest,

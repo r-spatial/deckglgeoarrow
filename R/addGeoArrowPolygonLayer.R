@@ -232,6 +232,13 @@ addGeoArrowPolygonLayer = function(
 
   if (!missing(data)) {
 
+    if (inherits(data, "SpatVector")) {
+      stopifnot(
+        "need package 'geos' to handle 'SpatVector'" = requireNamespace("geos")
+      )
+      data = geos::as_geos_geometry(data)
+    }
+
     data = parseGeoarrow(
       data = data
       , interleaved = TRUE

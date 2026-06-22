@@ -16,11 +16,11 @@ parseGeoarrow = function(
   if (inherits(data, "SpatVector")) {
     stopifnot(
       "need package 'terra' to handle 'SpatVector'" =
-        requireNamespace("terra")
+        requireNamespace("terra", quietly = TRUE)
     )
     stopifnot(
       "need package 'geos' to handle 'SpatVector'" =
-        requireNamespace("geos")
+        requireNamespace("geos", quietly = TRUE)
     )
 
     geom = geos::geos_read_wkb(terra::geom(data, wkb = TRUE))

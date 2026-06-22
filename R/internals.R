@@ -13,6 +13,33 @@ parseGeoarrow = function(
     return(data)
   }
 
+  if (inherits(data, "SpatVector")) {
+    stopifnot(
+      "need package 'terra' to handle 'SpatVector'" =
+        requireNamespace("terra")
+    )
+    stopifnot(
+      "need package 'geos' to handle 'SpatVector'" =
+        requireNamespace("geos")
+    )
+
+    geom = geos::geos_read_wkb(terra::geom(data, wkb = TRUE))
+    data = as.data.frame(data)
+
+    if (ncol(data) == 0) {
+      data = geom
+    } else {
+      data$geometry = geoarrow::as_geoarrow_vctr(
+        geom
+        , schema = geoarrow::infer_geoarrow_schema(
+          geom
+          , coord_type = ifelse(interleaved, "INTERLEAVED", "SEPARATE")
+        )
+      )
+    }
+  }
+
+
   if (is.null(dim(data))) {
     data = data.frame(
       id = 1:length(data)

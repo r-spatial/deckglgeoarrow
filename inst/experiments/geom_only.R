@@ -262,6 +262,7 @@ m
 ## terra =======================================================================
 f <- system.file("ex/lux.shp", package="terra")
 v <- vect(f)
+# v <- vect("POLYGON ((0 -5, 10 0, 10 -10, 0 -5))")
 
 m = maplibre(style = style_positron)
 
@@ -280,7 +281,7 @@ m = maplibre(style = style_positron)
 
 m = m |>
   addGeoArrowScatterplotLayer(
-    data = as_geos_geometry(pt)
+    data = pt
   )
 
 m

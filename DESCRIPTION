@@ -10,7 +10,7 @@ Authors@R:
       person("RConsortium", 
              role = "fnd",
              comment = c("https://r-consortium.org/", ROR = "01z833950")))
-Description: Leverages the very performant 'GeoArrow' memory layout to render
+Description: Leverages the high-performance 'GeoArrow' memory layout to render
     potentially very large 'Deck.gl' data layers on a 'maplibregl'/'mapboxgl' 
     map created with R package 'mapgl'. The heavy lifting is done on the 
     'JavaScript' side in the browser using 'deck.gl-geoarrow' 

@@ -60,6 +60,399 @@ function evaluateExpression(expression, properties) {
   }
 }
 
+// Escape a value for safe insertion as tooltip/popup text.
+function escapeTemplateValue(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Render a {brace} template against a properties object. Shared, package-wide
+// tooltip/popup syntax. NOTE: duplicated verbatim in mapboxgl.js,
+// maplibregl.js, mapboxgl_compare.js, and flowmap.js — keep in sync.
+function renderTemplate(template, properties) {
+  if (typeof template !== "string") {
+    return template;
+  }
+  return template.replace(/\{([^}]+)\}/g, function (match, path) {
+    const value = path
+      .trim()
+      .split(".")
+      .reduce(function (acc, key) {
+        return acc == null ? undefined : acc[key];
+      }, properties);
+    return value == null ? "" : escapeTemplateValue(value);
+  });
+}
+
+// Resolve a tooltip/popup content spec: array -> expression, "{..}" -> brace
+// template, string -> column name lookup.
+function resolveTooltipContent(spec, properties) {
+  if (Array.isArray(spec)) {
+    return evaluateExpression(spec, properties);
+  }
+  if (typeof spec === "string" && spec.indexOf("{") !== -1) {
+    return renderTemplate(spec, properties);
+  }
+  return properties[spec];
+}
+
+// Convert "#rgb"/"#rrggbb" + alpha to rgba(); pass other color strings through.
+function tooltipHexToRgba(color, alpha) {
+  if (typeof color !== "string" || color.charAt(0) !== "#") {
+    return color;
+  }
+  let h = color.slice(1);
+  if (h.length === 3) {
+    h = h
+      .split("")
+      .map(function (c) {
+        return c + c;
+      })
+      .join("");
+  }
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+}
+
+// Build (and cache) a scoped CSS class from a tooltip/popup style spec. Returns
+// null for an empty/absent spec. NOTE: duplicated across the bindings and
+// flowmap.js — keep in sync.
+function tooltipStyleToClass(spec) {
+  if (!spec || typeof spec !== "object") {
+    return null;
+  }
+  if (!window._mapglTooltipStyleClasses) {
+    window._mapglTooltipStyleClasses = {};
+  }
+  const cache = window._mapglTooltipStyleClasses;
+  const key = JSON.stringify(spec);
+  if (cache[key]) {
+    return cache[key];
+  }
+  const cls = "mapgl-tooltip-style-" + (Object.keys(cache).length + 1);
+
+  let bg = spec.background_color;
+  if (bg != null && spec.background_opacity != null) {
+    bg = tooltipHexToRgba(bg, spec.background_opacity);
+  }
+
+  const content = [];
+  if (bg != null) content.push("background:" + bg + ";");
+  if (spec.text_color != null) content.push("color:" + spec.text_color + ";");
+  if (spec.border_color != null || spec.border_width != null) {
+    const bw = spec.border_width == null ? 1 : spec.border_width;
+    const bc = spec.border_color == null ? "transparent" : spec.border_color;
+    content.push("border:" + bw + "px solid " + bc + ";");
+  }
+  if (spec.border_radius != null) {
+    content.push("border-radius:" + spec.border_radius + "px;");
+  }
+  if (spec.font_family != null) {
+    content.push("font-family:" + spec.font_family + ";");
+  }
+  if (spec.font_size != null) {
+    content.push("font-size:" + spec.font_size + "px;");
+  }
+  if (spec.font_weight != null) {
+    content.push("font-weight:" + spec.font_weight + ";");
+  }
+  if (spec.padding != null) content.push("padding:" + spec.padding + "px;");
+  if (spec.max_width != null) {
+    const mw =
+      typeof spec.max_width === "number"
+        ? spec.max_width + "px"
+        : spec.max_width;
+    content.push("max-width:" + mw + ";");
+  }
+  if (spec.shadow) {
+    const ss = spec.shadow_size == null ? 8 : spec.shadow_size;
+    const sc = spec.shadow_color == null ? "rgba(0, 0, 0, 0.2)" : spec.shadow_color;
+    content.push("box-shadow:0 2px " + ss + "px " + sc + ";");
+  }
+
+  let css =
+    "." +
+    cls +
+    " .mapboxgl-popup-content, ." +
+    cls +
+    " .maplibregl-popup-content {" +
+    content.join("") +
+    "}";
+  if (bg != null) {
+    css +=
+      "." +
+      cls +
+      " .mapboxgl-popup-tip, ." +
+      cls +
+      " .maplibregl-popup-tip {border-top-color:" +
+      bg +
+      ";border-bottom-color:" +
+      bg +
+      ";}";
+  }
+
+  const styleEl = document.createElement("style");
+  styleEl.textContent = css;
+  document.head.appendChild(styleEl);
+  cache[key] = cls;
+  return cls;
+}
+
+// Apply a style spec's generated class to a popup. (Re)applies on the "open"
+// event so a lazily-built tooltip container gets themed in both Mapbox and
+// MapLibre, swapping out any previously applied generated class.
+function applyPopupClass(popup, spec) {
+  if (!popup) {
+    return;
+  }
+  const cls = tooltipStyleToClass(spec);
+  const prev = popup._mapglStyleClass;
+  if (popup._container && prev && prev !== cls) {
+    popup._container.classList.remove(prev);
+  }
+  popup._mapglStyleClass = cls || null;
+  if (popup._container && cls) {
+    popup._container.classList.add(cls);
+  }
+  if (!popup._mapglClassHook && typeof popup.on === "function") {
+    popup._mapglClassHook = true;
+    popup.on("open", function () {
+      if (popup._container && popup._mapglStyleClass) {
+        popup._container.classList.add(popup._mapglStyleClass);
+      }
+    });
+  }
+}
+
+function formatDmsCoordinate(value, axis, precision) {
+  const direction =
+    axis === "lng" ? (value < 0 ? "W" : "E") : value < 0 ? "S" : "N";
+  const absolute = Math.abs(value);
+  let degrees = Math.floor(absolute);
+  const minutesFloat = (absolute - degrees) * 60;
+  let minutes = Math.floor(minutesFloat);
+  let seconds = (minutesFloat - minutes) * 60;
+
+  const factor = Math.pow(10, precision);
+  seconds = Math.round(seconds * factor) / factor;
+  if (seconds >= 60) {
+    seconds = 0;
+    minutes += 1;
+  }
+  if (minutes >= 60) {
+    minutes = 0;
+    degrees += 1;
+  }
+
+  const secondsText = seconds
+    .toFixed(precision)
+    .padStart(precision > 0 ? precision + 3 : 2, "0");
+  return `${degrees}\u00b0${String(minutes).padStart(2, "0")}'${secondsText}"${direction}`;
+}
+
+function formatCoordinates(lngLat, format, precision) {
+  if (format === "dms") {
+    return `${formatDmsCoordinate(lngLat.lng, "lng", precision)}, ${formatDmsCoordinate(lngLat.lat, "lat", precision)}`;
+  }
+  return `${lngLat.lng.toFixed(precision)}, ${lngLat.lat.toFixed(precision)}`;
+}
+
+function createCoordinatesControl(options) {
+  const controlOptions = options || {};
+  const format = controlOptions.format || "decimal";
+  const precisionValue = Number(controlOptions.precision);
+  const precision = Number.isFinite(precisionValue)
+    ? Math.min(20, Math.max(0, Math.floor(precisionValue)))
+    : format === "dms" ? 1 : 5;
+  const emptyText = controlOptions.empty_text || "Move cursor over map";
+  const labelText = controlOptions.label || "";
+  const wrapLongitude = controlOptions.wrap !== false;
+
+  const container = document.createElement("div");
+  container.className = "mapgl-coordinates-control maplibregl-ctrl";
+  container.style.cssText = `
+    background: #ffffff;
+    padding: 8px 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    color: #222;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.35;
+    min-width: 142px;
+    max-width: 240px;
+    border: 1px solid rgba(0,0,0,0.1);
+    pointer-events: none;
+  `;
+
+  if (labelText) {
+    const label = document.createElement("div");
+    label.className = "mapgl-coordinates-label";
+    label.textContent = labelText;
+    label.style.cssText = `
+      margin-bottom: 2px;
+      color: #666;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    `;
+    container.appendChild(label);
+  }
+
+  const value = document.createElement("div");
+  value.className = "mapgl-coordinates-value";
+  value.textContent = emptyText;
+  value.style.cssText = `
+    color: #111;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  `;
+  container.appendChild(value);
+
+  let mapRef = null;
+  const update = (event) => {
+    if (!event || !event.lngLat) return;
+    const lngLat =
+      wrapLongitude && typeof event.lngLat.wrap === "function"
+        ? event.lngLat.wrap()
+        : event.lngLat;
+    value.textContent = formatCoordinates(lngLat, format, precision);
+  };
+  const clear = () => {
+    value.textContent = emptyText;
+  };
+
+  return {
+    onAdd: function (map) {
+      mapRef = map;
+      mapRef.on("mousemove", update);
+      mapRef.getCanvas().addEventListener("mouseleave", clear);
+      return container;
+    },
+    onRemove: function () {
+      if (mapRef) {
+        mapRef.off("mousemove", update);
+        mapRef.getCanvas().removeEventListener("mouseleave", clear);
+      }
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+      mapRef = null;
+    },
+  };
+}
+
+function createMapglLaserPointer(options) {
+  const pointerOptions = options || {};
+  const color = pointerOptions.color || "#ff2d55";
+  const sizeValue = Number(pointerOptions.size);
+  const size = Number.isFinite(sizeValue) && sizeValue > 0 ? sizeValue : 14;
+
+  const pointer = document.createElement("div");
+  pointer.className = "mapgl-sync-laser-pointer";
+  pointer.style.cssText = `
+    position: absolute;
+    display: none;
+    width: ${size}px;
+    height: ${size}px;
+    margin: 0;
+    padding: 0;
+    border: 2px solid ${color};
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 14px ${color};
+    box-sizing: border-box;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  `;
+
+  const dot = document.createElement("div");
+  dot.style.cssText = `
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: ${color};
+    transform: translate(-50%, -50%);
+  `;
+  pointer.appendChild(dot);
+  return pointer;
+}
+
+function setupSyncLaserPointer(maps, options) {
+  const pointers = maps.map(() => createMapglLaserPointer(options));
+
+  maps.forEach((map, index) => {
+    map.getContainer().appendChild(pointers[index]);
+  });
+
+  const hide = (pointer) => {
+    pointer.style.display = "none";
+  };
+
+  const update = (targetMap, pointer, event) => {
+    if (!event || !event.lngLat || !targetMap || !pointer) return;
+
+    const point = targetMap.project(event.lngLat);
+    const container = targetMap.getContainer();
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    if (
+      point.x < 0 ||
+      point.y < 0 ||
+      point.x > width ||
+      point.y > height
+    ) {
+      hide(pointer);
+      return;
+    }
+
+    pointer.style.display = "block";
+    pointer.style.left = `${point.x}px`;
+    pointer.style.top = `${point.y}px`;
+  };
+
+  // Moving the cursor on one map shows the laser on every other map
+  const moveHandlers = maps.map((sourceMap, index) => (event) => {
+    maps.forEach((targetMap, targetIndex) => {
+      if (targetIndex !== index) {
+        update(targetMap, pointers[targetIndex], event);
+      }
+    });
+  });
+  const leaveHandlers = maps.map((sourceMap, index) => () => {
+    pointers.forEach((pointer, targetIndex) => {
+      if (targetIndex !== index) {
+        hide(pointer);
+      }
+    });
+  });
+
+  maps.forEach((map, index) => {
+    map.on("mousemove", moveHandlers[index]);
+    map.getCanvas().addEventListener("mouseleave", leaveHandlers[index]);
+  });
+
+  return function cleanupSyncLaserPointer() {
+    maps.forEach((map, index) => {
+      map.off("mousemove", moveHandlers[index]);
+      map.getCanvas().removeEventListener("mouseleave", leaveHandlers[index]);
+      pointers[index].remove();
+    });
+  };
+}
+
 function onMouseMoveTooltip(e, map, tooltipPopup, tooltipProperty, layerId) {
   if (e.features.length > 0) {
     // Query all features at this point to determine z-order
@@ -88,19 +481,12 @@ function onMouseMoveTooltip(e, map, tooltipPopup, tooltipProperty, layerId) {
         window._activeTooltip.remove();
       }
 
-      let description;
-
-      // Check if tooltipProperty is an expression (array) or a simple property name (string)
-      if (Array.isArray(tooltipProperty)) {
-        // It's an expression, evaluate it
-        description = evaluateExpression(
-          tooltipProperty,
-          e.features[0].properties,
-        );
-      } else {
-        // It's a property name, get the value
-        description = e.features[0].properties[tooltipProperty];
-      }
+      // tooltipProperty may be a column name, a {brace} template, or a
+      // concat()/number_format() expression.
+      const description = resolveTooltipContent(
+        tooltipProperty,
+        e.features[0].properties,
+      );
 
       tooltipPopup.setLngLat(e.lngLat).setHTML(description).addTo(map);
 
@@ -130,7 +516,7 @@ function onMouseLeaveTooltip(map, tooltipPopup) {
   }
 }
 
-function onClickPopup(e, map, popupProperty, layerId) {
+function onClickPopup(e, map, popupProperty, layerId, popupStyle) {
   if (e.features.length > 0) {
     // Query all features at this point to determine z-order
     const allFeatures = map.queryRenderedFeatures(e.point);
@@ -153,19 +539,12 @@ function onClickPopup(e, map, popupProperty, layerId) {
 
     // Only show popup if this is the topmost layer with a popup
     if (topmostLayerWithPopup === layerId) {
-      let description;
-
-      // Check if popupProperty is an expression (array) or a simple property name (string)
-      if (Array.isArray(popupProperty)) {
-        // It's an expression, evaluate it
-        description = evaluateExpression(
-          popupProperty,
-          e.features[0].properties,
-        );
-      } else {
-        // It's a property name, get the value
-        description = e.features[0].properties[popupProperty];
-      }
+      // popupProperty may be a column name, a {brace} template, or a
+      // concat()/number_format() expression.
+      const description = resolveTooltipContent(
+        popupProperty,
+        e.features[0].properties,
+      );
 
       // Remove any existing popup for this layer
       if (window._maplibrePopups && window._maplibrePopups[layerId]) {
@@ -177,6 +556,7 @@ function onClickPopup(e, map, popupProperty, layerId) {
         .setLngLat(e.lngLat)
         .setHTML(description)
         .addTo(map);
+      applyPopupClass(popup, popupStyle);
 
       // Store reference to this popup
       if (!window._maplibrePopups) {
@@ -202,6 +582,8 @@ HTMLWidgets.widget({
   factory: function (el, width, height) {
     // Store maps and compare object to allow access during Shiny updates
     let beforeMap, afterMap, compareControl, draw;
+    let compareMaps = [];
+    let compareMapsData = [];
 
     return {
       renderValue: function (x) {
@@ -223,78 +605,97 @@ HTMLWidgets.widget({
         // Set position relative on container to properly contain absolutely positioned maps
         el.style.position = "relative";
 
-        // Create container divs for the maps
-        const beforeContainerId = `${el.id}-before`;
-        const afterContainerId = `${el.id}-after`;
+        // Normalize map configs: x.maps is present for sync grids with more
+        // than two maps; classic compare widgets supply x.map1/x.map2
+        compareMapsData = Array.isArray(x.maps) && x.maps.length > 0
+          ? x.maps
+          : [x.map1, x.map2];
+        const nMaps = compareMapsData.length;
+
+        // Side names drive container ids, Shiny input prefixes, and proxy
+        // targeting; 2-map widgets keep the historical "before"/"after" names
+        const sideNameFor = (index) =>
+          nMaps === 2 ? (index === 0 ? "before" : "after") : `map${index + 1}`;
+        const containerIds = compareMapsData.map(
+          (mapData, index) => `${el.id}-${sideNameFor(index)}`,
+        );
 
         // Different HTML structure based on mode
         if (x.mode === "sync") {
-          // Side-by-side sync mode
-          const containerStyle =
-            x.orientation === "horizontal"
-              ? `display: flex; flex-direction: column; width: 100%; height: 100%;`
-              : `display: flex; flex-direction: row; width: 100%; height: 100%;`;
+          // Grid of synced maps; legacy 2-map sync keeps its side-by-side
+          // (vertical) or stacked (horizontal) layout via the column count
+          const cols =
+            x.sync_cols || (x.orientation === "horizontal" ? 1 : 2);
 
-          const mapStyle =
-            x.orientation === "horizontal"
-              ? `width: 100%; height: 50%; position: relative;`
-              : `width: 50%; height: 100%; position: relative;`;
+          const containerStyle = `display: grid; grid-template-columns: repeat(${cols}, 1fr); grid-auto-rows: 1fr; width: 100%; height: 100%;`;
+          const mapStyle = `position: relative; width: 100%; height: 100%; min-width: 0; min-height: 0;`;
 
           el.innerHTML = `
                       <div style="${containerStyle}">
-                        <div id="${beforeContainerId}" class="map" style="${mapStyle}"></div>
-                        <div id="${afterContainerId}" class="map" style="${mapStyle}"></div>
+                        ${containerIds
+                          .map(
+                            (id) =>
+                              `<div id="${id}" class="map" style="${mapStyle}"></div>`,
+                          )
+                          .join("\n")}
                       </div>
                     `;
         } else {
           // Default swipe mode
           el.innerHTML = `
-                      <div id="${beforeContainerId}" class="map" style="width: 100%; height: 100%; position: absolute;"></div>
-                      <div id="${afterContainerId}" class="map" style="width: 100%; height: 100%; position: absolute;"></div>
+                      <div id="${containerIds[0]}" class="map" style="width: 100%; height: 100%; position: absolute;"></div>
+                      <div id="${containerIds[1]}" class="map" style="width: 100%; height: 100%; position: absolute;"></div>
                     `;
         }
 
-        beforeMap = new maplibregl.Map({
-          container: beforeContainerId,
-          style: x.map1.style,
-          center: x.map1.center,
-          zoom: x.map1.zoom,
-          bearing: x.map1.bearing,
-          pitch: x.map1.pitch,
-          accessToken: x.map1.access_token,
-          ...x.map1.additional_params,
+        compareMaps = compareMapsData.map(function (mapData, index) {
+          const syncedMap = new maplibregl.Map({
+            container: containerIds[index],
+            style: mapData.style,
+            center: mapData.center,
+            zoom: mapData.zoom,
+            bearing: mapData.bearing,
+            pitch: mapData.pitch,
+            accessToken: mapData.access_token,
+            ...mapData.additional_params,
+          });
+
+          // Initialize controls array
+          syncedMap.controls = [];
+
+          // Set projection on style load (MapLibre doesn't support projection in constructor)
+          syncedMap.on("style.load", function () {
+            if (!syncedMap._basemapLayerIds) {
+              syncedMap._basemapLayerIds = new Set(
+                syncedMap.getStyle().layers.map((layer) => layer.id),
+              );
+            }
+
+            if (mapData.projection) {
+              syncedMap.setProjection({ type: mapData.projection });
+            }
+          });
+
+          return syncedMap;
         });
 
-        // Initialize controls array
-        beforeMap.controls = [];
+        beforeMap = compareMaps[0];
+        afterMap = compareMaps[1];
 
-        // Set projection on style load (MapLibre doesn't support projection in constructor)
-        beforeMap.on("style.load", function () {
-          if (x.map1.projection) {
-            beforeMap.setProjection({ type: x.map1.projection });
+        // Resolve a side name ("before", "after", or "mapN") to its map.
+        // An out-of-range "mapN" returns undefined so callers no-op rather
+        // than mutating the wrong map; other unknown values fall back to the
+        // after map, matching the historical behavior where anything other
+        // than "before" targeted the after map.
+        const resolveCompareMap = (side) => {
+          if (side === "before") return compareMaps[0];
+          if (side === "after") return compareMaps[1];
+          const match = /^map(\d+)$/.exec(side || "");
+          if (match) {
+            return compareMaps[parseInt(match[1], 10) - 1];
           }
-        });
-
-        afterMap = new maplibregl.Map({
-          container: afterContainerId,
-          style: x.map2.style,
-          center: x.map2.center,
-          zoom: x.map2.zoom,
-          bearing: x.map2.bearing,
-          pitch: x.map2.pitch,
-          accessToken: x.map2.access_token,
-          ...x.map2.additional_params,
-        });
-
-        // Initialize controls array
-        afterMap.controls = [];
-
-        // Set projection on style load (MapLibre doesn't support projection in constructor)
-        afterMap.on("style.load", function () {
-          if (x.map2.projection) {
-            afterMap.setProjection({ type: x.map2.projection });
-          }
-        });
+          return afterMap;
+        };
 
         if (x.mode === "swipe") {
           // Only create the swiper in swipe mode
@@ -325,7 +726,7 @@ HTMLWidgets.widget({
           // Function to synchronize maps as seen in the mapbox-gl-sync-move module
           const syncMaps = () => {
             // Array of maps to sync
-            const maps = [beforeMap, afterMap];
+            const maps = compareMaps;
             // Array of move event handlers
             const moveHandlers = [];
 
@@ -369,55 +770,71 @@ HTMLWidgets.widget({
 
           // Initialize the sync
           syncMaps();
+
+          if (x.laser && x.laser.enabled) {
+            setupSyncLaserPointer(compareMaps, x.laser);
+          }
         }
 
-        // Ensure both maps resize correctly
-        beforeMap.on("load", function () {
-          beforeMap.resize();
-          applyMapModifications(beforeMap, x.map1);
-
-          // Setup Shiny event handlers for the before map
-          if (HTMLWidgets.shinyMode) {
-            setupShinyEvents(beforeMap, el.id, "before");
+        // Add compare-level legends once every map has loaded (load order is
+        // not guaranteed, and legend interactivity depends on layers added
+        // during each map's modifications)
+        let loadedCount = 0;
+        const addCompareLegends = function () {
+          if (!x.compare_legends || !Array.isArray(x.compare_legends)) {
+            return;
           }
-        });
+          x.compare_legends.forEach(function (legendInfo) {
+            // Add CSS
+            const legendCss = document.createElement("style");
+            legendCss.innerHTML = legendInfo.css;
+            legendCss.setAttribute("data-mapgl-legend-css", el.id);
+            document.head.appendChild(legendCss);
 
-        afterMap.on("load", function () {
-          afterMap.resize();
-          applyMapModifications(afterMap, x.map2);
+            // Create legend element
+            const legend = document.createElement("div");
+            legend.innerHTML = legendInfo.html;
+            legend.classList.add("mapboxgl-legend");
 
-          // Setup Shiny event handlers for the after map
-          if (HTMLWidgets.shinyMode) {
-            setupShinyEvents(afterMap, el.id, "after");
-          }
-
-          // Add compare-level legends after both maps are loaded
-          if (x.compare_legends && Array.isArray(x.compare_legends)) {
-            x.compare_legends.forEach(function (legendInfo) {
-              // Add CSS
-              const legendCss = document.createElement("style");
-              legendCss.innerHTML = legendInfo.css;
-              legendCss.setAttribute("data-mapgl-legend-css", el.id);
-              document.head.appendChild(legendCss);
-
-              // Create legend element
-              const legend = document.createElement("div");
-              legend.innerHTML = legendInfo.html;
-              legend.classList.add("mapboxgl-legend");
-
-              // Append to the appropriate container based on target
-              if (legendInfo.target === "compare") {
-                // Append to the main compare container
-                el.appendChild(legend);
-              } else if (legendInfo.target === "before") {
-                // Append to the before map container
-                beforeMap.getContainer().appendChild(legend);
-              } else if (legendInfo.target === "after") {
-                // Append to the after map container
-                afterMap.getContainer().appendChild(legend);
+            // Append to the appropriate container based on target
+            if (legendInfo.target === "compare") {
+              // Append to the main compare container
+              el.appendChild(legend);
+            } else {
+              const targetMap = resolveCompareMap(legendInfo.target);
+              if (targetMap) {
+                targetMap.getContainer().appendChild(legend);
+                if (
+                  legendInfo.interactivity &&
+                  typeof initializeLegendInteractivity === "function"
+                ) {
+                  initializeLegendInteractivity(
+                    targetMap,
+                    targetMap.getContainer().id,
+                    legendInfo.interactivity,
+                  );
+                }
               }
-            });
-          }
+            }
+          });
+        };
+
+        // Ensure all maps resize correctly
+        compareMaps.forEach(function (syncedMap, index) {
+          syncedMap.on("load", function () {
+            syncedMap.resize();
+            applyMapModifications(syncedMap, compareMapsData[index]);
+
+            // Setup Shiny event handlers for this map
+            if (HTMLWidgets.shinyMode) {
+              setupShinyEvents(syncedMap, el.id, sideNameFor(index));
+            }
+
+            loadedCount++;
+            if (loadedCount === compareMaps.length) {
+              addCompareLegends();
+            }
+          });
         });
 
         // Define updateDrawnFeatures function for the draw tool
@@ -440,7 +857,7 @@ HTMLWidgets.widget({
 
               // Get the message and determine which map to target
               var message = data.message;
-              var map = message.map === "before" ? beforeMap : afterMap;
+              var map = resolveCompareMap(message.map);
 
               if (!map) return;
 
@@ -652,6 +1069,7 @@ HTMLWidgets.widget({
                         map,
                         message.layer.popup,
                         message.layer.id,
+                        message.layer.popup_style,
                       );
                     };
 
@@ -682,6 +1100,7 @@ HTMLWidgets.widget({
                       closeOnClick: false,
                       maxWidth: "400px",
                     });
+                    applyPopupClass(tooltip, message.layer.tooltip_style);
 
                     // Define named handler functions:
                     const mouseMoveHandler = function (e) {
@@ -918,6 +1337,22 @@ HTMLWidgets.widget({
                 }
                 layerState.layoutProperties[message.layer][message.name] =
                   message.value;
+              } else if (message.type === "set_flowmap_filter") {
+                if (window.MapGLFlowmapPlugin) {
+                  window.MapGLFlowmapPlugin.setFilter(
+                    map,
+                    message.id,
+                    message.filter,
+                  );
+                }
+              } else if (message.type === "set_flowmap_settings") {
+                if (window.MapGLFlowmapPlugin) {
+                  window.MapGLFlowmapPlugin.setSettings(
+                    map,
+                    message.id,
+                    message.settings,
+                  );
+                }
               } else if (message.type === "set_paint_property") {
                 const layerId = message.layer;
                 const propertyName = message.name;
@@ -981,6 +1416,16 @@ HTMLWidgets.widget({
                 // Append legend to the correct map container
                 const targetContainer = map.getContainer();
                 targetContainer.appendChild(legend);
+                if (
+                  message.interactivity &&
+                  typeof initializeLegendInteractivity === "function"
+                ) {
+                  initializeLegendInteractivity(
+                    map,
+                    targetContainer.id,
+                    message.interactivity,
+                  );
+                }
               } else if (message.type === "set_config_property") {
                 map.setConfigProperty(
                   message.importId,
@@ -1708,10 +2153,9 @@ HTMLWidgets.widget({
                   });
 
                   // Re-apply map modifications
-                  if (map === beforeMap) {
-                    applyMapModifications(map, x.map1);
-                  } else {
-                    applyMapModifications(map, x.map2);
+                  const mapIndex = compareMaps.indexOf(map);
+                  if (mapIndex >= 0) {
+                    applyMapModifications(map, compareMapsData[mapIndex]);
                   }
                 });
               } else if (message.type === "add_navigation_control") {
@@ -1777,6 +2221,17 @@ HTMLWidgets.widget({
 
                 // Add to controls array
                 map.controls.push({ type: "reset", control: resetControlObj });
+              } else if (message.type === "add_coordinates_control") {
+                const coordinatesControlObj = createCoordinatesControl(message.options);
+                map.addControl(
+                  coordinatesControlObj,
+                  message.options.position || "bottom-right",
+                );
+
+                if (!map.controls) {
+                  map.controls = [];
+                }
+                map.controls.push({ type: "coordinates", control: coordinatesControlObj });
               } else if (message.type === "add_draw_control") {
                 let drawOptions = message.options || {};
                 if (message.freehand) {
@@ -2141,7 +2596,7 @@ HTMLWidgets.widget({
                 layersList.className = "layers-list";
                 layersControl.appendChild(layersList);
 
-                const allMaps = [beforeMap, afterMap];
+                const allMaps = compareMaps;
                 let layersConfig = message.layers_config;
 
                 if (layersConfig && Array.isArray(layersConfig)) {
@@ -2486,12 +2941,15 @@ HTMLWidgets.widget({
                     closeOnClick: false,
                     maxWidth: "400px",
                   });
+                  applyPopupClass(tooltip, message.tooltip_style);
 
                   map.on("mousemove", message.layer, function (e) {
                     map.getCanvas().style.cursor = "pointer";
                     if (e.features.length > 0) {
-                      const description =
-                        e.features[0].properties[message.tooltip];
+                      const description = resolveTooltipContent(
+                        message.tooltip,
+                        e.features[0].properties,
+                      );
                       tooltip
                         .setLngLat(e.lngLat)
                         .setHTML(description)
@@ -2533,7 +2991,13 @@ HTMLWidgets.widget({
 
                   // Create new click handler for popup
                   const clickHandler = function (e) {
-                    onClickPopup(e, map, message.popup, message.layer);
+                    onClickPopup(
+                      e,
+                      map,
+                      message.popup,
+                      message.layer,
+                      message.popup_style,
+                    );
                   };
 
                   // Store handler reference
@@ -2786,8 +3250,15 @@ HTMLWidgets.widget({
             }
           });
 
-          // Add hover events if enabled for this map
-          const mapConfig = mapType === "before" ? x.map1 : x.map2;
+          // Add hover events if enabled for this map; resolve the side name
+          // to the matching map config ("before"/"after" or "mapN")
+          const sideMatch = /^map(\d+)$/.exec(mapType);
+          const configIndex = sideMatch
+            ? parseInt(sideMatch[1], 10) - 1
+            : mapType === "before"
+              ? 0
+              : 1;
+          const mapConfig = compareMapsData[configIndex] || {};
           if (mapConfig.hover_events && mapConfig.hover_events.enabled) {
             map.on("mousemove", function (e) {
               if (window.Shiny) {
@@ -2875,19 +3346,12 @@ HTMLWidgets.widget({
               if (topmostLayerWithTooltip === layerId) {
                 map.getCanvas().style.cursor = "pointer";
 
-                let description;
-
-                // Check if tooltipProperty is an expression (array) or a simple property name (string)
-                if (Array.isArray(tooltipProperty)) {
-                  // It's an expression, evaluate it
-                  description = evaluateExpression(
-                    tooltipProperty,
-                    e.features[0].properties,
-                  );
-                } else {
-                  // It's a property name, get the value
-                  description = e.features[0].properties[tooltipProperty];
-                }
+                // tooltipProperty may be a column name, a {brace} template, or
+                // a concat()/number_format() expression.
+                const description = resolveTooltipContent(
+                  tooltipProperty,
+                  e.features[0].properties,
+                );
 
                 tooltipPopup
                   .setLngLat(e.lngLat)
@@ -2987,20 +3451,13 @@ HTMLWidgets.widget({
             }
           }
 
-          function onClickPopup(e, map, popupProperty, layerId) {
-            let description;
-
-            // Check if popupProperty is an expression (array) or a simple property name (string)
-            if (Array.isArray(popupProperty)) {
-              // It's an expression, evaluate it
-              description = evaluateExpression(
-                popupProperty,
-                e.features[0].properties,
-              );
-            } else {
-              // It's a property name, get the value
-              description = e.features[0].properties[popupProperty];
-            }
+          function onClickPopup(e, map, popupProperty, layerId, popupStyle) {
+            // popupProperty may be a column name, a {brace} template, or a
+            // concat()/number_format() expression.
+            const description = resolveTooltipContent(
+              popupProperty,
+              e.features[0].properties,
+            );
 
             // Remove any existing popup for this layer
             if (window._maplibrePopups && window._maplibrePopups[layerId]) {
@@ -3012,6 +3469,7 @@ HTMLWidgets.widget({
               .setLngLat(e.lngLat)
               .setHTML(description)
               .addTo(map);
+            applyPopupClass(popup, popupStyle);
 
             // Store reference to this popup
             if (!window._maplibrePopups) {
@@ -3043,6 +3501,20 @@ HTMLWidgets.widget({
             mapData.h3j_sources.forEach(async function (source) {
               await map.addH3JSource(source.id, {
                 data: source.url,
+              });
+            });
+          }
+          // Process H3T (tiled h3j) sources if provided
+          if (mapData.h3t_sources) {
+            mapData.h3t_sources.forEach(function (source) {
+              map.addH3TSource(source.id, {
+                tiles: source.tiles,
+                sourcelayer: source.sourcelayer,
+                geometry_type: source.geometry_type,
+                minzoom: source.minzoom,
+                maxzoom: source.maxzoom,
+                promoteId: source.promoteId,
+                debug: source.debug,
               });
             });
           }
@@ -3230,7 +3702,7 @@ HTMLWidgets.widget({
                 // Add popups or tooltips if provided
                 if (layer.popup) {
                   map.on("click", layer.id, function (e) {
-                    onClickPopup(e, map, layer.popup, layer.id);
+                    onClickPopup(e, map, layer.popup, layer.id, layer.popup_style);
                   });
 
                   // Change cursor to pointer when hovering over the layer
@@ -3250,6 +3722,7 @@ HTMLWidgets.widget({
                     closeOnClick: false,
                     maxWidth: "400px",
                   });
+                  applyPopupClass(tooltip, layer.tooltip_style);
 
                   // Create a reference to the mousemove handler function
                   const mouseMoveHandler = function (e) {
@@ -3355,6 +3828,22 @@ HTMLWidgets.widget({
                 console.error("Failed to add layer: ", layer, e);
               }
             });
+          }
+
+          if (mapData.flowmaps) {
+            if (window.MapGLFlowmapPlugin) {
+              const flowmapEl = {
+                id: `${el.id}-map${compareMaps.indexOf(map) + 1}`,
+              };
+              window.MapGLFlowmapPlugin.init(
+                map,
+                mapData,
+                flowmapEl,
+                HTMLWidgets,
+              );
+            } else {
+              console.error("Flowmap plugin is not loaded. Cannot add flowmap layers.");
+            }
           }
 
           // Set terrain if provided
@@ -4145,6 +4634,21 @@ HTMLWidgets.widget({
             );
           }
 
+          // Add coordinates control if enabled
+          if (mapData.coordinates_control) {
+            const coordinatesControlObj = createCoordinatesControl(
+              mapData.coordinates_control,
+            );
+            map.addControl(
+              coordinatesControlObj,
+              mapData.coordinates_control.position || "bottom-right",
+            );
+            map.controls.push({
+              type: "coordinates",
+              control: coordinatesControlObj,
+            });
+          }
+
           function updateDrawnFeatures() {
             if (map._mapgl_draw) {
               var drawnFeatures = map._mapgl_draw.getAll();
@@ -4212,6 +4716,43 @@ HTMLWidgets.widget({
               mapData.layers_control.layers ||
               map.getStyle().layers.map((layer) => layer.id);
             let layersConfig = mapData.layers_control.layers_config;
+            const getLayerControlVisibility = (targetMap, layerId) => {
+              if (
+                window.MapGLFlowmapPlugin &&
+                window.MapGLFlowmapPlugin.hasLayer(targetMap, layerId)
+              ) {
+                return window.MapGLFlowmapPlugin.getVisibility(
+                  targetMap,
+                  layerId,
+                );
+              }
+              if (targetMap.getLayer(layerId)) {
+                return (
+                  targetMap.getLayoutProperty(layerId, "visibility") ||
+                  "visible"
+                );
+              }
+              return "visible";
+            };
+            const setLayerControlVisibility = (
+              targetMap,
+              layerId,
+              visibility,
+            ) => {
+              if (
+                window.MapGLFlowmapPlugin &&
+                window.MapGLFlowmapPlugin.setVisibility(
+                  targetMap,
+                  layerId,
+                  visibility,
+                )
+              ) {
+                return;
+              }
+              if (targetMap.getLayer(layerId)) {
+                targetMap.setLayoutProperty(layerId, "visibility", visibility);
+              }
+            };
 
             // If we have a layers_config, use that; otherwise fall back to original behavior
             if (layersConfig && Array.isArray(layersConfig)) {
@@ -4227,11 +4768,17 @@ HTMLWidgets.widget({
                 link.setAttribute("data-layer-ids", JSON.stringify(layerIds));
                 link.setAttribute("data-layer-type", config.type);
 
-                // Check if the first layer's visibility is set to "none" initially
+                // Check if the first layer's visibility is set to "none" initially.
+                // In a compare widget each side only has its own layers, but a single
+                // layers_control can reference ids from both sides (e.g. "sp" and "env")
+                // so the toggle can fire on both maps. If the first id isn't present on
+                // this map, fall back to "visible". We pre-check with getLayer() because
+                // getLayoutProperty() on a missing layer fires an error event (not a
+                // throw), which try/catch cannot silence.
                 const firstLayerId = layerIds[0];
-                const initialVisibility = map.getLayoutProperty(
+                const initialVisibility = getLayerControlVisibility(
+                  map,
                   firstLayerId,
-                  "visibility",
                 );
                 link.className = initialVisibility === "none" ? "" : "active";
 
@@ -4244,17 +4791,20 @@ HTMLWidgets.widget({
                   const layerIds = JSON.parse(
                     this.getAttribute("data-layer-ids"),
                   );
+                  // read visibility from whichever map actually has this layer
+                  // (pre-check with getLayer() — getLayoutProperty fires an error
+                  // event on missing layers and try/catch cannot silence it)
                   const firstLayerId = layerIds[0];
-                  const visibility = map.getLayoutProperty(
+                  const visibility = getLayerControlVisibility(
+                    map,
                     firstLayerId,
-                    "visibility",
                   );
 
                   const newVis = visibility === "visible" ? "none" : "visible";
-                  const allMaps = [beforeMap, afterMap];
+                  const allMaps = compareMaps;
                   layerIds.forEach((layerId) => {
                     allMaps.forEach((m) => {
-                      try { m.setLayoutProperty(layerId, "visibility", newVis); } catch(err) {}
+                      setLayerControlVisibility(m, layerId, newVis);
                     });
                   });
                   this.className = newVis === "visible" ? "active" : "";
@@ -4278,15 +4828,15 @@ HTMLWidgets.widget({
                   e.preventDefault();
                   e.stopPropagation();
 
-                  const visibility = map.getLayoutProperty(
+                  const visibility = getLayerControlVisibility(
+                    map,
                     clickedLayer,
-                    "visibility",
                   );
 
                   // toggle on BOTH maps in the compare widget
                   const newVis = visibility === "visible" ? "none" : "visible";
-                  [beforeMap, afterMap].forEach((m) => {
-                    try { m.setLayoutProperty(clickedLayer, "visibility", newVis); } catch(err) {}
+                  compareMaps.forEach((m) => {
+                    setLayerControlVisibility(m, clickedLayer, newVis);
                   });
                   this.className = newVis === "visible" ? "active" : "";
                 };
@@ -4353,6 +4903,10 @@ HTMLWidgets.widget({
 
       getAfterMap: function () {
         return afterMap;
+      },
+
+      getMaps: function () {
+        return compareMaps;
       },
     };
   },

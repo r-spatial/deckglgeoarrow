@@ -1,6 +1,6 @@
 # deckglgeoarrow: Use 'GeoArrow' to Add 'Deck.gl' Layers to a 'maplibregl'/'mapboxgl' Map
 
-Leverages the very performant 'GeoArrow' memory layout to render
+Leverages the high-performance 'GeoArrow' memory layout to render
 potentially very large 'Deck.gl' data layers on a
 'maplibregl'/'mapboxgl' map created with R package 'mapgl'. The heavy
 lifting is done on the 'JavaScript' side in the browser using

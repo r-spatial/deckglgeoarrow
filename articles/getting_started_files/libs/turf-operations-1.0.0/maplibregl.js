@@ -1,3 +1,612 @@
+// Attach cluster-click + cursor handlers to a "-clusters" layer.
+// Auto-branches on source capability:
+//   - live-clustered GeoJSON  -> await source.getClusterExpansionZoom()
+//   - precomputed vector tiles -> easeTo with zoom + 2
+// Idempotent: handler refs are stored per layer id so remove_layer can
+// tear them down, and re-calling attach on the same layer is a no-op.
+function _mapglAttachClusterHandlers(map, layerId, sourceId) {
+  if (!map._mapglClusterHandlers) map._mapglClusterHandlers = {};
+  if (map._mapglClusterHandlers[layerId]) return;
+
+  const click = async (e) => {
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: [layerId],
+    });
+    if (!features.length) return;
+    const feature = features[0];
+    const source = map.getSource(sourceId);
+
+    if (source && typeof source.getClusterExpansionZoom === "function") {
+      // Native live-clustered GeoJSON source (MapLibre v5: Promise API).
+      try {
+        const clusterId = feature.properties.cluster_id;
+        const zoom = await source.getClusterExpansionZoom(clusterId);
+        map.easeTo({ center: feature.geometry.coordinates, zoom });
+      } catch (err) {
+        /* swallow: nothing to do if expansion zoom fails */
+      }
+    } else {
+      // Pre-clustered vector tiles: no source-side cluster tree, so
+      // step the zoom up by one. Tiles re-cluster at every level, so
+      // +2 would traverse an intermediate level mid-ease and flash a
+      // second regrouping — +1 gives a clean single break-apart.
+      map.easeTo({
+        center: feature.geometry.coordinates,
+        zoom: Math.min(map.getZoom() + 1, 20),
+      });
+    }
+  };
+  const mouseenter = () => {
+    map.getCanvas().style.cursor = "pointer";
+  };
+  const mouseleave = () => {
+    map.getCanvas().style.cursor = "";
+  };
+
+  map.on("click", layerId, click);
+  map.on("mouseenter", layerId, mouseenter);
+  map.on("mouseleave", layerId, mouseleave);
+  map._mapglClusterHandlers[layerId] = { click, mouseenter, mouseleave };
+}
+
+function _mapglDetachClusterHandlers(map, layerId) {
+  if (!map._mapglClusterHandlers || !map._mapglClusterHandlers[layerId]) return;
+  const h = map._mapglClusterHandlers[layerId];
+  map.off("click", layerId, h.click);
+  map.off("mouseenter", layerId, h.mouseenter);
+  map.off("mouseleave", layerId, h.mouseleave);
+  delete map._mapglClusterHandlers[layerId];
+}
+
+function _mapglPostDrawnFeatures(syncUrl, mapglId, features) {
+  if (!syncUrl || !mapglId || typeof fetch !== "function") return;
+
+  fetch(syncUrl, {
+    method: "POST",
+    body: JSON.stringify(features),
+  }).catch((e) => {
+    if (typeof console !== "undefined" && console.debug) {
+      console.debug("mapgl draw sync failed", e);
+    }
+  });
+}
+
+function _mapglSyncDrawnFeatures(options) {
+  const drawControl = options.drawControl;
+  if (!drawControl) return;
+
+  const drawnFeatures = drawControl.getAll();
+  const widget = options.widget;
+
+  if (HTMLWidgets.shinyMode && typeof Shiny !== "undefined") {
+    Shiny.setInputValue(options.inputId + "_drawn_features", drawnFeatures, {
+      priority: "event",
+    });
+  } else if (options.syncUrl && options.mapglId) {
+    if (options.debounce && widget) {
+      clearTimeout(widget._mapglDrawSyncTimer);
+      widget._mapglDrawSyncTimer = setTimeout(() => {
+        _mapglPostDrawnFeatures(
+          options.syncUrl,
+          options.mapglId,
+          drawnFeatures,
+        );
+      }, 150);
+    } else {
+      _mapglPostDrawnFeatures(options.syncUrl, options.mapglId, drawnFeatures);
+    }
+  }
+
+  if (widget) {
+    widget.drawFeatures = drawnFeatures;
+  }
+}
+
+function _mapglHasDrawAttributes(attributes) {
+  return Array.isArray(attributes) && attributes.length > 0;
+}
+
+function _mapglAttributeDefaultValue(field) {
+  if (Object.prototype.hasOwnProperty.call(field, "default")) {
+    return field.default;
+  }
+  return undefined;
+}
+
+function _mapglEnsureDrawAttributeStyles() {
+  if (document.querySelector("#mapgl-draw-attribute-editor-styles")) return;
+
+  const style = document.createElement("style");
+  style.id = "mapgl-draw-attribute-editor-styles";
+  style.textContent = `
+    .mapgl-draw-attribute-editor {
+      position: absolute;
+      z-index: 2;
+      width: 260px;
+      max-width: calc(100% - 20px);
+      background: #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.28);
+      color: #222;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 12px;
+      display: none;
+      overflow: hidden;
+    }
+    .mapgl-draw-attribute-editor.mapgl-draw-attribute-editor-visible {
+      display: block;
+    }
+    .mapgl-draw-attribute-editor-header {
+      padding: 9px 10px;
+      border-bottom: 1px solid #e2e2e2;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .mapgl-draw-attribute-editor-body {
+      padding: 10px;
+    }
+    .mapgl-draw-attribute-field {
+      margin-bottom: 10px;
+    }
+    .mapgl-draw-attribute-field label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .mapgl-draw-attribute-field input,
+    .mapgl-draw-attribute-field select,
+    .mapgl-draw-attribute-field textarea {
+      box-sizing: border-box;
+      width: 100%;
+      border: 1px solid #cfcfcf;
+      border-radius: 3px;
+      padding: 6px 7px;
+      font: inherit;
+    }
+    .mapgl-draw-attribute-field input[type="checkbox"] {
+      width: auto;
+      margin-right: 6px;
+    }
+    .mapgl-draw-attribute-checkbox-label {
+      display: flex !important;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 0 !important;
+    }
+    .mapgl-draw-attribute-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 2px;
+    }
+    .mapgl-draw-attribute-save {
+      border: 0;
+      border-radius: 3px;
+      background: #1f2937;
+      color: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+      padding: 6px 10px;
+    }
+    .mapgl-draw-attribute-message {
+      color: #666;
+      font-size: 11px;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function _mapglEditorPositionStyle(position) {
+  const style = {};
+  const vertical = position && position.indexOf("bottom") !== -1 ? "bottom" : "top";
+  const horizontal = position && position.indexOf("right") !== -1 ? "left" : "right";
+  style[vertical] = "10px";
+  style[horizontal] = "10px";
+  return style;
+}
+
+function _mapglApplyStyle(element, style) {
+  Object.keys(style).forEach((key) => {
+    element.style[key] = style[key];
+  });
+}
+
+function formatDmsCoordinate(value, axis, precision) {
+  const direction =
+    axis === "lng" ? (value < 0 ? "W" : "E") : value < 0 ? "S" : "N";
+  const absolute = Math.abs(value);
+  let degrees = Math.floor(absolute);
+  const minutesFloat = (absolute - degrees) * 60;
+  let minutes = Math.floor(minutesFloat);
+  let seconds = (minutesFloat - minutes) * 60;
+
+  const factor = Math.pow(10, precision);
+  seconds = Math.round(seconds * factor) / factor;
+  if (seconds >= 60) {
+    seconds = 0;
+    minutes += 1;
+  }
+  if (minutes >= 60) {
+    minutes = 0;
+    degrees += 1;
+  }
+
+  const secondsText = seconds
+    .toFixed(precision)
+    .padStart(precision > 0 ? precision + 3 : 2, "0");
+  return `${degrees}\u00b0${String(minutes).padStart(2, "0")}'${secondsText}"${direction}`;
+}
+
+function formatCoordinates(lngLat, format, precision) {
+  if (format === "dms") {
+    return `${formatDmsCoordinate(lngLat.lng, "lng", precision)}, ${formatDmsCoordinate(lngLat.lat, "lat", precision)}`;
+  }
+  return `${lngLat.lng.toFixed(precision)}, ${lngLat.lat.toFixed(precision)}`;
+}
+
+function createCoordinatesControl(options) {
+  const controlOptions = options || {};
+  const format = controlOptions.format || "decimal";
+  const precisionValue = Number(controlOptions.precision);
+  const precision = Number.isFinite(precisionValue)
+    ? Math.min(20, Math.max(0, Math.floor(precisionValue)))
+    : format === "dms" ? 1 : 5;
+  const emptyText = controlOptions.empty_text || "Move cursor over map";
+  const labelText = controlOptions.label || "";
+  const wrapLongitude = controlOptions.wrap !== false;
+
+  const container = document.createElement("div");
+  container.className = "mapgl-coordinates-control maplibregl-ctrl";
+  container.style.cssText = `
+    background: #ffffff;
+    padding: 8px 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    color: #222;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.35;
+    min-width: 142px;
+    max-width: 240px;
+    border: 1px solid rgba(0,0,0,0.1);
+    pointer-events: none;
+  `;
+
+  if (labelText) {
+    const label = document.createElement("div");
+    label.className = "mapgl-coordinates-label";
+    label.textContent = labelText;
+    label.style.cssText = `
+      margin-bottom: 2px;
+      color: #666;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    `;
+    container.appendChild(label);
+  }
+
+  const value = document.createElement("div");
+  value.className = "mapgl-coordinates-value";
+  value.textContent = emptyText;
+  value.style.cssText = `
+    color: #111;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  `;
+  container.appendChild(value);
+
+  let mapRef = null;
+  const update = (event) => {
+    if (!event || !event.lngLat) return;
+    const lngLat =
+      wrapLongitude && typeof event.lngLat.wrap === "function"
+        ? event.lngLat.wrap()
+        : event.lngLat;
+    value.textContent = formatCoordinates(lngLat, format, precision);
+  };
+  const clear = () => {
+    value.textContent = emptyText;
+  };
+
+  return {
+    onAdd: function (map) {
+      mapRef = map;
+      mapRef.on("mousemove", update);
+      mapRef.getCanvas().addEventListener("mouseleave", clear);
+      return container;
+    },
+    onRemove: function () {
+      if (mapRef) {
+        mapRef.off("mousemove", update);
+        mapRef.getCanvas().removeEventListener("mouseleave", clear);
+      }
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+      mapRef = null;
+    },
+  };
+}
+
+function _mapglCurrentFieldValue(feature, field) {
+  const properties = (feature && feature.properties) || {};
+  if (Object.prototype.hasOwnProperty.call(properties, field.name)) {
+    return properties[field.name];
+  }
+  const defaultValue = _mapglAttributeDefaultValue(field);
+  if (defaultValue !== undefined) {
+    return defaultValue;
+  }
+  return field.type === "checkbox" ? false : "";
+}
+
+function _mapglApplyAttributeDefaults(drawControl, feature, attributes) {
+  const featureId = feature && feature.id;
+  if (!featureId) return;
+
+  const properties = feature.properties || {};
+  attributes.forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(properties, field.name)) return;
+    const defaultValue = _mapglAttributeDefaultValue(field);
+    if (defaultValue !== undefined) {
+      drawControl.setFeatureProperty(featureId, field.name, defaultValue);
+    }
+  });
+}
+
+function _mapglCreateAttributeInput(field, value) {
+  let input;
+
+  if (field.type === "textarea") {
+    input = document.createElement("textarea");
+    input.rows = 3;
+    input.value = value == null ? "" : value;
+  } else if (field.type === "select") {
+    input = document.createElement("select");
+    const emptyOption = document.createElement("option");
+    emptyOption.value = "";
+    emptyOption.textContent = "";
+    input.appendChild(emptyOption);
+    (field.choices || []).forEach((choice, index) => {
+      const option = document.createElement("option");
+      option.value = String(index);
+      option.textContent = choice.label == null ? String(choice.value) : choice.label;
+      option.dataset.mapglValue = JSON.stringify(choice.value);
+      if (value === choice.value || String(value) === String(choice.value)) {
+        option.selected = true;
+      }
+      input.appendChild(option);
+    });
+  } else if (field.type === "number") {
+    input = document.createElement("input");
+    input.type = "number";
+    input.value = value == null ? "" : value;
+    ["min", "max", "step"].forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(field, key)) {
+        input.setAttribute(key, field[key]);
+      }
+    });
+  } else if (field.type === "checkbox") {
+    input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = value === true || value === "true" || value === 1;
+  } else {
+    input = document.createElement("input");
+    input.type = "text";
+    input.value = value == null ? "" : value;
+  }
+
+  if (field.placeholder && field.type !== "select" && field.type !== "checkbox") {
+    input.placeholder = field.placeholder;
+  }
+  if (field.required) {
+    input.required = true;
+  }
+  input.dataset.fieldName = field.name;
+  input.dataset.fieldType = field.type;
+  return input;
+}
+
+function _mapglInputValue(input, field) {
+  if (field.type === "checkbox") {
+    return input.checked;
+  }
+  if (field.type === "number") {
+    return input.value === "" ? null : Number(input.value);
+  }
+  if (field.type === "select") {
+    if (input.value === "") return null;
+    const selected = input.options[input.selectedIndex];
+    return selected && selected.dataset.mapglValue
+      ? JSON.parse(selected.dataset.mapglValue)
+      : input.value;
+  }
+  return input.value;
+}
+
+function initializeDrawAttributeEditor(map, drawControl, options) {
+  const attributes = options.attributes || [];
+  if (!_mapglHasDrawAttributes(attributes)) return null;
+
+  _mapglEnsureDrawAttributeStyles();
+
+  const container = document.createElement("div");
+  container.className = "mapgl-draw-attribute-editor";
+  _mapglApplyStyle(container, _mapglEditorPositionStyle(options.position));
+
+  const header = document.createElement("div");
+  header.className = "mapgl-draw-attribute-editor-header";
+  header.textContent = "Feature attributes";
+
+  const body = document.createElement("form");
+  body.className = "mapgl-draw-attribute-editor-body";
+
+  container.appendChild(header);
+  container.appendChild(body);
+  map.getContainer().appendChild(container);
+
+  let selectedFeatureId = null;
+
+  const hide = () => {
+    selectedFeatureId = null;
+    container.classList.remove("mapgl-draw-attribute-editor-visible");
+    body.innerHTML = "";
+  };
+
+  const show = (feature) => {
+    selectedFeatureId = feature && feature.id;
+    if (!selectedFeatureId) {
+      hide();
+      return;
+    }
+
+    const currentFeature = drawControl.get(selectedFeatureId) || feature;
+    body.innerHTML = "";
+
+    attributes.forEach((field) => {
+      const value = _mapglCurrentFieldValue(currentFeature, field);
+      const wrapper = document.createElement("div");
+      wrapper.className = "mapgl-draw-attribute-field";
+      const input = _mapglCreateAttributeInput(field, value);
+
+      if (field.type === "checkbox") {
+        const label = document.createElement("label");
+        label.className = "mapgl-draw-attribute-checkbox-label";
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(field.label || field.name));
+        wrapper.appendChild(label);
+      } else {
+        const label = document.createElement("label");
+        label.textContent = field.label || field.name;
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
+      }
+
+      body.appendChild(wrapper);
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "mapgl-draw-attribute-actions";
+
+    const save = document.createElement("button");
+    save.type = "submit";
+    save.className = "mapgl-draw-attribute-save";
+    save.textContent = "Save";
+
+    const message = document.createElement("span");
+    message.className = "mapgl-draw-attribute-message";
+
+    actions.appendChild(save);
+    actions.appendChild(message);
+    body.appendChild(actions);
+    container.classList.add("mapgl-draw-attribute-editor-visible");
+  };
+
+  body.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!selectedFeatureId) return;
+    if (typeof body.reportValidity === "function" && !body.reportValidity()) {
+      return;
+    }
+
+    attributes.forEach((field) => {
+      const input = Array.from(
+        body.querySelectorAll("[data-field-name]"),
+      ).find((element) => element.dataset.fieldName === field.name);
+      if (!input) return;
+      drawControl.setFeatureProperty(
+        selectedFeatureId,
+        field.name,
+        _mapglInputValue(input, field),
+      );
+    });
+
+    const message = body.querySelector(".mapgl-draw-attribute-message");
+    if (message) {
+      message.textContent = "Saved";
+      setTimeout(() => {
+        message.textContent = "";
+      }, 1200);
+    }
+
+    if (typeof options.onChange === "function") {
+      options.onChange(false);
+    }
+  });
+
+  map.on("draw.create", (e) => {
+    if (e.features) {
+      e.features.forEach((feature) => {
+        _mapglApplyAttributeDefaults(drawControl, feature, attributes);
+      });
+    }
+    if (e.features && e.features.length === 1) {
+      show(e.features[0]);
+    }
+  });
+
+  map.on("draw.selectionchange", (e) => {
+    if (e.features && e.features.length === 1) {
+      show(e.features[0]);
+    } else {
+      hide();
+    }
+  });
+
+  map.on("draw.delete", hide);
+
+  return {
+    hide: hide,
+    show: show,
+  };
+}
+
+// Shared layer-state and filter-composition helpers. See the twin block
+// in mapboxgl.js for the design notes.
+function _mapglEnsureLayerState(map) {
+  if (!window._mapglLayerState) window._mapglLayerState = {};
+  const mapId = map.getContainer().id;
+  const s =
+    window._mapglLayerState[mapId] ||
+    (window._mapglLayerState[mapId] = {});
+  if (!s.filters) s.filters = {};
+  if (!s.paintProperties) s.paintProperties = {};
+  if (!s.layoutProperties) s.layoutProperties = {};
+  if (!s.tooltips) s.tooltips = {};
+  if (!s.popups) s.popups = {};
+  // Parallel maps holding the (optional) tooltip/popup style spec for proxy
+  // set_tooltip()/set_popup() so theming survives a style reload.
+  if (!s.tooltipStyles) s.tooltipStyles = {};
+  if (!s.popupStyles) s.popupStyles = {};
+  if (!s.legends) s.legends = {};
+  if (!s.interactiveFilters) s.interactiveFilters = {};
+  if (!s.filterStack) s.filterStack = {};
+  return s;
+}
+
+function _mapglComposeAndApplyFilter(map, layerId) {
+  const state = _mapglEnsureLayerState(map);
+  const stack = state.filterStack[layerId] || {};
+  const active = [stack.base, stack.user, stack.legend, stack.slider].filter(
+    (f) => f != null,
+  );
+  const composed =
+    active.length === 0 ? null : active.length === 1 ? active[0] : ["all", ...active];
+  if (map.getLayer && map.getLayer(layerId)) {
+    map.setFilter(layerId, composed);
+  }
+  state.filters[layerId] = composed;
+}
+
+window._mapglEnsureLayerState = _mapglEnsureLayerState;
+window._mapglComposeFilter = _mapglComposeAndApplyFilter;
+
 // Measurement functionality
 function createMeasurementBox(map) {
   const box = document.createElement("div");
@@ -456,6 +1065,185 @@ function evaluateExpression(expression, properties) {
   }
 }
 
+// Escape a value for safe insertion as tooltip/popup text. Used by the brace
+// template renderer so substituted values cannot inject markup.
+function escapeTemplateValue(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Render a {brace} template against a properties object. Each {key} (dotted
+// paths like {origin.id} supported) is replaced by the HTML-escaped value;
+// literal text/markup in the template is emitted as-is. Shared, package-wide
+// tooltip/popup syntax. NOTE: duplicated verbatim in mapboxgl.js,
+// mapboxgl_compare.js, maplibregl_compare.js, and flowmap.js — keep in sync.
+function renderTemplate(template, properties) {
+  if (typeof template !== "string") {
+    return template;
+  }
+  return template.replace(/\{([^}]+)\}/g, function (match, path) {
+    const value = path
+      .trim()
+      .split(".")
+      .reduce(function (acc, key) {
+        return acc == null ? undefined : acc[key];
+      }, properties);
+    return value == null ? "" : escapeTemplateValue(value);
+  });
+}
+
+// Resolve a tooltip/popup content spec against a feature's properties:
+//   array  -> Mapbox-style expression (concat/number_format/get) via evaluateExpression
+//   "{..}" -> brace template via renderTemplate
+//   string -> a column name (direct property lookup)
+function resolveTooltipContent(spec, properties) {
+  if (Array.isArray(spec)) {
+    return evaluateExpression(spec, properties);
+  }
+  if (typeof spec === "string" && spec.indexOf("{") !== -1) {
+    return renderTemplate(spec, properties);
+  }
+  return properties[spec];
+}
+
+// Convert "#rgb"/"#rrggbb" + alpha to rgba(); pass other color strings through.
+function tooltipHexToRgba(color, alpha) {
+  if (typeof color !== "string" || color.charAt(0) !== "#") {
+    return color;
+  }
+  let h = color.slice(1);
+  if (h.length === 3) {
+    h = h
+      .split("")
+      .map(function (c) {
+        return c + c;
+      })
+      .join("");
+  }
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+}
+
+// Build (and cache) a scoped CSS class from a tooltip/popup style spec. Returns
+// null for an empty/absent spec (native appearance). One <style> per unique
+// spec, shared via a window-level cache. NOTE: duplicated across the bindings
+// and flowmap.js — keep in sync.
+function tooltipStyleToClass(spec) {
+  if (!spec || typeof spec !== "object") {
+    return null;
+  }
+  if (!window._mapglTooltipStyleClasses) {
+    window._mapglTooltipStyleClasses = {};
+  }
+  const cache = window._mapglTooltipStyleClasses;
+  const key = JSON.stringify(spec);
+  if (cache[key]) {
+    return cache[key];
+  }
+  const cls = "mapgl-tooltip-style-" + (Object.keys(cache).length + 1);
+
+  let bg = spec.background_color;
+  if (bg != null && spec.background_opacity != null) {
+    bg = tooltipHexToRgba(bg, spec.background_opacity);
+  }
+
+  const content = [];
+  if (bg != null) content.push("background:" + bg + ";");
+  if (spec.text_color != null) content.push("color:" + spec.text_color + ";");
+  if (spec.border_color != null || spec.border_width != null) {
+    const bw = spec.border_width == null ? 1 : spec.border_width;
+    const bc = spec.border_color == null ? "transparent" : spec.border_color;
+    content.push("border:" + bw + "px solid " + bc + ";");
+  }
+  if (spec.border_radius != null) {
+    content.push("border-radius:" + spec.border_radius + "px;");
+  }
+  if (spec.font_family != null) {
+    content.push("font-family:" + spec.font_family + ";");
+  }
+  if (spec.font_size != null) {
+    content.push("font-size:" + spec.font_size + "px;");
+  }
+  if (spec.font_weight != null) {
+    content.push("font-weight:" + spec.font_weight + ";");
+  }
+  if (spec.padding != null) content.push("padding:" + spec.padding + "px;");
+  if (spec.max_width != null) {
+    const mw =
+      typeof spec.max_width === "number"
+        ? spec.max_width + "px"
+        : spec.max_width;
+    content.push("max-width:" + mw + ";");
+  }
+  if (spec.shadow) {
+    const ss = spec.shadow_size == null ? 8 : spec.shadow_size;
+    const sc = spec.shadow_color == null ? "rgba(0, 0, 0, 0.2)" : spec.shadow_color;
+    content.push("box-shadow:0 2px " + ss + "px " + sc + ";");
+  }
+
+  let css =
+    "." +
+    cls +
+    " .mapboxgl-popup-content, ." +
+    cls +
+    " .maplibregl-popup-content {" +
+    content.join("") +
+    "}";
+  if (bg != null) {
+    css +=
+      "." +
+      cls +
+      " .mapboxgl-popup-tip, ." +
+      cls +
+      " .maplibregl-popup-tip {border-top-color:" +
+      bg +
+      ";border-bottom-color:" +
+      bg +
+      ";}";
+  }
+
+  const styleEl = document.createElement("style");
+  styleEl.textContent = css;
+  document.head.appendChild(styleEl);
+  cache[key] = cls;
+  return cls;
+}
+
+// Apply a style spec's generated class to a popup. A tooltip's Popup is built
+// lazily on addTo(), so its container does not exist at creation time and
+// neither addClassName() nor (in Mapbox GL v3) a later options.className write
+// reliably lands. Instead we (re)apply the class on every "open" event, when
+// the container is guaranteed to exist — works for both Mapbox and MapLibre —
+// and swap out any previously applied generated class so nothing accumulates.
+function applyPopupClass(popup, spec) {
+  if (!popup) {
+    return;
+  }
+  const cls = tooltipStyleToClass(spec);
+  const prev = popup._mapglStyleClass;
+  if (popup._container && prev && prev !== cls) {
+    popup._container.classList.remove(prev);
+  }
+  popup._mapglStyleClass = cls || null;
+  if (popup._container && cls) {
+    popup._container.classList.add(cls);
+  }
+  if (!popup._mapglClassHook && typeof popup.on === "function") {
+    popup._mapglClassHook = true;
+    popup.on("open", function () {
+      if (popup._container && popup._mapglStyleClass) {
+        popup._container.classList.add(popup._mapglStyleClass);
+      }
+    });
+  }
+}
+
 function onMouseMoveTooltip(e, map, tooltipPopup, tooltipProperty, layerId) {
   if (e.features.length > 0) {
     // Query all features at this point to determine z-order
@@ -484,19 +1272,12 @@ function onMouseMoveTooltip(e, map, tooltipPopup, tooltipProperty, layerId) {
         window._activeTooltip.remove();
       }
 
-      let description;
-
-      // Check if tooltipProperty is an expression (array) or a simple property name (string)
-      if (Array.isArray(tooltipProperty)) {
-        // It's an expression, evaluate it
-        description = evaluateExpression(
-          tooltipProperty,
-          e.features[0].properties,
-        );
-      } else {
-        // It's a property name, get the value
-        description = e.features[0].properties[tooltipProperty];
-      }
+      // tooltipProperty may be a column name, a {brace} template, or a
+      // concat()/number_format() expression — resolveTooltipContent handles all.
+      const description = resolveTooltipContent(
+        tooltipProperty,
+        e.features[0].properties,
+      );
 
       tooltipPopup.setLngLat(e.lngLat).setHTML(description).addTo(map);
 
@@ -526,7 +1307,7 @@ function onMouseLeaveTooltip(map, tooltipPopup) {
   }
 }
 
-function onClickPopup(e, map, popupProperty, layerId) {
+function onClickPopup(e, map, popupProperty, layerId, popupStyle) {
   if (e.features.length > 0) {
     // Query all features at this point to determine z-order
     const allFeatures = map.queryRenderedFeatures(e.point);
@@ -549,19 +1330,12 @@ function onClickPopup(e, map, popupProperty, layerId) {
 
     // Only show popup if this is the topmost layer with a popup
     if (topmostLayerWithPopup === layerId) {
-      let description;
-
-      // Check if popupProperty is an expression (array) or a simple property name (string)
-      if (Array.isArray(popupProperty)) {
-        // It's an expression, evaluate it
-        description = evaluateExpression(
-          popupProperty,
-          e.features[0].properties,
-        );
-      } else {
-        // It's a property name, get the value
-        description = e.features[0].properties[popupProperty];
-      }
+      // popupProperty may be a column name, a {brace} template, or a
+      // concat()/number_format() expression.
+      const description = resolveTooltipContent(
+        popupProperty,
+        e.features[0].properties,
+      );
 
       // Remove any existing popup for this layer
       if (window._mapboxPopups && window._mapboxPopups[layerId]) {
@@ -573,6 +1347,7 @@ function onClickPopup(e, map, popupProperty, layerId) {
         .setLngLat(e.lngLat)
         .setHTML(description)
         .addTo(map);
+      applyPopupClass(popup, popupStyle);
 
       // Store reference to this popup
       if (!window._mapboxPopups) {
@@ -724,6 +1499,279 @@ function generateDrawStyles(styling) {
       },
     },
   ];
+}
+
+function addBezierDrawStyles(styles, styling) {
+  const activeColor = styling && styling.active_color ? styling.active_color : "#fbb03b";
+  const baseStyles = styles || (MapboxDraw.lib && MapboxDraw.lib.theme) || [];
+  const bezierStyles = [
+    {
+      id: "gl-draw-bezier-handle-line-active",
+      type: "line",
+      filter: [
+        "all",
+        ["==", "$type", "LineString"],
+        ["==", "meta2", "handle-line"],
+      ],
+      layout: {
+        "line-cap": "round",
+        "line-join": "round",
+      },
+      paint: {
+        "line-color": activeColor,
+        "line-width": 1,
+      },
+    },
+    {
+      id: "gl-draw-bezier-handle-stroke-inactive",
+      type: "circle",
+      filter: [
+        "all",
+        ["==", "meta", "vertex"],
+        ["==", "meta2", "handle"],
+        ["==", "$type", "Point"],
+        ["!=", "mode", "static"],
+      ],
+      paint: {
+        "circle-radius": 5,
+        "circle-color": "#fff",
+      },
+    },
+    {
+      id: "gl-draw-bezier-handle-inactive",
+      type: "circle",
+      filter: [
+        "all",
+        ["==", "meta", "vertex"],
+        ["==", "meta2", "handle"],
+        ["==", "$type", "Point"],
+        ["!=", "mode", "static"],
+      ],
+      paint: {
+        "circle-radius": 4,
+        "circle-color": activeColor,
+      },
+    },
+  ];
+
+  return baseStyles.concat(bezierStyles);
+}
+
+function sanitizeBezierDisplayFeature(feature) {
+  if (!feature || !feature.properties) return feature;
+
+  const sanitized = {
+    type: feature.type,
+    properties: {},
+    geometry: feature.geometry,
+  };
+
+  if (Object.prototype.hasOwnProperty.call(feature, "id")) {
+    sanitized.id = feature.id;
+  }
+
+  Object.keys(feature.properties).forEach((key) => {
+    if (
+      key === "bezierGroup" ||
+      key === "user_bezierGroup" ||
+      key === "bezierCurve"
+    ) {
+      return;
+    }
+    sanitized.properties[key] = feature.properties[key];
+  });
+
+  return sanitized;
+}
+
+function wrapBezierDisplayModeForMapLibre(mode) {
+  if (!mode || typeof mode.toDisplayFeatures !== "function") return mode;
+
+  const wrappedMode = Object.assign({}, mode);
+  const originalToDisplayFeatures = mode.toDisplayFeatures;
+  wrappedMode.toDisplayFeatures = function (state, geojson, display) {
+    return originalToDisplayFeatures.call(
+      this,
+      state,
+      geojson,
+      function (feature) {
+        display(sanitizeBezierDisplayFeature(feature));
+      },
+    );
+  };
+
+  return wrappedMode;
+}
+
+function wrapBezierToolbarMode(mode) {
+  if (!mode || typeof mode.onSetup !== "function") return mode;
+
+  const wrappedMode = Object.assign({}, mode);
+  const originalOnSetup = mode.onSetup;
+  wrappedMode.onSetup = function (options) {
+    const activateUIButton = this.activateUIButton;
+    this.activateUIButton = function () {};
+
+    try {
+      return originalOnSetup.call(this, options);
+    } finally {
+      this.activateUIButton = activateUIButton;
+    }
+  };
+
+  return wrappedMode;
+}
+
+function enableBezierDrawMode(drawOptions, styling) {
+  if (!window.MapglBezierDraw) {
+    console.warn("Bezier draw mode dependency is not available.");
+    return drawOptions;
+  }
+
+  drawOptions.modes = Object.assign({}, drawOptions.modes || MapboxDraw.modes, {
+    simple_select: wrapBezierDisplayModeForMapLibre(
+      window.MapglBezierDraw.SimpleSelectModeBezierOverride,
+    ),
+    direct_select: wrapBezierDisplayModeForMapLibre(
+      window.MapglBezierDraw.DirectModeBezierOverride,
+    ),
+    draw_bezier_curve: wrapBezierDisplayModeForMapLibre(
+      wrapBezierToolbarMode(window.MapglBezierDraw.DrawBezierCurve),
+    ),
+  });
+  drawOptions.userProperties = true;
+  drawOptions.styles = addBezierDrawStyles(drawOptions.styles, styling);
+
+  return drawOptions;
+}
+
+function addBezierButtonStyles() {
+  if (document.querySelector("#mapgl-bezier-styles")) return;
+
+  const style = document.createElement("style");
+  style.id = "mapgl-bezier-styles";
+  style.textContent = `
+    .mapbox-gl-draw_bezier {
+      background: transparent;
+      background-image: url('data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"%3E%3Cpath d="M3 15 C7 3, 13 17, 17 5" fill="none" stroke="%23000000" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="3" cy="15" r="1.5" fill="%23000000"/%3E%3Ccircle cx="17" cy="5" r="1.5" fill="%23000000"/%3E%3C/svg%3E') !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+    }
+    .mapbox-gl-draw_bezier_polygon {
+      background: transparent;
+      background-image: url('data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"%3E%3Cpath d="M4 14 C5 4, 15 4, 16 14 C12 17, 8 17, 4 14 Z" fill="none" stroke="%23000000" stroke-width="2" stroke-linejoin="round"/%3E%3C/svg%3E') !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+    }
+    .mapbox-gl-draw_bezier:hover,
+    .mapbox-gl-draw_bezier_polygon:hover,
+    .mapbox-gl-draw_bezier.active,
+    .mapbox-gl-draw_bezier_polygon.active {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function setActiveBezierButton(drawControlGroup, className) {
+  if (!drawControlGroup || !className) return;
+
+  drawControlGroup
+    .querySelectorAll(".active")
+    .forEach((btn) => btn.classList.remove("active"));
+
+  const button = drawControlGroup.querySelector("." + className);
+  if (button) button.classList.add("active");
+}
+
+function clearActiveBezierButton(drawControlGroup) {
+  if (!drawControlGroup) return;
+
+  drawControlGroup._mapglActiveBezierButton = null;
+  drawControlGroup
+    .querySelectorAll(
+      ".mapbox-gl-draw_bezier.active, .mapbox-gl-draw_bezier_polygon.active",
+    )
+    .forEach((btn) => btn.classList.remove("active"));
+}
+
+function addBezierButtons(map, drawControl, options) {
+  if (!drawControl || !(options.bezier || options.bezierPolygon)) return;
+
+  addBezierButtonStyles();
+
+  setTimeout(() => {
+    const drawControlGroup = map
+      .getContainer()
+      .querySelector(options.controlGroupSelector);
+    if (!drawControlGroup) return;
+
+    const trashBtn = drawControlGroup.querySelector(".mapbox-gl-draw_trash");
+    const iconClass = options.iconClass || "";
+
+    if (!drawControlGroup._mapglBezierNativeClickHandler) {
+      drawControlGroup._mapglBezierNativeClickHandler = (e) => {
+        if (
+          e.target.closest(
+            ".mapbox-gl-draw_bezier, .mapbox-gl-draw_bezier_polygon",
+          )
+        ) {
+          return;
+        }
+        clearActiveBezierButton(drawControlGroup);
+      };
+      drawControlGroup.addEventListener(
+        "click",
+        drawControlGroup._mapglBezierNativeClickHandler,
+        true,
+      );
+    }
+
+    const addButton = (className, title, modeOptions) => {
+      if (drawControlGroup.querySelector("." + className)) return;
+
+      const button = document.createElement("button");
+      button.className = `${className} ${iconClass}`.trim();
+      button.title = title;
+      button.type = "button";
+      button.addEventListener("click", () => {
+        drawControlGroup._mapglActiveBezierButton = className;
+        drawControl.changeMode("draw_bezier_curve", modeOptions || {});
+        setActiveBezierButton(drawControlGroup, className);
+        requestAnimationFrame(() => {
+          if (drawControlGroup._mapglActiveBezierButton === className) {
+            setActiveBezierButton(drawControlGroup, className);
+          }
+        });
+      });
+
+      if (trashBtn) {
+        drawControlGroup.insertBefore(button, trashBtn);
+      } else {
+        drawControlGroup.appendChild(button);
+      }
+    };
+
+    if (options.bezier) {
+      addButton("mapbox-gl-draw_bezier", "Bezier curve tool", {});
+    }
+    if (options.bezierPolygon) {
+      addButton("mapbox-gl-draw_bezier_polygon", "Bezier polygon tool", {
+        isPolygon: true,
+      });
+    }
+
+    map.on("draw.modechange", (e) => {
+      if (e && e.mode === "draw_bezier_curve") {
+        setActiveBezierButton(
+          drawControlGroup,
+          drawControlGroup._mapglActiveBezierButton,
+        );
+      } else {
+        clearActiveBezierButton(drawControlGroup);
+      }
+    });
+  }, 100);
 }
 
 // Helper function to add features from a source to draw
@@ -1152,6 +2200,15 @@ HTMLWidgets.widget({
                 map.addLayer(layerConfig);
               }
 
+              // Seed the filter registry with this layer's initial filter
+              // so later filter sources compose with it rather than clobber it.
+              (function () {
+                const _s = _mapglEnsureLayerState(map);
+                _s.filterStack[layer.id] = _s.filterStack[layer.id] || {};
+                _s.filterStack[layer.id].base = layer.filter || null;
+                _s.filters[layer.id] = layer.filter || null;
+              })();
+
               // Add popups or tooltips if provided
               if (layer.popup) {
                 // Initialize popup tracking if it doesn't exist
@@ -1161,7 +2218,7 @@ HTMLWidgets.widget({
 
                 // Create click handler for this layer
                 const clickHandler = function (e) {
-                  onClickPopup(e, map, layer.popup, layer.id);
+                  onClickPopup(e, map, layer.popup, layer.id, layer.popup_style);
                 };
 
                 // Store these handler references so we can remove them later if needed
@@ -1190,6 +2247,7 @@ HTMLWidgets.widget({
                   closeOnClick: false,
                   maxWidth: "400px",
                 });
+                applyPopupClass(tooltip, layer.tooltip_style);
 
                 // Create a reference to the mousemove handler function.
                 // We need to pass 'e', 'map', 'tooltip', 'layer.tooltip', and 'layer.id' to onMouseMoveTooltip.
@@ -1309,10 +2367,30 @@ HTMLWidgets.widget({
               }
             });
           }
+          if (x.h3t_sources) {
+            x.h3t_sources.forEach(function (source) {
+              map.addH3TSource(source.id, {
+                tiles: source.tiles,
+                sourcelayer: source.sourcelayer,
+                geometry_type: source.geometry_type,
+                minzoom: source.minzoom,
+                maxzoom: source.maxzoom,
+                promoteId: source.promoteId,
+                debug: source.debug,
+              });
+              if (x.layers) {
+                x.layers.forEach((layer) => add_my_layers(layer));
+              }
+            });
+          }
 
           // Add layers if provided
           if (x.layers) {
             x.layers.forEach((layer) => add_my_layers(layer));
+          }
+
+          if (window.MapGLFlowmapPlugin) {
+            window.MapGLFlowmapPlugin.init(map, x, el, HTMLWidgets);
           }
 
           // Apply setFilter if provided
@@ -1634,6 +2712,19 @@ HTMLWidgets.widget({
               });
             }
 
+            if (x.draw_control.bezier || x.draw_control.bezier_polygon) {
+              drawOptions = enableBezierDrawMode(
+                drawOptions,
+                x.draw_control.styling,
+              );
+            }
+
+            if (_mapglHasDrawAttributes(x.draw_control.attributes)) {
+              drawOptions = Object.assign({}, drawOptions, {
+                userProperties: true,
+              });
+            }
+
             draw = new MapboxDraw(drawOptions);
             map.addControl(draw, x.draw_control.position);
             map.controls.push({ type: "draw", control: draw });
@@ -1722,10 +2813,23 @@ HTMLWidgets.widget({
               }
             }
 
+            addBezierButtons(map, draw, {
+              bezier: x.draw_control.bezier,
+              bezierPolygon: x.draw_control.bezier_polygon,
+              controlGroupSelector:
+                ".maplibregl-ctrl-group:has(.mapbox-gl-draw_polygon)",
+            });
+
+            initializeDrawAttributeEditor(map, draw, {
+              attributes: x.draw_control.attributes,
+              position: x.draw_control.position,
+              onChange: updateDrawnFeatures,
+            });
+
             // Add event listeners
-            map.on("draw.create", updateDrawnFeatures);
-            map.on("draw.delete", updateDrawnFeatures);
-            map.on("draw.update", updateDrawnFeatures);
+            map.on("draw.create", () => updateDrawnFeatures(false));
+            map.on("draw.delete", () => updateDrawnFeatures(false));
+            map.on("draw.update", () => updateDrawnFeatures(true));
 
             // Add measurement functionality if enabled
             if (x.draw_control.show_measurements) {
@@ -1739,6 +2843,7 @@ HTMLWidgets.widget({
             // Add initial features if provided
             if (x.draw_control.source) {
               addSourceFeaturesToDraw(draw, x.draw_control.source, map);
+              updateDrawnFeatures(false);
             }
 
             // Process any queued features
@@ -1749,6 +2854,7 @@ HTMLWidgets.widget({
                 }
                 addSourceFeaturesToDraw(draw, data.source, map);
               });
+              updateDrawnFeatures(false);
             }
 
             // Add custom mode buttons
@@ -1906,23 +3012,15 @@ HTMLWidgets.widget({
             }
           }
 
-          function updateDrawnFeatures() {
-            if (draw) {
-              var drawnFeatures = draw.getAll();
-              if (HTMLWidgets.shinyMode) {
-                Shiny.setInputValue(
-                  el.id + "_drawn_features",
-                  JSON.stringify(drawnFeatures),
-                );
-              }
-              // Store drawn features in the widget's data
-              if (el.querySelector) {
-                var widget = HTMLWidgets.find("#" + el.id);
-                if (widget) {
-                  widget.drawFeatures = drawnFeatures;
-                }
-              }
-            }
+          function updateDrawnFeatures(debounce) {
+            _mapglSyncDrawnFeatures({
+              inputId: el.id,
+              drawControl: draw,
+              widget: HTMLWidgets.find("#" + el.id),
+              syncUrl: x.sync_url,
+              mapglId: x.mapgl_id,
+              debounce: debounce,
+            });
           }
 
           if (!x.add) {
@@ -1961,6 +3059,17 @@ HTMLWidgets.widget({
             const fullscreen = new maplibregl.FullscreenControl();
             map.addControl(fullscreen, position);
             map.controls.push({ type: "fullscreen", control: fullscreen });
+          }
+
+          // Add slider control if configured
+          if (
+            x.slider_control &&
+            typeof window.MapglSliderControl === "function"
+          ) {
+            const _tsCfg = x.slider_control;
+            const _ts = new window.MapglSliderControl(_tsCfg);
+            map.addControl(_ts, _tsCfg.position || "top-left");
+            map.controls.push({ type: "slider", control: _ts });
           }
 
           // Add geolocate control if enabled
@@ -2092,6 +3201,16 @@ HTMLWidgets.widget({
             map.controls.push({ type: "screenshot", control: screenshotControlObj });
           }
 
+          // Add coordinates control if enabled
+          if (x.coordinates_control) {
+            const coordinatesControlObj = createCoordinatesControl(x.coordinates_control);
+            map.addControl(
+              coordinatesControlObj,
+              x.coordinates_control.position || "bottom-right",
+            );
+            map.controls.push({ type: "coordinates", control: coordinatesControlObj });
+          }
+
           if (x.images && Array.isArray(x.images)) {
             const mapId = el.id;
             x.images.forEach(async function (imageInfo) {
@@ -2189,6 +3308,26 @@ HTMLWidgets.widget({
               x.layers_control.layers ||
               map.getStyle().layers.map((layer) => layer.id);
             let layersConfig = x.layers_control.layers_config;
+            const getLayerControlVisibility = (layerId) => {
+              if (
+                window.MapGLFlowmapPlugin &&
+                window.MapGLFlowmapPlugin.hasLayer(map, layerId)
+              ) {
+                return window.MapGLFlowmapPlugin.getVisibility(map, layerId);
+              }
+              return map.getLayoutProperty(layerId, "visibility") || "visible";
+            };
+            const setLayerControlVisibility = (layerId, visibility) => {
+              if (
+                window.MapGLFlowmapPlugin &&
+                window.MapGLFlowmapPlugin.setVisibility(map, layerId, visibility)
+              ) {
+                return;
+              }
+              if (map.getLayer(layerId)) {
+                map.setLayoutProperty(layerId, "visibility", visibility);
+              }
+            };
 
             // If we have a layers_config, use that; otherwise fall back to original behavior
             if (layersConfig && Array.isArray(layersConfig)) {
@@ -2206,10 +3345,8 @@ HTMLWidgets.widget({
 
                 // Check if the first layer's visibility is set to "none" initially
                 const firstLayerId = layerIds[0];
-                const initialVisibility = map.getLayoutProperty(
-                  firstLayerId,
-                  "visibility",
-                );
+                const initialVisibility =
+                  getLayerControlVisibility(firstLayerId);
                 link.className = initialVisibility === "none" ? "" : "active";
 
                 // Also hide any associated legends if the layer is initially hidden
@@ -2233,15 +3370,12 @@ HTMLWidgets.widget({
                     this.getAttribute("data-layer-ids"),
                   );
                   const firstLayerId = layerIds[0];
-                  const visibility = map.getLayoutProperty(
-                    firstLayerId,
-                    "visibility",
-                  );
+                  const visibility = getLayerControlVisibility(firstLayerId);
 
                   // Toggle visibility for all layer IDs in the group
                   if (visibility === "visible") {
                     layerIds.forEach((layerId) => {
-                      map.setLayoutProperty(layerId, "visibility", "none");
+                      setLayerControlVisibility(layerId, "none");
                       // Hide associated legends
                       const associatedLegends = document.querySelectorAll(
                         `.mapboxgl-legend[data-layer-id="${layerId}"]`,
@@ -2253,7 +3387,7 @@ HTMLWidgets.widget({
                     this.className = "";
                   } else {
                     layerIds.forEach((layerId) => {
-                      map.setLayoutProperty(layerId, "visibility", "visible");
+                      setLayerControlVisibility(layerId, "visible");
                       // Show associated legends
                       const associatedLegends = document.querySelectorAll(
                         `.mapboxgl-legend[data-layer-id="${layerId}"]`,
@@ -2282,10 +3416,7 @@ HTMLWidgets.widget({
                 link.textContent = layerId;
 
                 // Check if the layer visibility is set to "none" initially
-                const initialVisibility = map.getLayoutProperty(
-                  layerId,
-                  "visibility",
-                );
+                const initialVisibility = getLayerControlVisibility(layerId);
                 link.className = initialVisibility === "none" ? "" : "active";
 
                 // Also hide any associated legends if the layer is initially hidden
@@ -2304,14 +3435,11 @@ HTMLWidgets.widget({
                   e.preventDefault();
                   e.stopPropagation();
 
-                  const visibility = map.getLayoutProperty(
-                    clickedLayer,
-                    "visibility",
-                  );
+                  const visibility = getLayerControlVisibility(clickedLayer);
 
                   // Toggle layer visibility by changing the layout object's visibility property
                   if (visibility === "visible") {
-                    map.setLayoutProperty(clickedLayer, "visibility", "none");
+                    setLayerControlVisibility(clickedLayer, "none");
                     this.className = "";
 
                     // Hide associated legends
@@ -2323,11 +3451,7 @@ HTMLWidgets.widget({
                     });
                   } else {
                     this.className = "active";
-                    map.setLayoutProperty(
-                      clickedLayer,
-                      "visibility",
-                      "visible",
-                    );
+                    setLayerControlVisibility(clickedLayer, "visible");
 
                     // Show associated legends
                     const associatedLegends = document.querySelectorAll(
@@ -2377,29 +3501,11 @@ HTMLWidgets.widget({
             map._initialStyleLoaded = true;
           }
 
-          // If clusters are present, add event handling
+          // If clusters are present, attach event handling. Helper
+          // auto-branches on source capability (native vs precomputed).
           map.getStyle().layers.forEach((layer) => {
             if (layer.id.includes("-clusters")) {
-              map.on("click", layer.id, async (e) => {
-                const features = map.queryRenderedFeatures(e.point, {
-                  layers: [layer.id],
-                });
-                const clusterId = features[0].properties.cluster_id;
-                const zoom = await map
-                  .getSource(layer.source)
-                  .getClusterExpansionZoom(clusterId);
-                map.easeTo({
-                  center: features[0].geometry.coordinates,
-                  zoom,
-                });
-              });
-
-              map.on("mouseenter", layer.id, () => {
-                map.getCanvas().style.cursor = "pointer";
-              });
-              map.on("mouseleave", layer.id, () => {
-                map.getCanvas().style.cursor = "";
-              });
+              _mapglAttachClusterHandlers(map, layer.id, layer.source);
             }
           });
 
@@ -2530,44 +3636,51 @@ if (HTMLWidgets.shinyMode) {
     if (map) {
       var message = data.message;
 
-      // Initialize layer state tracking if not already present
-      if (!window._mapglLayerState) {
-        window._mapglLayerState = {};
-      }
+      // Initialize (or upgrade) layer state tracking via the shared helper.
       const mapId = map.getContainer().id;
-      if (!window._mapglLayerState[mapId]) {
-        window._mapglLayerState[mapId] = {
-          filters: {}, // layerId -> filter expression
-          paintProperties: {}, // layerId -> {propertyName -> value}
-          layoutProperties: {}, // layerId -> {propertyName -> value}
-          tooltips: {}, // layerId -> tooltip property
-          popups: {}, // layerId -> popup property
-          legends: {}, // legendId -> {html: string, css: string}
-        };
-      }
-      const layerState = window._mapglLayerState[mapId];
+      const layerState = _mapglEnsureLayerState(map);
 
       // Helper function to update drawn features
-      function updateDrawnFeatures() {
+      function updateDrawnFeatures(debounce) {
         var drawControl = widget.drawControl || widget.getDraw();
-        if (drawControl) {
-          var drawnFeatures = drawControl.getAll();
-          if (HTMLWidgets.shinyMode) {
-            Shiny.setInputValue(
-              data.id + "_drawn_features",
-              JSON.stringify(drawnFeatures),
-            );
-          }
-          // Store drawn features in the widget's data
-          if (widget) {
-            widget.drawFeatures = drawnFeatures;
-          }
-        }
+        _mapglSyncDrawnFeatures({
+          inputId: data.id,
+          drawControl: drawControl,
+          widget: widget,
+          debounce: debounce,
+        });
       }
       if (message.type === "set_filter") {
-        map.setFilter(message.layer, message.filter);
-        // Track filter state for layer restoration
-        layerState.filters[message.layer] = message.filter;
+        // Route through the filter registry so `user` composes with
+        // base/legend/slider slots.
+        layerState.filterStack[message.layer] =
+          layerState.filterStack[message.layer] || {};
+        layerState.filterStack[message.layer].user = message.filter || null;
+        _mapglComposeAndApplyFilter(map, message.layer);
+      } else if (message.type === "add_h3t_sources") {
+        (message.h3t_sources || []).forEach(function (source) {
+          try {
+            map.addH3TSource(source.id, {
+              tiles: source.tiles,
+              sourcelayer: source.sourcelayer,
+              geometry_type: source.geometry_type,
+              minzoom: source.minzoom,
+              maxzoom: source.maxzoom,
+              promoteId: source.promoteId,
+              debug: source.debug,
+            });
+          } catch (e) {
+            console.error("addH3TSource failed for", source.id, e);
+          }
+        });
+      } else if (message.type === "add_h3j_sources") {
+        (message.h3j_sources || []).forEach(async function (source) {
+          try {
+            await map.addH3JSource(source.id, { data: source.url });
+          } catch (e) {
+            console.error("addH3JSource failed for", source.id, e);
+          }
+        });
       } else if (message.type === "add_source") {
         if (message.source.type === "vector") {
           const sourceConfig = {
@@ -2653,6 +3766,39 @@ if (HTMLWidgets.shinyMode) {
             map.addLayer(message.layer);
           }
 
+          // Cluster click/cursor parity for layers added via proxy.
+          if (
+            message.layer.id &&
+            message.layer.id.includes("-clusters")
+          ) {
+            _mapglAttachClusterHandlers(
+              map,
+              message.layer.id,
+              message.layer.source,
+            );
+          }
+
+          // Seed the filter registry for this late-added layer. If an
+          // active slider targets this layer id, compose its filter
+          // in immediately.
+          layerState.filterStack[message.layer.id] =
+            layerState.filterStack[message.layer.id] || {};
+          layerState.filterStack[message.layer.id].base =
+            message.layer.filter || null;
+          const _ts = map._mapglSliderControl;
+          if (
+            _ts &&
+            _ts.targetsLayer &&
+            _ts.targetsLayer(message.layer.id)
+          ) {
+            layerState.filterStack[message.layer.id].slider =
+              _ts.currentFilter();
+            if (typeof _ts.captureAndApplyPaintForLayer === "function") {
+              _ts.captureAndApplyPaintForLayer(message.layer.id);
+            }
+          }
+          _mapglComposeAndApplyFilter(map, message.layer.id);
+
           // Add popups or tooltips if provided
           if (message.layer.popup) {
             // Initialize popup tracking if it doesn't exist
@@ -2662,7 +3808,13 @@ if (HTMLWidgets.shinyMode) {
 
             // Create click handler for this layer
             const clickHandler = function (e) {
-              onClickPopup(e, map, message.layer.popup, message.layer.id);
+              onClickPopup(
+                e,
+                map,
+                message.layer.popup,
+                message.layer.id,
+                message.layer.popup_style,
+              );
             };
 
             // Store these handler references so we can remove them later if needed
@@ -2691,6 +3843,7 @@ if (HTMLWidgets.shinyMode) {
               closeOnClick: false,
               maxWidth: "400px",
             });
+            applyPopupClass(tooltip, message.layer.tooltip_style);
 
             // Define named handler functions:
             const mouseMoveHandler = function (e) {
@@ -2828,6 +3981,18 @@ if (HTMLWidgets.shinyMode) {
           }
         }
 
+        // Cascade: if this layer is the parent of a cluster_options
+        // shortcut (siblings `-clusters` and `-cluster-count` exist),
+        // remove those too. The shared source drops with the parent
+        // layer below.
+        ["-clusters", "-cluster-count"].forEach((suffix) => {
+          const siblingId = message.layer + suffix;
+          if (map.getLayer(siblingId)) {
+            _mapglDetachClusterHandlers(map, siblingId);
+            map.removeLayer(siblingId);
+          }
+        });
+
         if (map.getLayer(message.layer)) {
           // Remove tooltip handlers
           if (window._mapboxHandlers && window._mapboxHandlers[message.layer]) {
@@ -2869,6 +4034,9 @@ if (HTMLWidgets.shinyMode) {
             }
           }
 
+          // Tear down cluster click/cursor handlers if any were attached.
+          _mapglDetachClusterHandlers(map, message.layer);
+
           // Remove the layer
           map.removeLayer(message.layer);
         }
@@ -2877,14 +4045,14 @@ if (HTMLWidgets.shinyMode) {
         }
 
         // Clean up tracked layer state
-        const mapId = map.getContainer().id;
         if (window._mapglLayerState && window._mapglLayerState[mapId]) {
-          const layerState = window._mapglLayerState[mapId];
-          delete layerState.filters[message.layer];
-          delete layerState.paintProperties[message.layer];
-          delete layerState.layoutProperties[message.layer];
-          delete layerState.tooltips[message.layer];
-          delete layerState.popups[message.layer];
+          const _ls = window._mapglLayerState[mapId];
+          delete _ls.filters[message.layer];
+          delete _ls.paintProperties[message.layer];
+          delete _ls.layoutProperties[message.layer];
+          delete _ls.tooltips[message.layer];
+          delete _ls.popups[message.layer];
+          delete _ls.filterStack[message.layer];
           // Note: legends are not tied to specific layers, so we don't clear them here
         }
       } else if (message.type === "fit_bounds") {
@@ -2907,6 +4075,18 @@ if (HTMLWidgets.shinyMode) {
         }
         layerState.layoutProperties[message.layer][message.name] =
           message.value;
+      } else if (message.type === "set_flowmap_filter") {
+        if (window.MapGLFlowmapPlugin) {
+          window.MapGLFlowmapPlugin.setFilter(map, message.id, message.filter);
+        }
+      } else if (message.type === "set_flowmap_settings") {
+        if (window.MapGLFlowmapPlugin) {
+          window.MapGLFlowmapPlugin.setSettings(
+            map,
+            message.id,
+            message.settings,
+          );
+        }
       } else if (message.type === "set_paint_property") {
         const layerId = message.layer;
         const propertyName = message.name;
@@ -3375,6 +4555,7 @@ if (HTMLWidgets.shinyMode) {
                         closeOnClick: false,
                         maxWidth: "400px",
                       });
+                      applyPopupClass(tooltip, layer.tooltip_style);
 
                       // Re-add tooltip handlers
                       const tooltipProperty = layer.tooltip || "NAME";
@@ -3382,8 +4563,12 @@ if (HTMLWidgets.shinyMode) {
                       const mouseMoveHandler = function (e) {
                         map.getCanvas().style.cursor = "pointer";
                         if (e.features.length > 0) {
-                          const description =
-                            e.features[0].properties[tooltipProperty];
+                          // Use the shared resolver so {brace} templates and
+                          // concat()/number_format() expressions keep working.
+                          const description = resolveTooltipContent(
+                            tooltipProperty,
+                            e.features[0].properties,
+                          );
                           tooltip
                             .setLngLat(e.lngLat)
                             .setHTML(description)
@@ -3566,6 +4751,12 @@ if (HTMLWidgets.shinyMode) {
                     closeOnClick: false,
                     maxWidth: "400px",
                   });
+                  applyPopupClass(
+                    tooltip,
+                    (savedLayerState.tooltipStyles &&
+                      savedLayerState.tooltipStyles[layerId]) ||
+                      null,
+                  );
 
                   const mouseMoveHandler = function (e) {
                     onMouseMoveTooltip(
@@ -3619,7 +4810,15 @@ if (HTMLWidgets.shinyMode) {
 
                   // Create new popup handler
                   const clickHandler = function (e) {
-                    onClickPopup(e, map, popupProperty, layerId);
+                    onClickPopup(
+                      e,
+                      map,
+                      popupProperty,
+                      layerId,
+                      (savedLayerState.popupStyles &&
+                        savedLayerState.popupStyles[layerId]) ||
+                        null,
+                    );
                   };
 
                   map.on("click", layerId, clickHandler);
@@ -3950,6 +5149,12 @@ if (HTMLWidgets.shinyMode) {
                             closeOnClick: false,
                             maxWidth: "400px",
                           });
+                          applyPopupClass(
+                            tooltip,
+                            (savedLayerState.tooltipStyles &&
+                              savedLayerState.tooltipStyles[layerId]) ||
+                              null,
+                          );
 
                           const mouseMoveHandler = function (e) {
                             onMouseMoveTooltip(
@@ -4000,7 +5205,15 @@ if (HTMLWidgets.shinyMode) {
                           }
 
                           const clickHandler = function (e) {
-                            onClickPopup(e, map, popupProperty, layerId);
+                            onClickPopup(
+                              e,
+                              map,
+                              popupProperty,
+                              layerId,
+                              (savedLayerState.popupStyles &&
+                                savedLayerState.popupStyles[layerId]) ||
+                                null,
+                            );
                           };
 
                           map.on("click", layerId, clickHandler);
@@ -4329,6 +5542,12 @@ if (HTMLWidgets.shinyMode) {
                             closeOnClick: false,
                             maxWidth: "400px",
                           });
+                          applyPopupClass(
+                            tooltip,
+                            (savedLayerState.tooltipStyles &&
+                              savedLayerState.tooltipStyles[layerId]) ||
+                              null,
+                          );
 
                           const mouseMoveHandler = function (e) {
                             onMouseMoveTooltip(
@@ -4379,7 +5598,15 @@ if (HTMLWidgets.shinyMode) {
                           }
 
                           const clickHandler = function (e) {
-                            onClickPopup(e, map, popupProperty, layerId);
+                            onClickPopup(
+                              e,
+                              map,
+                              popupProperty,
+                              layerId,
+                              (savedLayerState.popupStyles &&
+                                savedLayerState.popupStyles[layerId]) ||
+                                null,
+                            );
                           };
 
                           map.on("click", layerId, clickHandler);
@@ -4543,6 +5770,16 @@ if (HTMLWidgets.shinyMode) {
           );
         }
 
+        if (message.bezier || message.bezier_polygon) {
+          drawOptions = enableBezierDrawMode(drawOptions, message.styling);
+        }
+
+        if (_mapglHasDrawAttributes(message.attributes)) {
+          drawOptions = Object.assign({}, drawOptions, {
+            userProperties: true,
+          });
+        }
+
         // Create the draw control
         var drawControl = new MapboxDraw(drawOptions);
         map.addControl(drawControl, message.position);
@@ -4635,10 +5872,24 @@ if (HTMLWidgets.shinyMode) {
           }
         }
 
+        addBezierButtons(map, drawControl, {
+          bezier: message.bezier,
+          bezierPolygon: message.bezier_polygon,
+          controlGroupSelector:
+            ".maplibregl-ctrl-group:has(.mapbox-gl-draw_polygon)",
+          iconClass: "maplibregl-ctrl-icon",
+        });
+
+        initializeDrawAttributeEditor(map, drawControl, {
+          attributes: message.attributes,
+          position: message.position,
+          onChange: updateDrawnFeatures,
+        });
+
         // Add event listeners
-        map.on("draw.create", updateDrawnFeatures);
-        map.on("draw.delete", updateDrawnFeatures);
-        map.on("draw.update", updateDrawnFeatures);
+        map.on("draw.create", () => updateDrawnFeatures(false));
+        map.on("draw.delete", () => updateDrawnFeatures(false));
+        map.on("draw.update", () => updateDrawnFeatures(true));
 
         // Add measurement functionality if enabled
         if (message.show_measurements) {
@@ -4648,6 +5899,7 @@ if (HTMLWidgets.shinyMode) {
         // Add initial features if provided
         if (message.source) {
           addSourceFeaturesToDraw(drawControl, message.source, map);
+          updateDrawnFeatures(false);
         }
 
         // Add rectangle and radius buttons if enabled
@@ -4809,15 +6061,13 @@ if (HTMLWidgets.shinyMode) {
         var drawControl = widget.drawControl || widget.getDraw();
         if (drawControl) {
           const features = drawControl.getAll();
-          Shiny.setInputValue(
-            data.id + "_drawn_features",
-            JSON.stringify(features),
-          );
+          Shiny.setInputValue(data.id + "_drawn_features", features, {
+            priority: "event",
+          });
         } else {
-          Shiny.setInputValue(
-            data.id + "_drawn_features",
-            JSON.stringify(null),
-          );
+          Shiny.setInputValue(data.id + "_drawn_features", null, {
+            priority: "event",
+          });
         }
       } else if (message.type === "clear_drawn_features") {
         var drawControl = widget.drawControl || widget.getDraw();
@@ -4897,6 +6147,26 @@ if (HTMLWidgets.shinyMode) {
         const fullscreen = new maplibregl.FullscreenControl();
         map.addControl(fullscreen, position);
         map.controls.push({ type: "fullscreen", control: fullscreen });
+      } else if (message.type === "add_slider_control") {
+        if (typeof window.MapglSliderControl === "function") {
+          if (map._mapglSliderControl) {
+            try {
+              map.removeControl(map._mapglSliderControl);
+            } catch (e) { /* noop */ }
+            map.controls = map.controls.filter(function (c) {
+              return c.type !== "slider";
+            });
+          }
+          const _ts = new window.MapglSliderControl(message.options || {});
+          map.addControl(_ts, (message.options && message.options.position) || "top-left");
+          map.controls.push({ type: "slider", control: _ts });
+        } else {
+          console.warn("MapglSliderControl is not loaded.");
+        }
+      } else if (message.type === "update_slider_control") {
+        if (map._mapglSliderControl) {
+          map._mapglSliderControl.update(message.options || {});
+        }
       } else if (message.type === "add_scale_control") {
         const scaleControl = new maplibregl.ScaleControl({
           maxWidth: message.options.maxWidth,
@@ -4948,6 +6218,13 @@ if (HTMLWidgets.shinyMode) {
         const screenshotControlObj = createScreenshotControl(map, message.options, true);
         map.addControl(screenshotControlObj, message.options.position || "top-right");
         map.controls.push({ type: "screenshot", control: screenshotControlObj });
+      } else if (message.type === "add_coordinates_control") {
+        const coordinatesControlObj = createCoordinatesControl(message.options);
+        map.addControl(
+          coordinatesControlObj,
+          message.options.position || "bottom-right",
+        );
+        map.controls.push({ type: "coordinates", control: coordinatesControlObj });
       } else if (message.type === "add_geolocate_control") {
         const geolocate = new maplibregl.GeolocateControl({
           positionOptions: message.options.positionOptions,
@@ -5375,6 +6652,9 @@ if (HTMLWidgets.shinyMode) {
             }
           });
           map.controls = [];
+          if (map._mapglSliderControl) {
+            delete map._mapglSliderControl;
+          }
 
           const layersControl = document.querySelector(
             `#${data.id} .layers-control`,
@@ -5480,9 +6760,11 @@ if (HTMLWidgets.shinyMode) {
       } else if (message.type === "set_tooltip") {
         const layerId = message.layer;
         const newTooltipProperty = message.tooltip;
+        const newTooltipStyle = message.tooltip_style || null;
 
-        // Track tooltip state
+        // Track tooltip state (content + style)
         layerState.tooltips[layerId] = newTooltipProperty;
+        layerState.tooltipStyles[layerId] = newTooltipStyle;
 
         // If there's an active tooltip open, remove it first
         if (window._activeTooltip) {
@@ -5508,6 +6790,7 @@ if (HTMLWidgets.shinyMode) {
           closeOnClick: false,
           maxWidth: "400px",
         });
+        applyPopupClass(tooltip, newTooltipStyle);
 
         // Define new handlers referencing the updated tooltip property
         const mouseMoveHandler = function (e) {
@@ -5532,9 +6815,11 @@ if (HTMLWidgets.shinyMode) {
       } else if (message.type === "set_popup") {
         const layerId = message.layer;
         const newPopupProperty = message.popup;
+        const newPopupStyle = message.popup_style || null;
 
-        // Track popup state
+        // Track popup state (content + style)
         layerState.popups[layerId] = newPopupProperty;
+        layerState.popupStyles[layerId] = newPopupStyle;
 
         // Remove any existing popup for this layer
         if (window._mapboxPopups && window._mapboxPopups[layerId]) {
@@ -5557,7 +6842,7 @@ if (HTMLWidgets.shinyMode) {
 
         // Create new click handler
         const clickHandler = function (e) {
-          onClickPopup(e, map, newPopupProperty, layerId);
+          onClickPopup(e, map, newPopupProperty, layerId, newPopupStyle);
         };
 
         // Add the new event handler

@@ -27,7 +27,7 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Tim Appelhans <tim.appelhans@gmail.com>
+**Maintainer**: Tim Appelhans <tappelhans@tutamail.com>
 ([ORCID](https://orcid.org/0000-0002-9824-2707))
 
 Other contributors:

@@ -131,7 +131,7 @@ polygonLayer = function(map, opts, table) {
 
     onHover: (info, event) => {
         if (info.picked === false) {
-          removePopups("geoarrow-deckgl-tooltip");
+          removePopups(opts.tooltipOptions.className);
         }
         let popup = clickFun(info, event, opts, "tooltip", opts.map_class);
         if (popup !== undefined) {

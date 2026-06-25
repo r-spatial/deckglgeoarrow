@@ -1,6 +1,6 @@
 # Changelog
 
-## deckglgeoarrow 0.0.0.9091 (2026-06-22)
+## deckglgeoarrow 0.0.0.9092 (2026-06-25)
 
 ##### ✨ features and improvements
 

@@ -21,8 +21,7 @@
 <script src="getting_started_files/libs/maplibregl-binding-0.5.0/maplibregl.js"></script><link href="getting_started_files/libs/layers-control-1.0.0/layers-control.css" rel="stylesheet">
 <script src="getting_started_files/libs/deckglScatterplot-0.0.1/addGeoArrowDeckglScatterplotLayer.js"></script><script src="getting_started_files/libs/deck.gl-9.3.2/dist.min.js"></script><script src="getting_started_files/libs/parquet2arrow-0.7.1/parquet2arrow.js" type="module"></script><script src="getting_started_files/libs/apache-arrow-js-21.1.0/Arrow.es2015.min.js"></script><script src="getting_started_files/libs/geoarrow-js-0.3.3/geoarrow.umd.min.js"></script><link id="scatter-geoarrowWidget-attachment" rel="attachment" href="getting_started_files/libs/scatter-0.0.1/scatter.arrow">
 <script src="getting_started_files/libs/deck.gl-geoarrow-0.3.1/dist.umd.min.js"></script><link href="getting_started_files/libs/deckglgeoarrowHelpers-0.0.1/css/deckglgeoarrow.css" rel="stylesheet">
-<script src="getting_started_files/libs/deckglgeoarrowHelpers-0.0.1/deckglgeoarrowHelpers.js"></script><link id="scatter2-geoarrowWidget-attachment" rel="attachment" href="getting_started_files/libs/scatter2-0.0.1/scatter2.arrow">
-<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting started with deckglgeoarrow">
+<script src="getting_started_files/libs/deckglgeoarrowHelpers-0.0.1/deckglgeoarrowHelpers.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting started with deckglgeoarrow">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -32,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">deckglgeoarrow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9091</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9092</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,16 +78,58 @@
 
 
     <p><code>deckglgeoarrow</code> provides functions to quickly add layers to a <code>mapgl::maplibregl()</code> map.</p>
+<section class="level3"><h3 id="layers">Layers<a class="anchor" aria-label="anchor" href="#layers"></a>
+</h3>
+<p>Currently, the following <code>add*Layer</code> functions are available:</p>
+<ul>
+<li>
+<code>addGeoarrowScatterplotLayer</code> - points</li>
+<li>
+<code>addGeoarrowPathLayer</code> - lines</li>
+<li>
+<code>addGeoarrowPolygonLayer</code> - polygons</li>
+</ul>
+<p>All layers accept one of three data related inputs:</p>
+<ul>
+<li>
+<code>data</code> - an R object from packages <code>wk</code>, <code>sf</code>, <code>geos</code> or <code>terra</code>
+</li>
+<li>
+<code>file</code> - a local file path to a <code>geoarrow</code> or <code>geoparquet</code> file</li>
+<li>
+<code>url</code> - a remote URL pointing to a <code>geoarrow</code> or <code>geoparquet</code> file</li>
+</ul>
+<p>In addition, mainly for developers, <code>nanoarrow_array_streams</code> are also supported.</p>
+</section><section class="level3"><h3 id="styles">Styles<a class="anchor" aria-label="anchor" href="#styles"></a>
+</h3>
+<p>For style customisation, all (Deck.gl) layers have two types of properties:</p>
+<ul>
+<li>
+<code>render_options</code> — constant properties across a layer (use function <code><a href="../reference/renderOptions.html">renderOptions()</a></code>)</li>
+<li>
+<code>data_accessors</code> — properties that can vary across rows (use function <code><a href="../reference/dataAccessors.html">dataAccessors()</a></code>)</li>
+</ul>
+<p>Additionally, <code>popup</code>(s) and <code>tooltip</code>(s) can be defined in various ways:</p>
+<ul>
+<li>
+<code>TRUE</code> - all attributes of a feature will be displayed</li>
+<li>
+<code>NULL</code>/<code>FALSE</code> - no popup/tooltip will be shown</li>
+<li>a character vector of <code>column names</code> - only the specified attribute columns will be shown</li>
+</ul>
+<p>Similar to the style cusomisation mentioned above, <code>popups</code> and <code>tooltips</code> can be customised using <code>popup_options</code> via function <code><a href="../reference/popupOptions.html">popupOptions()</a></code> and <code>tooltip_options</code> via function <code><a href="../reference/popupOptions.html">tooltipOptions()</a></code></p>
+</section><section class="level3"><h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</h3>
+<p>Putting this together, here’s example showing 1k points using <code>addGeoarrowScatterplotLayer</code></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://walker-data.com/mapgl/" class="external-link">mapgl</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/deckglgeoarrow" class="external-link">deckglgeoarrow</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://paleolimbot.github.io/wk/" class="external-link">wk</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">style_positron</span> <span class="op">=</span> <span class="st">"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"</span></span>
 <span><span class="va">style_openfreemap</span> <span class="op">=</span> <span class="st">'https://tiles.openfreemap.org/styles/liberty'</span></span>
 <span></span>
-<span><span class="va">n</span> <span class="op">=</span> <span class="fl">1e6</span></span>
+<span><span class="va">n</span> <span class="op">=</span> <span class="fl">1e3</span></span>
 <span></span>
 <span><span class="va">pts</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span></span>
@@ -112,8 +153,7 @@
 <span>    , layer_id <span class="op">=</span> <span class="st">"scatter"</span></span>
 <span>    , geom_column_name <span class="op">=</span> <span class="st">"geometry"</span></span>
 <span>    , render_options <span class="op">=</span> <span class="fu"><a href="../reference/renderOptions.html">renderOptions</a></span><span class="op">(</span></span>
-<span>      zIndex <span class="op">=</span> <span class="fl">1</span></span>
-<span>      , beforeId <span class="op">=</span> <span class="st">"water"</span></span>
+<span>      beforeId <span class="op">=</span> <span class="st">"water"</span></span>
 <span>    <span class="op">)</span></span>
 <span>    , data_accessors <span class="op">=</span> <span class="fu"><a href="../reference/dataAccessors.html">dataAccessors</a></span><span class="op">(</span></span>
 <span>      getRadius <span class="op">=</span> <span class="st">"radius"</span></span>
@@ -122,56 +162,30 @@
 <span>      , getLineColor <span class="op">=</span> <span class="st">"lineColor"</span></span>
 <span>    <span class="op">)</span></span>
 <span>    , popup <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>    , popup_options <span class="op">=</span> <span class="fu"><a href="../reference/popupOptions.html">popupOptions</a></span><span class="op">(</span></span>
+<span>      anchor <span class="op">=</span> <span class="st">"bottom-right"</span></span>
+<span>    <span class="op">)</span></span>
+<span>    , tooltip <span class="op">=</span> <span class="st">"id"</span></span>
+<span>    , tooltip_options <span class="op">=</span> <span class="fu"><a href="../reference/popupOptions.html">tooltipOptions</a></span><span class="op">(</span></span>
+<span>      anchor <span class="op">=</span> <span class="st">"top-left"</span></span>
+<span>      , closeOnMove <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://walker-data.com/mapgl/reference/add_navigation_control.html" class="external-link">add_navigation_control</a></span><span class="op">(</span>visualize_pitch <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://walker-data.com/mapgl/reference/set_view.html" class="external-link">set_view</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://walker-data.com/mapgl/reference/add_globe_control.html" class="external-link">add_globe_control</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://walker-data.com/mapgl/reference/add_layers_control.html" class="external-link">add_layers_control</a></span><span class="op">(</span></span>
-<span>    layers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Scatter Layer"</span> <span class="op">=</span> <span class="fu"><a href="../reference/generateDeckglLayerId.html">generateDeckglLayerId</a></span><span class="op">(</span></span>
+<span>    layers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"Scatter Layer"</span> <span class="op">=</span> <span class="fu"><a href="../reference/generateDeckglLayerId.html">generateDeckglLayerId</a></span><span class="op">(</span></span>
 <span>      layer_id <span class="op">=</span> <span class="st">"scatter"</span>, beforeId <span class="op">=</span> <span class="st">"water"</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
-<div id="htmlwidget-7dc13d3e5fd60246a46c" style="width:100%;height:480px;" class="maplibregl html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7dc13d3e5fd60246a46c">{"x":{"style":"https://tiles.openfreemap.org/styles/liberty","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[],"navigation_control":{"show_compass":true,"show_zoom":true,"visualize_pitch":true,"position":"top-right","orientation":"vertical"},"setCenter":[0,0],"setZoom":2,"globe_control":{"position":"top-right"},"layers_control":{"control_id":"layers-control-cee59","position":"top-left","layers":{"Scatter Layer":"deck-layer-group-before:water"},"layers_config":[{"label":"Scatter Layer","ids":"deck-layer-group-before:water","type":"single"}],"collapsible":true,"use_icon":true,"custom_colors":null,"margin_top":null,"margin_right":null,"margin_bottom":null,"margin_left":null}},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglScatterplotLayer(map, data);\n      }","data":{"geom_column_name":"geometry","layerId":"scatter","popup":true,"tooltip":null,"renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":false,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":"water","zIndex":1},"dataAccessors":{"getRadius":"radius","getColor":[0,0,0,255],"getFillColor":"fillColor","getLineColor":"lineColor","getLineWidth":"lineWidth","getElevation":1000,"getWidth":1},"popupOptions":{"anchor":"bottom","className":"geoarrow-deckgl-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"geoarrow-deckgl-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"parameters":{"depthCompare":"always","cullMode":"back"},"map_class":"maplibregl","interleaved":true,"extension_type":"arrow"}}]}}</script>
+<div id="htmlwidget-81bbafce18037ae2e60a" style="width:100%;height:480px;" class="maplibregl html-widget"></div>
+<script type="application/json" data-for="htmlwidget-81bbafce18037ae2e60a">{"x":{"style":"https://tiles.openfreemap.org/styles/liberty","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[],"navigation_control":{"show_compass":true,"show_zoom":true,"visualize_pitch":true,"position":"top-right","orientation":"vertical"},"setCenter":[0,0],"setZoom":2,"globe_control":{"position":"top-right"},"layers_control":{"control_id":"layers-control-7dc74","position":"top-left","layers":{"Scatter Layer":"deck-layer-group-before:water"},"layers_config":[{"label":"Scatter Layer","ids":"deck-layer-group-before:water","type":"single"}],"collapsible":true,"use_icon":true,"custom_colors":null,"margin_top":null,"margin_right":null,"margin_bottom":null,"margin_left":null}},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglScatterplotLayer(map, data);\n      }","data":{"geom_column_name":"geometry","layerId":"scatter","popup":true,"tooltip":"id","renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":false,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":"water","zIndex":1},"dataAccessors":{"getRadius":"radius","getColor":[0,0,0,255],"getFillColor":"fillColor","getLineColor":"lineColor","getLineWidth":"lineWidth","getElevation":1000,"getWidth":1},"popupOptions":{"anchor":"bottom-right","className":"deckglgeoarrow-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"deckglgeoarrow-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":true,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"parameters":{"depthCompare":"always","cullMode":"back"},"map_class":"maplibregl","interleaved":true,"extension_type":"arrow"}}]}}</script>
 </div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://walker-data.com/mapgl/reference/maplibre.html" class="external-link">maplibre</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">style_openfreemap</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/addGeoArrowScatterplotLayer.html">addGeoArrowScatterplotLayer</a></span><span class="op">(</span></span>
-<span>    data <span class="op">=</span> <span class="va">pts</span></span>
-<span>    , layer_id <span class="op">=</span> <span class="st">"scatter2"</span></span>
-<span>    , geom_column_name <span class="op">=</span> <span class="st">"geometry"</span></span>
-<span>    , render_options <span class="op">=</span> <span class="fu"><a href="../reference/renderOptions.html">renderOptions</a></span><span class="op">(</span></span>
-<span>      zIndex <span class="op">=</span> <span class="fl">1</span></span>
-<span>      <span class="co"># , beforeId = "water"</span></span>
-<span>    <span class="op">)</span></span>
-<span>    , data_accessors <span class="op">=</span> <span class="fu"><a href="../reference/dataAccessors.html">dataAccessors</a></span><span class="op">(</span></span>
-<span>      getRadius <span class="op">=</span> <span class="st">"radius"</span></span>
-<span>      , getFillColor <span class="op">=</span> <span class="st">"fillColor"</span></span>
-<span>      , getLineWidth <span class="op">=</span> <span class="st">"lineWidth"</span></span>
-<span>      , getLineColor <span class="op">=</span> <span class="st">"lineColor"</span></span>
-<span>    <span class="op">)</span></span>
-<span>    , popup <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://walker-data.com/mapgl/reference/add_navigation_control.html" class="external-link">add_navigation_control</a></span><span class="op">(</span>visualize_pitch <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://walker-data.com/mapgl/reference/set_view.html" class="external-link">set_view</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://walker-data.com/mapgl/reference/add_globe_control.html" class="external-link">add_globe_control</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://walker-data.com/mapgl/reference/add_layers_control.html" class="external-link">add_layers_control</a></span><span class="op">(</span></span>
-<span>    layers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Scatter Layer 2"</span> <span class="op">=</span> <span class="fu"><a href="../reference/generateDeckglLayerId.html">generateDeckglLayerId</a></span><span class="op">(</span></span>
-<span>      layer_id <span class="op">=</span> <span class="st">"scatter2"</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<div class="cell-output-display">
-<div id="htmlwidget-7aeaa8348b20125d6ce0" style="width:100%;height:480px;" class="maplibregl html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7aeaa8348b20125d6ce0">{"x":{"style":"https://tiles.openfreemap.org/styles/liberty","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[],"navigation_control":{"show_compass":true,"show_zoom":true,"visualize_pitch":true,"position":"top-right","orientation":"vertical"},"setCenter":[0,0],"setZoom":2,"globe_control":{"position":"top-right"},"layers_control":{"control_id":"layers-control-d98c2","position":"top-left","layers":{"Scatter Layer 2":"deck-layer-group-slot:scatter2"},"layers_config":[{"label":"Scatter Layer 2","ids":"deck-layer-group-slot:scatter2","type":"single"}],"collapsible":true,"use_icon":true,"custom_colors":null,"margin_top":null,"margin_right":null,"margin_bottom":null,"margin_left":null}},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglScatterplotLayer(map, data);\n      }","data":{"geom_column_name":"geometry","layerId":"scatter2","popup":true,"tooltip":null,"renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":false,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":null,"zIndex":1},"dataAccessors":{"getRadius":"radius","getColor":[0,0,0,255],"getFillColor":"fillColor","getLineColor":"lineColor","getLineWidth":"lineWidth","getElevation":1000,"getWidth":1},"popupOptions":{"anchor":"bottom","className":"geoarrow-deckgl-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"geoarrow-deckgl-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"parameters":{"depthCompare":"always","cullMode":"back"},"map_class":"maplibregl","interleaved":true,"extension_type":"arrow"}}]}}</script>
-</div>
-</div>
-
-
-
-<script id="quarto-html-after-body" type="application/javascript">
+<p>More examples can be found <a href="https://github.com/r-spatial/deckglgeoarrow/tree/main/inst/experiments" class="external-link">here</a>.</p>
+</section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
@@ -254,7 +268,8 @@
       }
     }
   });
-  </script></main>
+  </script></main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

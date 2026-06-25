@@ -35,7 +35,7 @@ For `popupOptions`
 
 - anchor = "bottom"
 
-- className = "geoarrow-deckgl-popup"
+- className = "deckglgeoarrow-popup"
 
 - closeButton = TRUE
 
@@ -55,7 +55,7 @@ For `tooltipOptions`
 
 - anchor = "top-left"
 
-- className = "geoarrow-deckgl-tooltip"
+- className = "deckglgeoarrow-tooltip"
 
 - closeButton = FALSE
 
@@ -86,7 +86,7 @@ popupOptions()
 #> [1] "bottom"
 #> 
 #> $className
-#> [1] "geoarrow-deckgl-popup"
+#> [1] "deckglgeoarrow-popup"
 #> 
 #> $closeButton
 #> [1] TRUE
@@ -114,7 +114,7 @@ tooltipOptions()
 #> [1] "top-left"
 #> 
 #> $className
-#> [1] "geoarrow-deckgl-tooltip"
+#> [1] "deckglgeoarrow-tooltip"
 #> 
 #> $closeButton
 #> [1] FALSE

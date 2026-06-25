@@ -203,7 +203,7 @@ dataAccessors = function(...) {
 #' For `popupOptions`
 #'
 #' * anchor = "bottom"
-#' * className = "geoarrow-deckgl-popup"
+#' * className = "deckglgeoarrow-popup"
 #' * closeButton = TRUE
 #' * closeOnClick = TRUE
 #' * closeOnMove = FALSE
@@ -215,7 +215,7 @@ dataAccessors = function(...) {
 #' For `tooltipOptions`
 #'
 #' * anchor = "top-left"
-#' * className = "geoarrow-deckgl-tooltip"
+#' * className = "deckglgeoarrow-tooltip"
 #' * closeButton = FALSE
 #' * closeOnClick = FALSE
 #' * closeOnMove = FALSE
@@ -239,7 +239,7 @@ popupOptions = function(...) {
 
   default_lst = list(
     anchor = "bottom"
-    , className = "geoarrow-deckgl-popup"
+    , className = "deckglgeoarrow-popup"
     , closeButton = TRUE
     , closeOnClick = FALSE
     , closeOnMove = FALSE
@@ -261,7 +261,7 @@ tooltipOptions = function(...) {
 
   default_lst = list(
     anchor = "top-left"
-    , className = "geoarrow-deckgl-tooltip"
+    , className = "deckglgeoarrow-tooltip"
     , closeButton = FALSE
     , closeOnClick = FALSE
     , closeOnMove = FALSE

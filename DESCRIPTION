@@ -5,7 +5,7 @@ Authors@R:
     c(person(given = "Tim",
              family = "Appelhans",
              role = c("cre", "aut"),
-             email = "tim.appelhans@gmail.com",
+             email = "tappelhans@tutamail.com",
              comment = c(ORCID = "0000-0002-9824-2707")),
       person("RConsortium", 
              role = "fnd",

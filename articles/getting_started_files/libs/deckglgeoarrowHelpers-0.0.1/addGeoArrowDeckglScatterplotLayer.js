@@ -20,6 +20,10 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
       interleaved: opts.interleaved,
       layers: [],
       getCursor: ({ isHovering }) => (isHovering ? 'pointer' : 'grab'),
+      deviceProps: {
+        _cacheShaders: true,
+        _cachePipelines: true,
+      }
     });
     map.addControl(deckoverlay);
   }

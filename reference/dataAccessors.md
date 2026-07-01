@@ -19,6 +19,10 @@ dataAccessors(...)
   named accessors to be passed to the relevant deck.gl JavaScript
   Method.
 
+## Value
+
+List with named accessors, possibly modified via `...` argument.
+
 ## Details
 
 Please refer to the relevant [deck.gl

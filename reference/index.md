@@ -42,7 +42,7 @@
   : Names and versions of external JavaScript libraries.
 
 - [`generateDeckglLayerId()`](https://r-spatial.github.io/deckglgeoarrow/reference/generateDeckglLayerId.md)
-  : Generate proper internal layer ids
+  : Generate proper internal layer IDs
 
 - [`popupOptions()`](https://r-spatial.github.io/deckglgeoarrow/reference/popupOptions.md)
   [`tooltipOptions()`](https://r-spatial.github.io/deckglgeoarrow/reference/popupOptions.md)

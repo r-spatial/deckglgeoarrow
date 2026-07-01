@@ -19,6 +19,11 @@ tooltipOptions(...)
   PopupOptions](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/PopupOptions/)
   for details and available options.
 
+## Value
+
+List with named popup/tooltip options, possibly modified via `...`
+argument.
+
 ## Details
 
 Both `popupOptions` and `tooltipOptions` are passed to the PopupOptions

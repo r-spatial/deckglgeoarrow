@@ -24,7 +24,7 @@ renderOptions(...)
 
 ## Value
 
-list with named options, possibly modified via `...` argument.
+List with named options, possibly modified via `...` argument.
 
 ## Details
 

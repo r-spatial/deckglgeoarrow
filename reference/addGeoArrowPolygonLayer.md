@@ -103,6 +103,10 @@ addGeoArrowPolygonLayer(
   can be used to pass additional props and parameters to the deck.gl
   instance. See Details for more info.
 
+## Value
+
+The modified `map` object with the added polygon layer.
+
 ## Details
 
 `...` can be used to pass additional props and parameters to the deck.gl

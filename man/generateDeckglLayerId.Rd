@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{generateDeckglLayerId}
 \alias{generateDeckglLayerId}
-\title{Generate proper internal layer ids}
+\title{Generate proper internal layer IDs}
 \usage{
 generateDeckglLayerId(layer_id, beforeId = NULL)
 }
@@ -13,15 +13,18 @@ layer function used.}
 \item{beforeId}{the \code{beforeId} used in the respective \verb{addGeoArrowDeckgl*}
 layer function used.}
 }
+\value{
+Character vector of internally used layer IDs.
+}
 \description{
 Deck.gl injects layers into maplibre's canvas if \code{interleaved = TRUE} (the
 default in all layer functions provided here). To do so, it generates specific
-layer ids from the \code{layer_id} provided. This function generates these deck.gl
-specific layer ids on the R side, so they can be used in other controls, such
-as \code{mapgl::ad_layers_control()}.
+layer IDs from the \code{layer_id} provided. This function generates these deck.gl
+specific layer IDs on the R side, so they can be used in other controls, such
+as \code{\link[mapgl]{add_layers_control}}.
 }
 \examples{
 generateDeckglLayerId("my_scatterplot_layer")
-generateDeckglLayerId("my_scatterplot_layer", beforeId = "water")
+generateDeckglLayerId(beforeId = "water")
 
 }

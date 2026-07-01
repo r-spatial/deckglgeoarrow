@@ -63,7 +63,7 @@
 #' Higher values will be plotted on top of lower values.
 #' It is ignored, if `beforeId` is supplied.
 #'
-#' @return list with named options, possibly modified via `...` argument.
+#' @return List with named options, possibly modified via `...` argument.
 #'
 #' @examples
 #' # default settings
@@ -157,6 +157,8 @@ renderOptions = function(...) {
 #' * all `get*Color` accessors will accept either a vector of rgb(a) integers (0-255)
 #' or a hex color string (potentially also with alpha) - see examples.
 #'
+#' @return List with named accessors, possibly modified via `...` argument.
+#'
 #' @examples
 #' # default accessors
 #' dataAccessors()
@@ -224,6 +226,8 @@ dataAccessors = function(...) {
 #' * offset = 0
 #' * subpixelPositioning = FALSE
 #'
+#' @return List with named popup/tooltip options, possibly modified via `...` argument.
+#'
 #' @describeIn popupOptions options for popups
 #'
 #' @examples
@@ -276,27 +280,29 @@ tooltipOptions = function(...) {
   utils::modifyList(default_lst, dot_lst, keep.null = TRUE)
 }
 
-#' Generate proper internal layer ids
+#' Generate proper internal layer IDs
 #'
 #' Deck.gl injects layers into maplibre's canvas if `interleaved = TRUE` (the
 #' default in all layer functions provided here). To do so, it generates specific
-#' layer ids from the `layer_id` provided. This function generates these deck.gl
-#' specific layer ids on the R side, so they can be used in other controls, such
-#' as `mapgl::ad_layers_control()`.
+#' layer IDs from the `layer_id` provided. This function generates these deck.gl
+#' specific layer IDs on the R side, so they can be used in other controls, such
+#' as \code{\link[mapgl]{add_layers_control}}.
 #'
 #' @param layer_id the layer id provided to the respective `addGeoArrowDeckgl*`
 #' layer function used.
 #' @param beforeId the `beforeId` used in the respective `addGeoArrowDeckgl*`
 #' layer function used.
 #'
+#' @return Character vector of internally used layer IDs.
+#'
 #' @examples
 #' generateDeckglLayerId("my_scatterplot_layer")
-#' generateDeckglLayerId("my_scatterplot_layer", beforeId = "water")
+#' generateDeckglLayerId(beforeId = "water")
 #'
 #' @export
 generateDeckglLayerId = function(layer_id, beforeId = NULL) {
-  if (is.null(beforeId)) {
-    return(sprintf("deck-layer-group-slot:%s", layer_id))
+  if (!is.null(beforeId)) {
+    return(sprintf("deck-layer-group-before:%s", beforeId))
   }
-  return(sprintf("deck-layer-group-before:%s", beforeId))
+  return(sprintf("deck-layer-group-slot:%s", layer_id))
 }

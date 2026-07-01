@@ -14,6 +14,9 @@ tooltipOptions(...)
 See \href{https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/PopupOptions/}{maplibregl PopupOptions}
 for details and available options.}
 }
+\value{
+List with named popup/tooltip options, possibly modified via \code{...} argument.
+}
 \description{
 Options for popups and tooltips
 }

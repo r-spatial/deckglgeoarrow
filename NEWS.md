@@ -6,6 +6,8 @@
 
 #### 💬 documentation etc
 
+  * add return values, as requested by CRAN
+
 #### 🍬 miscellaneous
 
 

@@ -10,7 +10,7 @@ renderOptions(...)
 \item{...}{named options to be passed to the relevant deck.gl JavaScript Method.}
 }
 \value{
-list with named options, possibly modified via \code{...} argument.
+List with named options, possibly modified via \code{...} argument.
 }
 \description{
 In deck.gl every layer type has a specific set of render options, see e.g.

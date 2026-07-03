@@ -41,6 +41,8 @@
 #' which will plot the current layer underneath `"<some-existing-layer-id>"`.
 #' See below for an example.
 #'
+#' @return The modified \code{map} object with the added scatterplot layer.
+#'
 #' @examples
 #' library(wk)
 #' library(mapgl)

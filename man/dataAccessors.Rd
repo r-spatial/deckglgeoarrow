@@ -9,6 +9,9 @@ dataAccessors(...)
 \arguments{
 \item{...}{named accessors to be passed to the relevant deck.gl JavaScript Method.}
 }
+\value{
+List with named accessors, possibly modified via \code{...} argument.
+}
 \description{
 In deck.gl every layer type has a specific set of data accessors, see e.g.
 those for \href{https://deck.gl/docs/api-reference/layers/scatterplot-layer#data-accessors}{ScatterPlotLayer}.

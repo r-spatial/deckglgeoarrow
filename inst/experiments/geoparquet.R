@@ -13,13 +13,11 @@ m = maplibre(style = style_positron)
 # scatter parquet
 m = m |>
   addGeoArrowScatterplotLayer(
-    file = "~/Downloads/natural-earth_cities_native.parquet"
-    # url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
-    , layer_id = "scatter2"
+    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
+    , layer_id = "scatter"
     , geom_column_name = "geometry" # attr(dat, "sf_column")
     , render_options = renderOptions(
-      zIndex = 2
-      # , beforeId = "place_town"
+      # beforeId = "place_town"
     )
     , data_accessors = dataAccessors(
       getRadius = 10
@@ -27,9 +25,6 @@ m = m |>
       , getLineColor = '#000000ff'
     )
     , popup = TRUE
-    , popup_options = popupOptions(
-      anchor = "bottom-right"
-    )
     , tooltip = TRUE
     , tooltip_options = tooltipOptions(
       anchor = "top-left"
@@ -39,50 +34,50 @@ m = m |>
 m |>
   add_globe_control()
 
-## polygons parquet
-options(viewer = NULL)
-
-m = maplibre(style = style_positron)
-
-m = m |>
-  addGeoArrowPolygonLayer(
-    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries_native.parquet"
-    , geom_column_name = "geometry"
-    , render_options = renderOptions(
-      extruded = FALSE
-      , stroked = TRUE
-      # , beforeId = "boundary_county"
-      , zIndex = 1
-    )
-    , popup = TRUE
-    , tooltip = TRUE
-  )
-
-m |>
-  add_globe_control()
-
-## paths parquet
-options(viewer = NULL)
-
-m = maplibre(style = style_darkmatter)
-
-m = m |>
-  addGeoArrowPathLayer(
-    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/example/files/example_linestring_native.parquet"
-    , geom_column_name = "geometry"
-    , data_accessors = dataAccessors(
-      getColor = "#00ffff90"
-      , getWidth = 5
-    )
-    , render_options = renderOptions(
-      extruded = FALSE
-      , stroked = TRUE
-      # , beforeId = "boundary_county"
-      , zIndex = 1
-    )
-    , popup = TRUE
-    , tooltip = TRUE
-  )
-
-m |>
-  add_globe_control()
+# ## polygons parquet
+# options(viewer = NULL)
+#
+# m = maplibre(style = style_positron)
+#
+# m = m |>
+#   addGeoArrowPolygonLayer(
+#     url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries_native.parquet"
+#     , geom_column_name = "geometry"
+#     , render_options = renderOptions(
+#       extruded = FALSE
+#       , stroked = TRUE
+#       # , beforeId = "boundary_county"
+#       , zIndex = 1
+#     )
+#     , popup = TRUE
+#     , tooltip = TRUE
+#   )
+#
+# m |>
+#   add_globe_control()
+#
+# ## paths parquet
+# options(viewer = NULL)
+#
+# m = maplibre(style = style_darkmatter)
+#
+# m = m |>
+#   addGeoArrowPathLayer(
+#     url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/example/files/example_linestring_native.parquet"
+#     , geom_column_name = "geometry"
+#     , data_accessors = dataAccessors(
+#       getColor = "#00ffff90"
+#       , getWidth = 5
+#     )
+#     , render_options = renderOptions(
+#       extruded = FALSE
+#       , stroked = TRUE
+#       # , beforeId = "boundary_county"
+#       , zIndex = 1
+#     )
+#     , popup = TRUE
+#     , tooltip = TRUE
+#   )
+#
+# m |>
+#   add_globe_control()

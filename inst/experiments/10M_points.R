@@ -68,7 +68,7 @@ m |>
       , stroked = FALSE
     )
     , data_accessors = dataAccessors(
-      getFillColor = c(0, 0, 255, 10)
+      getFillColor = c(0, 0, 255, 20)
     )
     , parameters = list(
       depthCompare = "always"

@@ -42,7 +42,6 @@ lns = st_read(url)
 
 lns$lineColor = color_values(
   lns$Strahler
-  # , alpha = sample.int(255, nrow(lns), replace = TRUE)
   , palette = "blues"
 )
 lns$lineWidth = sample.int(150, nrow(lns), replace = TRUE)
@@ -56,7 +55,7 @@ m = maplibre(style = style_positron)
 m = m |>
   addGeoArrowScatterplotLayer(
     data = pts
-    , layer_id = "scatter1"
+    , layer_id = "scatter"
     , geom_column_name = "geometry"
     , render_options = renderOptions(
       zIndex = 1
@@ -67,10 +66,6 @@ m = m |>
       , getFillColor = "fillColor"
       , getLineWidth = "lineWidth"
       , getLineColor = "lineColor"
-    )
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
     )
     , popup = TRUE
     , popup_options = popupOptions(
@@ -97,14 +92,6 @@ m = m |>
     )
     , popup = TRUE
     , tooltip = TRUE
-    , interleaved = TRUE
-    , parameters = list(
-      ## FIXME: neither depthTest:false nor depthCompare:"always" work in globe
-      depthTest = FALSE
-      , depthCompare = "always"
-      # , antialias = TRUE
-      , cullMode = "back"
-    )
   )
 
 m |>
@@ -114,7 +101,8 @@ m |>
     , geom_column_name = attr(lns, "sf_column")
     , render_options = renderOptions(
       widthUnits = "meters"
-      , widthScale = 3000
+      , widthScale = 1000
+      , widthMaxPixels = 30
       , zIndex = 3
     )
     , data_accessors = dataAccessors(
@@ -123,12 +111,6 @@ m |>
     )
     , popup = TRUE
     , tooltip = TRUE
-    , interleaved = TRUE
-    , parameters = list(
-      depthTest = FALSE
-      , depthCompare = "always"
-      , cullMode = "back"
-    )
   ) |>
   set_view(c(100, 30), 2) |>
   add_globe_control() |>

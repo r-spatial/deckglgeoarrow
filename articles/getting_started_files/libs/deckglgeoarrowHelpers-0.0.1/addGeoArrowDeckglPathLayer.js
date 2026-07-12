@@ -91,32 +91,18 @@ pathLayer = function(map, opts, table) {
     miterLimit: opts.renderOptions.miterLimit,
     // _pathType: opts.renderOptions._pathType,
 
-/*
-    // data accessros
-    getColor: ({ index, data }) => {
-      if (typeof(opts.dataAccessors.getColor) === "string") {
-        const recordBatch = data.data;
-        return hexToRGBA(recordBatch.get(index)[opts.dataAccessors.getColor]);
-      } else {
-        return opts.dataAccessors.getColor;
-      }
-    },
-    getWidth: ({ index, data }) => {
-      if (typeof(opts.dataAccessors.getWidth) === "string") {
-        const recordBatch = data.data;
-        return recordBatch.get(index)[opts.dataAccessors.getWidth];
-      } else {
-        return opts.dataAccessors.getWidth;
-      }
-    },
-*/
-    getColor: opts.dataAccessors.getColor === null ? [0,0,0,255] : ({ index, data }) => {
-      return colorAccessor(index, data, opts.dataAccessors.getColor);
-    },
+    // data accessors
+    getColor: table_names.includes(opts.dataAccessors.getColor) ?
+      ({ index, data }) => {
+        return colorAccessor(index, data, opts.dataAccessors.getColor);
+      } : opts.dataAccessors.getColor === null ? [0,0,0,255] :
+        isHexColor(opts.dataAccessors.getColor) ? hexToRGBA(opts.dataAccessors.getColor) :
+          opts.dataAccessors.getColor,
 
-    getWidth: opts.dataAccessors.getWidth === null ? 1 : ({ index, data }) => {
-      return attributeAccessor(index, data, opts.dataAccessors.getWidth);
-    },
+    getWidth: table_names.includes(opts.dataAccessors.getWidth) ?
+      ({ index, data }) => {
+        return attributeAccessor(index, data, opts.dataAccessors.getWidth);
+      } : opts.dataAccessors.getWidth === null ? 1 : opts.dataAccessors.getWidth,
 
     // interactivity
     pickable: true,

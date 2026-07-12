@@ -106,22 +106,30 @@ polygonLayer = function(map, opts, table) {
     //https://deck.gl/docs/developer-guide/performance#supply-attributes-directly
     */
 
-    // data accessros
-    getFillColor: opts.dataAccessors.getFillColor === null ? [0,0,0,255] : ({ index, data }) => {
-      return colorAccessor(index, data, opts.dataAccessors.getFillColor);
-    },
+    // data accessors
+    getFillColor: table_names.includes(opts.dataAccessors.getFillColor) ?
+      ({ index, data }) => {
+        return colorAccessor(index, data, opts.dataAccessors.getFillColor);
+      } : opts.dataAccessors.getFillColor === null ? [0,0,0,255] :
+        isHexColor(opts.dataAccessors.getFillColor) ? hexToRGBA(opts.dataAccessors.getFillColor) :
+          opts.dataAccessors.getFillColor,
 
-    getLineColor: opts.dataAccessors.getLineColor === null ? [0,0,0,255] : ({ index, data }) => {
-      return colorAccessor(index, data, opts.dataAccessors.getLineColor);
-    },
+    getLineColor: table_names.includes(opts.dataAccessors.getLineColor) ?
+      ({ index, data }) => {
+        return colorAccessor(index, data, opts.dataAccessors.getLineColor);
+      } : opts.dataAccessors.getLineColor === null ? [0,0,0,255] :
+        isHexColor(opts.dataAccessors.getLineColor) ? hexToRGBA(opts.dataAccessors.getLineColor) :
+          opts.dataAccessors.getLineColor,
 
-    getLineWidth: opts.dataAccessors.getLineWidth === null ? 1 : ({ index, data }) => {
-      return attributeAccessor(index, data, opts.dataAccessors.getLineWidth);
-    },
+    getLineWidth: table_names.includes(opts.dataAccessors.getLineWidth) ?
+      ({ index, data }) => {
+        return attributeAccessor(index, data, opts.dataAccessors.getLineWidth);
+      } : opts.dataAccessors.getLineWidth === null ? 1 : opts.dataAccessors.getLineWidth,
 
-    getElevation: opts.dataAccessors.getElevation === null ? 1000 : ({ index, data }) => {
-      return attributeAccessor(index, data, opts.dataAccessors.getElevation);
-    },
+    getElevation: table_names.includes(opts.dataAccessors.getElevation) ?
+      ({ index, data }) => {
+        return attributeAccessor(index, data, opts.dataAccessors.getElevation);
+      } : opts.dataAccessors.getElevation === null ? 1 : opts.dataAccessors.getElevation,
 
     // interactivity
     pickable: true,

@@ -45,10 +45,6 @@ m |>
       , getLineWidth = "lineWidth"
       , getLineColor = "lineColor"
     )
-    , parameters = list(
-      depthCompare = "always"
-      , cullMode = "back"
-    )
     , popup = TRUE
     , popup_options = popupOptions(
       anchor = "bottom-right"
@@ -57,7 +53,6 @@ m |>
     , tooltip_options = tooltipOptions(
       anchor = "top-left"
     )
-    , interleaved = TRUE
   ) |>
   addGeoArrowScatterplotLayer(
     data = dat
@@ -77,6 +72,7 @@ m |>
     , tooltip = TRUE
     , tooltip_options = tooltipOptions(
       anchor = "top-left"
+      , closeOnMove = TRUE
     )
     , interleaved = TRUE
   ) |>

@@ -28,8 +28,12 @@ m = m |>
     , tooltip = TRUE
     , tooltip_options = tooltipOptions(
       anchor = "top-left"
+      , closeOnMove = TRUE
     )
   )
+
+str(m$dependencies)
+str(m$jsHooks)
 
 m |>
   add_globe_control()

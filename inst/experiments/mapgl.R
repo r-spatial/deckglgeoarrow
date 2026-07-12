@@ -44,8 +44,6 @@ lns$lineColor = color_values(
   lns$Strahler
   , palette = "blues"
 )
-lns$lineWidth = sample.int(150, nrow(lns), replace = TRUE)
-
 
 
 options(viewer = NULL)
@@ -71,11 +69,12 @@ m = m |>
     , popup_options = popupOptions(
       anchor = "bottom-right"
     )
-    , tooltip = TRUE
-    , tooltip_options = tooltipOptions(
-      anchor = "top-left"
-    )
-  )
+    , tooltip = FALSE
+  ) |>
+  set_view(c(100, 30), 2) |>
+  add_globe_control() |>
+  add_navigation_control(visualize_pitch = TRUE)
+
 
 m = m |>
   addGeoArrowPolygonLayer(
@@ -93,6 +92,7 @@ m = m |>
     , popup = TRUE
     , tooltip = TRUE
   )
+
 
 m |>
   addGeoArrowPathLayer(
@@ -112,9 +112,6 @@ m |>
     , popup = TRUE
     , tooltip = TRUE
   ) |>
-  set_view(c(100, 30), 2) |>
-  add_globe_control() |>
-  add_navigation_control(visualize_pitch = TRUE) |>
   add_layers_control(
     collapsible = TRUE
     , layers = list(

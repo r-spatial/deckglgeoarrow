@@ -40,6 +40,8 @@ m1 = m1 |>
     , circle_stroke_color = get_column("lineColor")
   )
 
+m1
+
 m2 = m2 |>
   addGeoArrowScatterplotLayer(
     data = dat
@@ -52,8 +54,6 @@ m2 = m2 |>
       , getLineColor = "lineColor"
     )
   )
-
-m1
 
 m2
 

@@ -1,21 +1,20 @@
 library(mapgl)
 library(deckglgeoarrow)
-library(sf)
+library(wk)
 
 style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'
 
 ### points =========================
-n = 25e6
-dat = data.frame(
-  id = 1:n
-  , x = runif(n, -180, 180)
-  , y = runif(n, -90, 90)
-)
-dat = st_as_sf(
-  dat
-  , coords = c("x", "y")
-  , crs = 4326
+n = 5e6
+
+pts = data.frame(
+  id = seq_len(n)
+  , geometry = xy(
+    x = runif(n, -180, 180)
+    , y = runif(n, -90, 90)
+    , crs = 4326
+  )
 )
 
 options(viewer = NULL)
@@ -24,13 +23,18 @@ m = maplibre(style = style_positron)
 
 m |>
   addGeoArrowScatterplotLayer(
-    data = dat
+    data = pts
     , layer_id = "scatter"
-    , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
       zIndex = 0
       , beforeId = "water"
       , stroked = TRUE
+    )
+    , data_accessors = dataAccessors(
+      getFillColor = "#74aa2380" #c(0, 255, 255, 255)
+      , getLineColor = "#4523bb"
+      , getRadius = 7
+      , getLineWidth = 4
     )
     , popup = TRUE
   )

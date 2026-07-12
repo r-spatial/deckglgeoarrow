@@ -145,7 +145,7 @@ renderOptions = function(...) {
 #'
 #' * getRadius = 1 (ScatterplotLayer)
 #' * getColor = c(0, 0, 0, 255) (ScatterplotLayer, PathLayer)
-#' * getFillColor = c(0, 0, 0, 130) (ScatterplotLayer, PolygonLayer)
+#' * getFillColor = c(0, 0, 0, 255) (ScatterplotLayer, PolygonLayer)
 #' * getLineColor = c(0, 0, 0, 255) (ScatterplotLayer, PolygonLayer)
 #' * getLineWidth = 1 (ScatterplotLayer, PolygonLayer)
 #' * getElevation = 1000 (PolygonLayer)
@@ -172,14 +172,16 @@ renderOptions = function(...) {
 #' @export
 dataAccessors = function(...) {
 
+  # we set all defaults to NULL, so deck.gl defaults are used and overhead on
+  # JS side is minimised, resulting in insanely fast default renders!
   default_lst = list(
-    getRadius = 1
-    , getColor = c(0, 0, 0, 255)
-    , getFillColor = c(0, 0, 0, 130)
-    , getLineColor = c(0, 0, 0, 255)
-    , getLineWidth = 1
-    , getElevation = 1000
-    , getWidth = 1
+    getRadius = NULL # 1
+    , getColor = NULL # c(0, 0, 0, 255)
+    , getFillColor = NULL # c(0, 0, 0, 255)
+    , getLineColor = NULL # c(0, 0, 0, 255)
+    , getLineWidth = NULL # 1
+    , getElevation = NULL # 1000
+    , getWidth = NULL # 1
   )
 
   dot_lst = list(...)

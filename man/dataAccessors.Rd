@@ -31,7 +31,7 @@ Currently, the following accessors are automatically set to he following default
 \itemize{
 \item getRadius = 1 (ScatterplotLayer)
 \item getColor = c(0, 0, 0, 255) (ScatterplotLayer, PathLayer)
-\item getFillColor = c(0, 0, 0, 130) (ScatterplotLayer, PolygonLayer)
+\item getFillColor = c(0, 0, 0, 255) (ScatterplotLayer, PolygonLayer)
 \item getLineColor = c(0, 0, 0, 255) (ScatterplotLayer, PolygonLayer)
 \item getLineWidth = 1 (ScatterplotLayer, PolygonLayer)
 \item getElevation = 1000 (PolygonLayer)

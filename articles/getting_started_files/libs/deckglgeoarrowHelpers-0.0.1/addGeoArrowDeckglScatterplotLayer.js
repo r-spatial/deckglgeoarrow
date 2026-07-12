@@ -101,14 +101,21 @@ scatterplotLayer = function(map, opts, table) {
     antialiasing: opts.renderOptions.antialiasing,
 
     // data accessros
-    getRadius: ({ index, data }) =>
-      attributeAccessor(index, data, opts.dataAccessors.getRadius),
-    getFillColor: ({ index, data }) =>
-      colorAccessor(index, data, opts.dataAccessors.getFillColor),
-    getLineColor: ({ index, data }) =>
-      colorAccessor(index, data, opts.dataAccessors.getLineColor),
-    getLineWidth: ({ index, data }) =>
-      attributeAccessor(index, data, opts.dataAccessors.getLineWidth),
+    getRadius: opts.dataAccessors.getRadius === null ? 1 : ({ index, data }) => {
+      return attributeAccessor(index, data, opts.dataAccessors.getRadius);
+    },
+
+    getFillColor: opts.dataAccessors.getFillColor === null ? [0,0,0,255] : ({ index, data }) => {
+      return colorAccessor(index, data, opts.dataAccessors.getFillColor);
+    },
+
+    getLineColor: opts.dataAccessors.getLineColor === null ? [0,0,0,255] : ({ index, data }) => {
+      return colorAccessor(index, data, opts.dataAccessors.getLineColor);
+    },
+
+    getLineWidth: opts.dataAccessors.getLineWidth === null ? 1 : ({ index, data }) => {
+      return attributeAccessor(index, data, opts.dataAccessors.getLineWidth);
+    },
 
     // interactivity
     pickable: true,

@@ -110,10 +110,13 @@ pathLayer = function(map, opts, table) {
       }
     },
 */
-    getColor: ({ index, data }) =>
-      colorAccessor(index, data, opts.dataAccessors.getColor),
-    getWidth: ({ index, data }) =>
-      attributeAccessor(index, data, opts.dataAccessors.getWidth),
+    getColor: opts.dataAccessors.getColor === null ? [0,0,0,255] : ({ index, data }) => {
+      return colorAccessor(index, data, opts.dataAccessors.getColor);
+    },
+
+    getWidth: opts.dataAccessors.getWidth === null ? 1 : ({ index, data }) => {
+      return attributeAccessor(index, data, opts.dataAccessors.getWidth);
+    },
 
     // interactivity
     pickable: true,

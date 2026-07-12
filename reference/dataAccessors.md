@@ -42,7 +42,7 @@ defaults:
 
 - getColor = c(0, 0, 0, 255) (ScatterplotLayer, PathLayer)
 
-- getFillColor = c(0, 0, 0, 130) (ScatterplotLayer, PolygonLayer)
+- getFillColor = c(0, 0, 0, 255) (ScatterplotLayer, PolygonLayer)
 
 - getLineColor = c(0, 0, 0, 255) (ScatterplotLayer, PolygonLayer)
 
@@ -67,25 +67,25 @@ NOTE:
 # default accessors
 dataAccessors()
 #> $getRadius
-#> [1] 1
+#> NULL
 #> 
 #> $getColor
-#> [1]   0   0   0 255
+#> NULL
 #> 
 #> $getFillColor
-#> [1]   0   0   0 130
+#> NULL
 #> 
 #> $getLineColor
-#> [1]   0   0   0 255
+#> NULL
 #> 
 #> $getLineWidth
-#> [1] 1
+#> NULL
 #> 
 #> $getElevation
-#> [1] 1000
+#> NULL
 #> 
 #> $getWidth
-#> [1] 1
+#> NULL
 #> 
 
 # modify selected accessors
@@ -94,10 +94,10 @@ dataAccessors(
   getLineColor = "#ff00ffaa"
 )
 #> $getRadius
-#> [1] 1
+#> NULL
 #> 
 #> $getColor
-#> [1]   0   0   0 255
+#> NULL
 #> 
 #> $getFillColor
 #> [1]   0   0 255 130
@@ -106,12 +106,12 @@ dataAccessors(
 #> [1] "#ff00ffaa"
 #> 
 #> $getLineWidth
-#> [1] 1
+#> NULL
 #> 
 #> $getElevation
-#> [1] 1000
+#> NULL
 #> 
 #> $getWidth
-#> [1] 1
+#> NULL
 #> 
 ```

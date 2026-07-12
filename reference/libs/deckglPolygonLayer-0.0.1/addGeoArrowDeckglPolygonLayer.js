@@ -107,14 +107,21 @@ polygonLayer = function(map, opts, table) {
     */
 
     // data accessros
-    getFillColor: ({ index, data }) =>
-      colorAccessor(index, data, opts.dataAccessors.getFillColor),
-    getLineColor: ({ index, data }) =>
-      colorAccessor(index, data, opts.dataAccessors.getLineColor),
-    getLineWidth: ({ index, data }) =>
-      attributeAccessor(index, data, opts.dataAccessors.getLineWidth),
-    getElevation: ({ index, data }) =>
-      attributeAccessor(index, data, opts.dataAccessors.getElevation),
+    getFillColor: opts.dataAccessors.getFillColor === null ? [0,0,0,255] : ({ index, data }) => {
+      return colorAccessor(index, data, opts.dataAccessors.getFillColor);
+    },
+
+    getLineColor: opts.dataAccessors.getLineColor === null ? [0,0,0,255] : ({ index, data }) => {
+      return colorAccessor(index, data, opts.dataAccessors.getLineColor);
+    },
+
+    getLineWidth: opts.dataAccessors.getLineWidth === null ? 1 : ({ index, data }) => {
+      return attributeAccessor(index, data, opts.dataAccessors.getLineWidth);
+    },
+
+    getElevation: opts.dataAccessors.getElevation === null ? 1000 : ({ index, data }) => {
+      return attributeAccessor(index, data, opts.dataAccessors.getElevation);
+    },
 
     // interactivity
     pickable: true,

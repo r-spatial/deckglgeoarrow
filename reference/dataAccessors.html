@@ -13,7 +13,7 @@ package."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">deckglgeoarrow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,7 +77,7 @@ layer types they apply to.</p>
 add it to the data and provide the column name to the respective data accessor.</p>
 <p>Currently, the following accessors are automatically set to he following defaults:</p><ul><li><p>getRadius = 1 (ScatterplotLayer)</p></li>
 <li><p>getColor = c(0, 0, 0, 255) (ScatterplotLayer, PathLayer)</p></li>
-<li><p>getFillColor = c(0, 0, 0, 130) (ScatterplotLayer, PolygonLayer)</p></li>
+<li><p>getFillColor = c(0, 0, 0, 255) (ScatterplotLayer, PolygonLayer)</p></li>
 <li><p>getLineColor = c(0, 0, 0, 255) (ScatterplotLayer, PolygonLayer)</p></li>
 <li><p>getLineWidth = 1 (ScatterplotLayer, PolygonLayer)</p></li>
 <li><p>getElevation = 1000 (PolygonLayer)</p></li>
@@ -93,25 +93,25 @@ or a hex color string (potentially also with alpha) - see examples.</p></li>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># default accessors</span></span></span>
 <span class="r-in"><span><span class="fu">dataAccessors</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getRadius</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getColor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   0   0   0 255</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getFillColor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   0   0   0 130</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getLineColor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   0   0   0 255</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getLineWidth</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getElevation</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getWidth</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># modify selected accessors</span></span></span>
@@ -120,10 +120,10 @@ or a hex color string (potentially also with alpha) - see examples.</p></li>
 <span class="r-in"><span>  getLineColor <span class="op">=</span> <span class="st">"#ff00ffaa"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getRadius</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getColor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   0   0   0 255</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getFillColor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]   0   0 255 130</span>
@@ -132,13 +132,13 @@ or a hex color string (potentially also with alpha) - see examples.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "#ff00ffaa"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getLineWidth</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getElevation</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $getWidth</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
@@ -152,7 +152,7 @@ or a hex color string (potentially also with alpha) - see examples.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

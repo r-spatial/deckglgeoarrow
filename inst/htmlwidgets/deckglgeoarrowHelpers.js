@@ -36,6 +36,12 @@ function objectToTable(obj, className, columns, geom_column_name) {
   return "<table class=" + className + ">" + tab + "</table>";
 }
 
+function hexToRGBABitwise(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  let rgba = [(n >> 24) & 255, (n >> 16)  & 255, (n >> 8) & 255, n & 255];
+  //debugger;
+  return rgba;
+}
 
 function hexToRGBA(hex) {
     // remove invalid characters
@@ -62,11 +68,11 @@ function isHexColor(string) {
 
 function colorAccessor(index, data, color)  {
   if (isHexColor(color)) {
-    return hexToRGBA(color);
+    return hexToRGBABitwise(color);
   }
   if (typeof(color) === "string") {
     const recordBatch = data.data;
-    return hexToRGBA(recordBatch.get(index)[color]);
+    return hexToRGBABitwise(recordBatch.get(index)[color]);
   }
   return color;
 }

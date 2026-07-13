@@ -40,7 +40,7 @@ addGeoArrowScatterplotLayer(
 
 - data:
 
-  a sf `(MULTI)POINT` object.
+  a `sf`, `wk`, `geos` or `SpatVector` `(MULTI)POINT` object.
 
 - file:
 
@@ -58,7 +58,7 @@ addGeoArrowScatterplotLayer(
 
 - geom_column_name:
 
-  the name of the geometry column of the sf object. It is inferred
+  the name of the geometry column of data object. It is inferred
   automatically if only one is present.
 
 - popup:

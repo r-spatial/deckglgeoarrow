@@ -40,7 +40,7 @@ addGeoArrowPathLayer(
 
 - data:
 
-  a sf `(MULTI)LINESTRING` object.
+  a `sf`, `wk`, `geos` or `SpatVector` `(MULTI)LINESTRING` object.
 
 - file:
 
@@ -58,7 +58,7 @@ addGeoArrowPathLayer(
 
 - geom_column_name:
 
-  the name of the geometry column of the sf object. It is inferred
+  the name of the geometry column of the data object. It is inferred
   automatically if only one is present.
 
 - popup:
@@ -122,7 +122,9 @@ map will be drawn on top of existing ones. It is, however, possible to
 inject layers into the existing `maplibre` (base) layer stack by using
 `render_options = renderOptions(beforeId = "<some-existing-layer-id>")`
 which will plot the current layer underneath
-`"<some-existing-layer-id>"`. See below for an example.
+`"<some-existing-layer-id>"`. See
+[addGeoArrowScatterplotLayer](https://r-spatial.github.io/deckglgeoarrow/reference/addGeoArrowScatterplotLayer.md)
+for an example.
 
 ## Examples
 

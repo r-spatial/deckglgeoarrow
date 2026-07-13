@@ -40,7 +40,7 @@ addGeoArrowPolygonLayer(
 
 - data:
 
-  a sf `(MULTI)POLYGON` object.
+  a `sf`, `wk`, `geos` or `SpatVector` `(MULTI)POLYGON` object.
 
 - file:
 
@@ -58,7 +58,7 @@ addGeoArrowPolygonLayer(
 
 - geom_column_name:
 
-  the name of the geometry column of the sf object. It is inferred
+  the name of the geometry column of the data object. It is inferred
   automatically if only one is present.
 
 - popup:

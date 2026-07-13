@@ -94,6 +94,10 @@ file_extension_map = list(
   , "geoparquet" = "parquet"
 )
 
+pickable = function(x) {
+  isTRUE(x) || is.character(x)
+}
+
 ## helper to write nanoarrow IPC stream to tempfile - deprecated
 writeGeoarrow = function(
     data

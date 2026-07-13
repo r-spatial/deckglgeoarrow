@@ -293,7 +293,7 @@ addGeoArrowPolygonLayer = function(
     )
     , map_class = map_class
     , interleaved = TRUE
-    , pickable = any(popup, tooltip)
+    , pickable = any(pickable(popup), pickable(tooltip))
     , extension_type = extension_type
   )
 

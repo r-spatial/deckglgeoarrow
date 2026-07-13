@@ -357,6 +357,7 @@ addGeoArrowScatterplotLayer = function(
     )
     , map_class = map_class
     , interleaved = TRUE
+    , pickable = any(popup, tooltip)
     , extension_type = extension_type
   )
 

@@ -3,10 +3,9 @@ library(deckglgeoarrow)
 library(wk)
 
 style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'
 
 ### points =========================
-n = 5e6
+n = 25e6
 
 pts = data.frame(
   id = seq_len(n)
@@ -21,6 +20,8 @@ options(viewer = NULL)
 
 m = maplibre(style = style_positron)
 
+# m |> addGeoArrowScatterplotLayer(pts)
+
 m |>
   addGeoArrowScatterplotLayer(
     data = pts
@@ -34,7 +35,8 @@ m |>
       getFillColor = "#74aa2380" #c(0, 255, 255, 255)
       , getLineColor = "#4523bb"
       , getRadius = 7
-      , getLineWidth = 4
+      , getLineWidth = 2
     )
-    , popup = TRUE
-  )
+    , popup = FALSE
+  ) |>
+  set_view(c(0, 0), 2)

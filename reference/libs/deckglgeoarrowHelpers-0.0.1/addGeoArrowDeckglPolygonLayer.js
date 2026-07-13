@@ -132,7 +132,7 @@ polygonLayer = function(map, opts, table) {
       } : opts.dataAccessors.getElevation === null ? 1 : opts.dataAccessors.getElevation,
 
     // interactivity
-    pickable: true,
+    pickable: opts.pickable,
 
     // GPU parameters (from luma.gl)
     // see https://luma.gl/docs/api-reference/core/parameters for valid params
@@ -141,14 +141,14 @@ polygonLayer = function(map, opts, table) {
     // (see https://github.com/developmentseed/lonboard/issues/1037)
     parameters: opts.parameters,
 
-    onClick: (info, event) => {
+    onClick: opts.popup === null ? null : (info, event) => {
         let popup = clickFun(info, event, opts, "popup", opts.map_class);
         if (popup !== undefined) {
           popup.addTo(map);
         }
     },
 
-    onHover: (info, event) => {
+    onHover: opts.tooltip === null ? null : (info, event) => {
         if (info.picked === false) {
           removePopups(opts.tooltipOptions.className);
         }

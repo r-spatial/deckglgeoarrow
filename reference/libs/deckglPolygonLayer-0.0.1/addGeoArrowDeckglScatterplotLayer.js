@@ -126,7 +126,7 @@ scatterplotLayer = function(map, opts, table) {
       } : opts.dataAccessors.getLineWidth === null ? 1 : opts.dataAccessors.getLineWidth,
 
     // interactivity
-    pickable: true,
+    pickable: opts.pickable,
 
     // GPU parameters (from luma.gl)
     // see https://luma.gl/docs/api-reference/core/parameters for valid params
@@ -135,15 +135,14 @@ scatterplotLayer = function(map, opts, table) {
     // (see https://github.com/developmentseed/lonboard/issues/1037)
     parameters: opts.parameters,
 
-    onClick: (info, event) => {
+    onClick: opts.popup === null ? null : (info, event) => {
         let popup = clickFun(info, event, opts, "popup", opts.map_class);
         if (popup !== undefined) {
           popup.addTo(map);
         }
     },
 
-    onHover: (info, event) => {
-      //debugger;
+    onHover: opts.tooltip === null ? null : (info, event) => {
         if (info.picked === false) {
           removePopups(opts.tooltipOptions.className);
         }

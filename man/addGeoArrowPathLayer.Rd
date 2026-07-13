@@ -24,7 +24,7 @@ addGeoArrowPathLayer(
 \arguments{
 \item{map}{the \code{\link[mapgl:maplibre]{mapgl::maplibre()}} or \code{\link[mapgl:mapboxgl]{mapgl::mapboxgl()}} map to add the layer to.}
 
-\item{data}{a sf \verb{(MULTI)LINESTRING} object.}
+\item{data}{a \code{sf}, \code{wk}, \code{geos} or \code{SpatVector} \verb{(MULTI)LINESTRING} object.}
 
 \item{file}{a valid local file path to a \code{geoarrow} or \code{geoparquet} file to be
 added to the map. Ignored if \code{data} is supplied.}
@@ -34,7 +34,7 @@ added to the map. Ignored if \code{data} or \code{file} is supplied.}
 
 \item{layer_id}{the layer id.}
 
-\item{geom_column_name}{the name of the geometry column of the sf object.
+\item{geom_column_name}{the name of the geometry column of the data object.
 It is inferred automatically if only one is present.}
 
 \item{popup}{should a popup be contructed? If \code{TRUE}, will create a popup fromm all
@@ -79,7 +79,7 @@ top of existing ones. It is, however, possible to inject layers into the
 existing \code{maplibre} (base) layer stack by using
 \code{render_options = renderOptions(beforeId = "<some-existing-layer-id>")}
 which will plot the current layer underneath \code{"<some-existing-layer-id>"}.
-See below for an example.
+See \link{addGeoArrowScatterplotLayer} for an example.
 }
 \examples{
 library(wk)

@@ -2,13 +2,13 @@
 #' using blazing fast [nanoarrow::write_nanoarrow()] data transfer.
 #'
 #' @param map the [mapgl::maplibre()] or [mapgl::mapboxgl()] map to add the layer to.
-#' @param data a sf `(MULTI)LINESTRING` object.
+#' @param data a `sf`, `wk`, `geos` or `SpatVector` `(MULTI)LINESTRING` object.
 #' @param file a valid local file path to a `geoarrow` or `geoparquet` file to be
 #' added to the map. Ignored if `data` is supplied.
 #' @param url a URL to a remotely hosted `geoarrow` or `geoparquet` file to be
 #' added to the map. Ignored if `data` or `file` is supplied.
 #' @param layer_id the layer id.
-#' @param geom_column_name the name of the geometry column of the sf object.
+#' @param geom_column_name the name of the geometry column of the data object.
 #' It is inferred automatically if only one is present.
 #' @param popup should a popup be contructed? If `TRUE`, will create a popup fromm all
 #' available attributes of the feature. Can also be a character vector of column
@@ -39,7 +39,7 @@
 #' existing `maplibre` (base) layer stack by using
 #' `render_options = renderOptions(beforeId = "<some-existing-layer-id>")`
 #' which will plot the current layer underneath `"<some-existing-layer-id>"`.
-#' See below for an example.
+#' See [addGeoArrowScatterplotLayer] for an example.
 #'
 #' @return The modified \code{map} object with the added path layer.
 #'

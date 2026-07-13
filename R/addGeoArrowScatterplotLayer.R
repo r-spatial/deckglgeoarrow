@@ -2,13 +2,13 @@
 #' using blazing fast [nanoarrow::write_nanoarrow()] data transfer.
 #'
 #' @param map the [mapgl::maplibre()] or [mapgl::mapboxgl()] map to add the layer to.
-#' @param data a sf `(MULTI)POINT` object.
+#' @param data a `sf`, `wk`, `geos` or `SpatVector` `(MULTI)POINT` object.
 #' @param file a valid local file path to a `geoarrow` or `geoparquet` file to be
 #' added to the map. Ignored if `data` is supplied.
 #' @param url a URL to a remotely hosted `geoarrow` or `geoparquet` file to be
 #' added to the map. Ignored if `data` or `file` is supplied.
 #' @param layer_id the layer id.
-#' @param geom_column_name the name of the geometry column of the sf object.
+#' @param geom_column_name the name of the geometry column of data object.
 #' It is inferred automatically if only one is present.
 #' @param popup should a popup be contructed? If `TRUE`, will create a popup fromm all
 #' available attributes of the feature. Can also be a character vector of column

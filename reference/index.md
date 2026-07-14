@@ -24,6 +24,17 @@
   [`nanoarrow::write_nanoarrow()`](https://arrow.apache.org/nanoarrow/latest/r/reference/read_nanoarrow.html)
   data transfer.
 
+- [`addGeoArrowS2Layer()`](https://r-spatial.github.io/deckglgeoarrow/reference/addGeoArrowS2Layer.md)
+  :
+
+  Add Deck.gl S2Layer to a
+  [`mapgl::maplibre()`](https://walker-data.com/mapgl/reference/maplibre.html)
+  or
+  [`mapgl::mapboxgl()`](https://walker-data.com/mapgl/reference/mapboxgl.html)
+  map using blazing fast
+  [`nanoarrow::write_nanoarrow()`](https://arrow.apache.org/nanoarrow/latest/r/reference/read_nanoarrow.html)
+  data transfer.
+
 - [`addGeoArrowScatterplotLayer()`](https://r-spatial.github.io/deckglgeoarrow/reference/addGeoArrowScatterplotLayer.md)
   :
 

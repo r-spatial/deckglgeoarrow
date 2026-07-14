@@ -138,3 +138,24 @@ function removePopups(className) {
     }
   }
 }
+
+// taken from:
+// https://stackoverflow.com/a/7977314
+function getExtension(filename) {
+  var parts = filename.split('.');
+  return parts[parts.length - 1];
+}
+
+// taken from:
+// https://stackoverflow.com/a/7977314
+function guessExtension(filename) {
+  var ext = getExtension(filename);
+  switch (ext.toLowerCase()) {
+    case 'arrow': return 'arrow';
+    case 'geoarrow': return 'arrow';
+    case 'arrows': return 'arrow';
+    case 'parquet': return 'parquet';
+    case 'geoparquet': return 'parquet';
+  }
+  return null;
+}

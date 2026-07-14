@@ -35,6 +35,15 @@
   [`nanoarrow::write_nanoarrow()`](https://arrow.apache.org/nanoarrow/latest/r/reference/read_nanoarrow.html)
   data transfer.
 
+- [`addSource()`](https://r-spatial.github.io/deckglgeoarrow/reference/addSource.md)
+  :
+
+  Add a data source to a
+  [`mapgl::maplibre()`](https://walker-data.com/mapgl/reference/maplibre.html)
+  or
+  [`mapgl::mapboxgl()`](https://walker-data.com/mapgl/reference/mapboxgl.html)
+  map.
+
 - [`dataAccessors()`](https://r-spatial.github.io/deckglgeoarrow/reference/dataAccessors.md)
   : Deck.gl data accessors
 

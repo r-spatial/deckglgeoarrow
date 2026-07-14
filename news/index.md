@@ -1,8 +1,15 @@
 # Changelog
 
-## deckglgeoarrow 0.0.2.9006 (2026-07-13)
+## deckglgeoarrow 0.0.2.9007 (2026-07-14)
 
 ##### ✨ features and improvements
+
+- new function
+  [`addSource()`](https://r-spatial.github.io/deckglgeoarrow/reference/addSource.md)
+  to add a source that can be shared across layers.
+- **BREAKING:** due to
+  [`addSource()`](https://r-spatial.github.io/deckglgeoarrow/reference/addSource.md)
+  a new argument `source` has been added to all layers.
 
 ##### 🐛 bug fixes
 

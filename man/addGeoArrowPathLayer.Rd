@@ -8,6 +8,7 @@ using blazing fast \code{\link[nanoarrow:read_nanoarrow]{nanoarrow::write_nanoar
 addGeoArrowPathLayer(
   map,
   data,
+  source,
   file,
   url,
   layer_id = "path",
@@ -24,7 +25,10 @@ addGeoArrowPathLayer(
 \arguments{
 \item{map}{the \code{\link[mapgl:maplibre]{mapgl::maplibre()}} or \code{\link[mapgl:mapboxgl]{mapgl::mapboxgl()}} map to add the layer to.}
 
-\item{data}{a \code{sf}, \code{wk}, \code{geos} or \code{SpatVector} \verb{(MULTI)LINESTRING} object.}
+\item{data}{a \code{sf}, \code{wk}, \code{geos} or \code{SpatVector} \verb{(MULTI)LINESTRING} object.
+Ignored if \code{source} is supplied.}
+
+\item{source}{the \code{id} of a source previously added via \code{\link[=addSource]{addSource()}}.}
 
 \item{file}{a valid local file path to a \code{geoarrow} or \code{geoparquet} file to be
 added to the map. Ignored if \code{data} is supplied.}

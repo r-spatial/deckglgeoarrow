@@ -3,6 +3,8 @@
 #'
 #' @param map the [mapgl::maplibre()] or [mapgl::mapboxgl()] map to add the layer to.
 #' @param data a `sf`, `wk`, `geos` or `SpatVector` `(MULTI)LINESTRING` object.
+#' Ignored if `source` is supplied.
+#' @param source the `id` of a source previously added via [addSource()].
 #' @param file a valid local file path to a `geoarrow` or `geoparquet` file to be
 #' added to the map. Ignored if `data` is supplied.
 #' @param url a URL to a remotely hosted `geoarrow` or `geoparquet` file to be
@@ -175,6 +177,7 @@
 addGeoArrowPathLayer = function(
     map
     , data
+    , source
     , file
     , url
     , layer_id = "path"
@@ -195,6 +198,7 @@ addGeoArrowPathLayer = function(
 .addGeoArrowPathLayer = function(
     map
     , data
+    , source
     , file
     , url
     , layer_id = "path"
@@ -233,28 +237,17 @@ addGeoArrowPathLayer = function(
     widget = map
   )
 
-  if (!missing(data)) {
-
-    data = parseGeoarrow(
-      data = data
-      , interleaved = TRUE
+  if (missing(source)) {
+    map = addSource(
+      map = map
+      , data = data
+      , file = file
+      , url = url
+      , id = layer_id
     )
-
+  } else {
+    layer_id = source
   }
-
-  map = geoarrowWidget::attachData(
-    widget = map
-    , data = data
-    , file = file
-    , url = url
-    , name = layer_id
-  )
-
-  extension_type = guessFileExtension(
-    data = data
-    , file = file
-    , url = url
-  )
 
   map$dependencies = c(
     map$dependencies
@@ -295,7 +288,6 @@ addGeoArrowPathLayer = function(
     , map_class = map_class
     , interleaved = TRUE
     , pickable = any(pickable(popup), pickable(tooltip))
-    , extension_type = extension_type
   )
 
   dot_lst = list(...)

@@ -2,6 +2,10 @@
 
 #### ✨ features and improvements
 
+  * new function `addSource()` to add a source that can be shared across layers.
+  * **BREAKING:** due to `addSource()` a new argument `source` has been added to
+    all layers.
+
 #### 🐛 bug fixes
 
 #### 💬 documentation etc

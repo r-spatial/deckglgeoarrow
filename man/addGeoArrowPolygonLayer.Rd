@@ -8,6 +8,7 @@ using blazing fast \code{\link[nanoarrow:read_nanoarrow]{nanoarrow::write_nanoar
 addGeoArrowPolygonLayer(
   map,
   data,
+  source,
   file,
   url,
   layer_id = "polygon",
@@ -24,7 +25,10 @@ addGeoArrowPolygonLayer(
 \arguments{
 \item{map}{the \code{\link[mapgl:maplibre]{mapgl::maplibre()}} or \code{\link[mapgl:mapboxgl]{mapgl::mapboxgl()}} map to add the layer to.}
 
-\item{data}{a \code{sf}, \code{wk}, \code{geos} or \code{SpatVector} \verb{(MULTI)POLYGON} object.}
+\item{data}{a \code{sf}, \code{wk}, \code{geos} or \code{SpatVector} \verb{(MULTI)POLYGON} object.
+Ignored if \code{source} is supplied.}
+
+\item{source}{the \code{id} of a source previously added via \code{\link[=addSource]{addSource()}}.}
 
 \item{file}{a valid local file path to a \code{geoarrow} or \code{geoparquet} file to be
 added to the map. Ignored if \code{data} is supplied.}

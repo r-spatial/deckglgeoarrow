@@ -31,10 +31,10 @@ Ignored if \code{source} is supplied.}
 \item{source}{the \code{id} of a source previously added via \code{\link[=addSource]{addSource()}}.}
 
 \item{file}{a valid local file path to a \code{geoarrow} or \code{geoparquet} file to be
-added to the map. Ignored if \code{data} is supplied.}
+added to the map. Ignored if \code{source} or \code{data} is supplied.}
 
 \item{url}{a URL to a remotely hosted \code{geoarrow} or \code{geoparquet} file to be
-added to the map. Ignored if \code{data} or \code{file} is supplied.}
+added to the map. Ignored if \code{source} or \code{data} or \code{file} is supplied.}
 
 \item{layer_id}{the layer id.}
 

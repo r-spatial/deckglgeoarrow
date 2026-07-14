@@ -6,9 +6,9 @@
 #' Ignored if `source` is supplied.
 #' @param source the `id` of a source previously added via [addSource()].
 #' @param file a valid local file path to a `geoarrow` or `geoparquet` file to be
-#' added to the map. Ignored if `data` is supplied.
+#' added to the map. Ignored if `source` or `data` is supplied.
 #' @param url a URL to a remotely hosted `geoarrow` or `geoparquet` file to be
-#' added to the map. Ignored if `data` or `file` is supplied.
+#' added to the map. Ignored if `source` or `data` or `file` is supplied.
 #' @param layer_id the layer id.
 #' @param geom_column_name the name of the geometry column of the data object.
 #' It is inferred automatically if only one is present.

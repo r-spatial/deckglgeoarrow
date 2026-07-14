@@ -37,13 +37,14 @@ library(wk)
 
 pt = wkt("POINT (0 0)")
 
-m = maplibre(style = style_positron)
+m = maplibre()
 
 m = m |>
   addSource(
     id = "pt"
     , data = pt
-  )
+  ) |>
+  addGeoArrowScatterplotLayer(source = "pt")
 
 ## open the map in the browser, press <Ctrl+u> and look for a line like this:
 ## <link id="pt-geoarrowWidget-attachment" rel="attachment" href="lib/pt-0.0.1/pt.arrow"/>

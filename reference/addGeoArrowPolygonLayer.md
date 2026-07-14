@@ -52,12 +52,12 @@ addGeoArrowPolygonLayer(
 - file:
 
   a valid local file path to a `geoarrow` or `geoparquet` file to be
-  added to the map. Ignored if `data` is supplied.
+  added to the map. Ignored if `source` or `data` is supplied.
 
 - url:
 
   a URL to a remotely hosted `geoarrow` or `geoparquet` file to be added
-  to the map. Ignored if `data` or `file` is supplied.
+  to the map. Ignored if `source` or `data` or `file` is supplied.
 
 - layer_id:
 

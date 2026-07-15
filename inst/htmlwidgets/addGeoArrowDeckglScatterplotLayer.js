@@ -15,7 +15,7 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
   deckoverlay = map._controls.find((el) => el.hasOwnProperty("_deck"));
 
   if (deckoverlay === undefined) {
-    deckoverlay = new deck.MapboxOverlay({
+    deckoverlay = new mapboxoverlay.MapboxOverlay({
       id: "geoarrow-deck-layer",
       interleaved: opts.interleaved,
       layers: [],
@@ -68,7 +68,7 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
 
 scatterplotLayer = function(map, opts, table) {
-  let gaDeckLayers = window["@geoarrow/deck"]["gl-layers"];
+  //let gaDeckLayers = window.gaDeckLayers;
 
   let table_names = table.schema.fields.map(obj => obj.name);
 

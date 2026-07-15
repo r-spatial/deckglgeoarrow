@@ -289,14 +289,10 @@ addGeoArrowScatterplotLayer = function(
     )
   )
 
-  map$dependencies = c(
-    map$dependencies
-    , if (!inherits(map, "mapdeck")) deckglDependencies()
-  )
-
-  map = geoarrowWidget::attachParquetWasmDependencies(
-    widget = map
-  )
+  # map$dependencies = c(
+  #   map$dependencies
+  #   , if (!inherits(map, "mapdeck")) deckglDependencies()
+  # )
 
   if (missing(source)) {
     map = addSource(
@@ -312,16 +308,22 @@ addGeoArrowScatterplotLayer = function(
 
   map$dependencies = c(
     map$dependencies
+    , importDependencies()
     , deckglgeoarrowDependencies()
     , helpersDependency()
   )
 
+  map = geoarrowWidget::attachParquetWasmDependencies(
+    widget = map
+  )
+
   if (missing(js_code)) {
     js_code = htmlwidgets::JS(
-      "function(el, x, data) {
+      'function(el, x, data) {
+        debugger;
         map = this.getMap();
         addGeoArrowDeckglScatterplotLayer(map, data);
-      }"
+      }'
     )
   }
 

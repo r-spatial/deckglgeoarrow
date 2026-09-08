@@ -100,29 +100,22 @@ scatterplotLayer = function(map, opts, table, id) {
   }
 
   let layer = new rdeckglgeoarrow.gaDeckLayers.GeoArrowScatterplotLayer({
-    //id: opts.decklayerId,
     id: id,
     data: table,
-    //getPosition: table.getChild(opts.geom_column_name),
-    beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,
-    zIndex: opts.renderOptions.zIndex,
 
     // render options
-    radiusUnits: opts.renderOptions.radiusUnits,
-    radiusScale: opts.renderOptions.radiusScale,
-    lineWidthUnits: opts.renderOptions.lineWidthUnits,
-    lineWidthScale: opts.renderOptions.lineWidthScale,
-    stroked: opts.renderOptions.stroked,
-    filled: opts.renderOptions.filled,
-    radiusMinPixels: opts.renderOptions.radiusMinPixels,
-    radiusMaxPixels: opts.renderOptions.radiusMaxPixels,
-    lineWidthMinPixels: opts.renderOptions.lineWidthMinPixels,
-    lineWidthMaxPixels: opts.renderOptions.lineWidthMaxPixels,
-    billboard: opts.renderOptions.billboard,
-    antialiasing: opts.renderOptions.antialiasing,
-    autoHighlight: opts.renderOptions.autoHighlight,
-    highlightColor: opts.renderOptions.highlightColor,
+    ...opts.renderOptions,
+
+    // interactivity
+    pickable: opts.pickable,
+
+    // GPU parameters (from luma.gl)
+    // see https://luma.gl/docs/api-reference/core/parameters for valid params
+    // this is currently mainly used to set 'depthCompare: "always"' to avoid
+    // z-fighting rendering issues. Passed via ... from R currently.
+    // (see https://github.com/developmentseed/lonboard/issues/1037)
+    parameters: opts.parameters,
 
     // data accessors
     getRadius: table_names.includes(opts.dataAccessors.getRadius) ?
@@ -148,16 +141,6 @@ scatterplotLayer = function(map, opts, table, id) {
       ({ index, data }) => {
         return attributeAccessor(index, data, opts.dataAccessors.getLineWidth);
       } : opts.dataAccessors.getLineWidth === null ? 1 : opts.dataAccessors.getLineWidth,
-
-    // interactivity
-    pickable: opts.pickable,
-
-    // GPU parameters (from luma.gl)
-    // see https://luma.gl/docs/api-reference/core/parameters for valid params
-    // this is currently mainly used to set 'depthCompare: "always"' to avoid
-    // z-fighting rendering issues. Passed via ... from R currently.
-    // (see https://github.com/developmentseed/lonboard/issues/1037)
-    parameters: opts.parameters,
 
     onClick: opts.popup === null ? null : (info, event) => {
         let popup = clickFun(info, event, opts, "popup", opts.map_class);

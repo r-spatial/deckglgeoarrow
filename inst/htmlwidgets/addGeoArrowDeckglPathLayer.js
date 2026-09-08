@@ -92,27 +92,22 @@ pathLayer = function(map, opts, table, id) {
   }
 
   let layer = new rdeckglgeoarrow.gaDeckLayers.GeoArrowPathLayer({
-    //id: opts.decklayerId,
-    id: id,
+     id: id,
     data: table,
-    //getPath: table.getChild(opts.geom_column_name),
-    getCursor: () => "inherit",
-    beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,
-    zIndex: opts.renderOptions.zIndex,
 
     // render options
-    widthUnits: opts.renderOptions.widthUnits,
-    widthScale: opts.renderOptions.widthScale,
-    widthMinPixels: opts.renderOptions.widthMinPixels,
-    widthMaxPixels: opts.renderOptions.widthMaxPixels,
-    capRounded: opts.renderOptions.capRounded,
-    jointRounded: opts.renderOptions.jointRounded,
-    billboard: opts.renderOptions.billboard,
-    miterLimit: opts.renderOptions.miterLimit,
-    autoHighlight: opts.renderOptions.autoHighlight,
-    highlightColor: opts.renderOptions.highlightColor,
-    // _pathType: opts.renderOptions._pathType,
+    ...opts.renderOptions,
+
+    // interactivity
+    pickable: opts.pickable,
+
+    // GPU parameters (from luma.gl)
+    // see https://luma.gl/docs/api-reference/core/parameters for valid params
+    // this is currently mainly used to set 'depthCompare: "always"' to avoid
+    // z-fighting rendering issues. Passed via ... from R currently.
+    // (see https://github.com/developmentseed/lonboard/issues/1037)
+    parameters: opts.parameters,
 
     // data accessors
     getColor: table_names.includes(opts.dataAccessors.getColor) ?
@@ -126,16 +121,6 @@ pathLayer = function(map, opts, table, id) {
       ({ index, data }) => {
         return attributeAccessor(index, data, opts.dataAccessors.getWidth);
       } : opts.dataAccessors.getWidth === null ? 1 : opts.dataAccessors.getWidth,
-
-    // interactivity
-    pickable: opts.pickable,
-
-    // GPU parameters (from luma.gl)
-    // see https://luma.gl/docs/api-reference/core/parameters for valid params
-    // this is currently mainly used to set 'depthCompare: "always"' to avoid
-    // z-fighting rendering issues. Passed via ... from R currently.
-    // (see https://github.com/developmentseed/lonboard/issues/1037)
-    parameters: opts.parameters,
 
     onClick: opts.popup === null ? null : (info, event) => {
         let popup = clickFun(info, event, opts, "popup", opts.map_class);

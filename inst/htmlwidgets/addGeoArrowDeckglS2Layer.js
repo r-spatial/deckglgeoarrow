@@ -100,34 +100,23 @@ s2Layer = function(map, opts, table, id) {
   }
 
   let layer = new rdeckglgeoarrow.gaDeckLayers.GeoArrowS2Layer({
-    //id: opts.decklayerId,
-    id: id,
+     id: id,
     data: table,
-    getS2Token: table.getChild(opts.s2_column_name),
-    beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,
-    zIndex: opts.renderOptions.zIndex,
+    getS2Token: table.getChild(opts.s2_column_name),
 
     // render options
-    filled: opts.renderOptions.filled,
-    stroked: opts.renderOptions.stroked,
-    extruded: opts.renderOptions.extruded,
-    wireframe: opts.renderOptions.wireframe,
-    elevationScale: opts.renderOptions.elevationScale,
-    lineWidthUnits: opts.renderOptions.lineWidthUnits,
-    lineWidthScale: opts.renderOptions.lineWidthScale,
-    lineWidthMinPixels: opts.renderOptions.lineWidthMinPixels,
-    lineWidthMaxPixels: opts.renderOptions.lineWidthMaxPixels,
-    lineJointRounded: opts.renderOptions.lineJointRounded,
-    lineMiterLimit: opts.renderOptions.lineMiterLimit,
-    autoHighlight: opts.renderOptions.autoHighlight,
-    highlightColor: opts.renderOptions.highlightColor,
-    /*
-    material: opts.renderOptions.material,
-    _normalize: opts.renderOptions._normalize,
-    _windingOrder: opts.renderOptions._windingOrder,
-    //https://deck.gl/docs/developer-guide/performance#supply-attributes-directly
-    */
+    ...opts.renderOptions,
+
+    // interactivity
+    pickable: opts.pickable,
+
+    // GPU parameters (from luma.gl)
+    // see https://luma.gl/docs/api-reference/core/parameters for valid params
+    // this is currently mainly used to set 'depthCompare: "always"' to avoid
+    // z-fighting rendering issues. Passed via ... from R currently.
+    // (see https://github.com/developmentseed/lonboard/issues/1037)
+    parameters: opts.parameters,
 
     // data accessors
     getFillColor: table_names.includes(opts.dataAccessors.getFillColor) ?
@@ -153,16 +142,6 @@ s2Layer = function(map, opts, table, id) {
       ({ index, data }) => {
         return attributeAccessor(index, data, opts.dataAccessors.getElevation);
       } : opts.dataAccessors.getElevation === null ? 1 : opts.dataAccessors.getElevation,
-
-    // interactivity
-    pickable: opts.pickable,
-
-    // GPU parameters (from luma.gl)
-    // see https://luma.gl/docs/api-reference/core/parameters for valid params
-    // this is currently mainly used to set 'depthCompare: "always"' to avoid
-    // z-fighting rendering issues. Passed via ... from R currently.
-    // (see https://github.com/developmentseed/lonboard/issues/1037)
-    parameters: opts.parameters,
 
     onClick: opts.popup === null ? null : (info, event) => {
         let popup = clickFun(info, event, opts, "popup", opts.map_class);

@@ -3,7 +3,7 @@
 \name{addGeoArrowScatterplotLayer}
 \alias{addGeoArrowScatterplotLayer}
 \title{Add Deck.gl ScatterplotLayer to a \code{\link[mapgl:maplibre]{mapgl::maplibre()}} or \code{\link[mapgl:mapboxgl]{mapgl::mapboxgl()}} map
-using blazing fast \code{\link[nanoarrow:read_nanoarrow]{nanoarrow::write_nanoarrow()}} data transfer.}
+using blazing fast \code{\link[nanoarrow:write_nanoarrow]{nanoarrow::write_nanoarrow()}} data transfer.}
 \usage{
 addGeoArrowScatterplotLayer(
   map,
@@ -69,7 +69,7 @@ The modified \code{map} object with the added scatterplot layer.
 }
 \description{
 Add Deck.gl ScatterplotLayer to a \code{\link[mapgl:maplibre]{mapgl::maplibre()}} or \code{\link[mapgl:mapboxgl]{mapgl::mapboxgl()}} map
-using blazing fast \code{\link[nanoarrow:read_nanoarrow]{nanoarrow::write_nanoarrow()}} data transfer.
+using blazing fast \code{\link[nanoarrow:write_nanoarrow]{nanoarrow::write_nanoarrow()}} data transfer.
 }
 \details{
 \code{...} can be used to pass additional props and parameters to the deck.gl instance

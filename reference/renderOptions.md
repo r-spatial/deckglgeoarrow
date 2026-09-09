@@ -105,6 +105,11 @@ defaults:
 
 - zIndex = 1
 
+- autoHighlight = FALSE - requires `pickable` to be TRUE
+
+- highlightColor = c(0, 0, 128, 128) - only applicable if
+  `autoHighlight` is TRUE
+
 `zIndex` can be used to set layers order if multiple layers are added to
 a map. Higher values will be plotted on top of lower values. It is
 ignored, if `beforeId` is supplied.
@@ -192,6 +197,12 @@ renderOptions()
 #> $zIndex
 #> [1] 1
 #> 
+#> $autoHighlight
+#> [1] FALSE
+#> 
+#> $highlightColor
+#> [1]   0   0 128 128
+#> 
 
 # modify selected options
 renderOptions(radiusUnits = "meters", radiusScale = 10)
@@ -272,6 +283,12 @@ renderOptions(radiusUnits = "meters", radiusScale = 10)
 #> 
 #> $zIndex
 #> [1] 1
+#> 
+#> $autoHighlight
+#> [1] FALSE
+#> 
+#> $highlightColor
+#> [1]   0   0 128 128
 #> 
 
 ```

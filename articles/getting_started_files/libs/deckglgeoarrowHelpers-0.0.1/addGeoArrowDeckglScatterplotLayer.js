@@ -1,5 +1,13 @@
 addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
+  // handle hex highlightColor - only if autoHighlight requested.
+  if (opts.renderOptions.autoHighlight &&
+    isHexColor(opts.renderOptions.highlightColor)) {
+      opts.renderOptions.highlightColor = hexToRGBABitwise(
+        opts.renderOptions.highlightColor
+      );
+    }
+
   // FIXME: turn into function for re-use across layer types
   // first we generate the proper internal layer name using the slot parameter
   opts.decklayerId = "deck-layer-group-slot:" + opts.layerId;
@@ -12,10 +20,10 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
   // FIXME: turn into function for re-use across layer types
   // do we already have a deckgl mapboxoverlay on our map?
-  deckoverlay = map._controls.find((el) => el.hasOwnProperty("_deck"));
+  let deckoverlay = map._controls.find((el) => el.hasOwnProperty("_deck"));
 
   if (deckoverlay === undefined) {
-    deckoverlay = new deck.MapboxOverlay({
+    deckoverlay = new rdeckglgeoarrow.MapboxOverlay({
       id: "geoarrow-deck-layer",
       interleaved: opts.interleaved,
       layers: [],
@@ -23,7 +31,8 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
       deviceProps: {
         _cacheShaders: true,
         _cachePipelines: true,
-      }
+      },
+
     });
     map.addControl(deckoverlay);
   }
@@ -40,18 +49,29 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
       } else if (opts.extension_type === "parquet") {
         return window.parquet2arrow(result);
       } else {
-        console.log("extension type not supported, need 'geoarrow' or 'geoparquet'");
+        console.warn("extension type not supported, need 'geoarrow' or 'geoparquet'");
       }
     })
     .then(arrow_table => {
 
-      let scatterlayer = scatterplotLayer(map, opts, arrow_table);
+      const scatterlayers = [];
+      let len = arrow_table.batches.length;
+      let batch = {};
+      let id = [];
+
+      for (let i = 0; i < len; i++) {
+
+        batch = arrow_table.batches[i];
+        id = `${opts.layerId}-${i}`;
+        scatterlayers.push(scatterplotLayer(map, opts, batch, id));
+
+      }
 
       // does the mapboxoverlay already have layer(s)?
       if (deckoverlay._props.layers.length ===  0) {
-        deckoverlay.setProps({ layers: [scatterlayer] });
+        deckoverlay.setProps({ layers: scatterlayers });
       } else {
-        let lrs = deckoverlay._props.layers.concat(scatterlayer);
+        let lrs = deckoverlay._props.layers.concat(scatterlayers);
         lrs = lrs.sort(function(a, b) {
           return a.props.zIndex - b.props.zIndex;
         });
@@ -67,8 +87,7 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 };
 
 
-scatterplotLayer = function(map, opts, table) {
-  let gaDeckLayers = window["@geoarrow/deck"]["gl-layers"];
+scatterplotLayer = function(map, opts, table, id) {
 
   let table_names = table.schema.fields.map(obj => obj.name);
 
@@ -80,27 +99,23 @@ scatterplotLayer = function(map, opts, table) {
     opts.tooltip = table_names;
   }
 
-  let layer = new gaDeckLayers.GeoArrowScatterplotLayer({
-    id: opts.decklayerId,
+  let layer = new rdeckglgeoarrow.gaDeckLayers.GeoArrowScatterplotLayer({
+    id: id,
     data: table,
-    getPosition: table.getChild(opts.geom_column_name),
-    beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,
-    zIndex: opts.renderOptions.zIndex,
 
     // render options
-    radiusUnits: opts.renderOptions.radiusUnits,
-    radiusScale: opts.renderOptions.radiusScale,
-    lineWidthUnits: opts.renderOptions.lineWidthUnits,
-    lineWidthScale: opts.renderOptions.lineWidthScale,
-    stroked: opts.renderOptions.stroked,
-    filled: opts.renderOptions.filled,
-    radiusMinPixels: opts.renderOptions.radiusMinPixels,
-    radiusMaxPixels: opts.renderOptions.radiusMaxPixels,
-    lineWidthMinPixels: opts.renderOptions.lineWidthMinPixels,
-    lineWidthMaxPixels: opts.renderOptions.lineWidthMaxPixels,
-    billboard: opts.renderOptions.billboard,
-    antialiasing: opts.renderOptions.antialiasing,
+    ...opts.renderOptions,
+
+    // interactivity
+    pickable: opts.pickable,
+
+    // GPU parameters (from luma.gl)
+    // see https://luma.gl/docs/api-reference/core/parameters for valid params
+    // this is currently mainly used to set 'depthCompare: "always"' to avoid
+    // z-fighting rendering issues. Passed via ... from R currently.
+    // (see https://github.com/developmentseed/lonboard/issues/1037)
+    parameters: opts.parameters,
 
     // data accessors
     getRadius: table_names.includes(opts.dataAccessors.getRadius) ?
@@ -126,16 +141,6 @@ scatterplotLayer = function(map, opts, table) {
       ({ index, data }) => {
         return attributeAccessor(index, data, opts.dataAccessors.getLineWidth);
       } : opts.dataAccessors.getLineWidth === null ? 1 : opts.dataAccessors.getLineWidth,
-
-    // interactivity
-    pickable: opts.pickable,
-
-    // GPU parameters (from luma.gl)
-    // see https://luma.gl/docs/api-reference/core/parameters for valid params
-    // this is currently mainly used to set 'depthCompare: "always"' to avoid
-    // z-fighting rendering issues. Passed via ... from R currently.
-    // (see https://github.com/developmentseed/lonboard/issues/1037)
-    parameters: opts.parameters,
 
     onClick: opts.popup === null ? null : (info, event) => {
         let popup = clickFun(info, event, opts, "popup", opts.map_class);

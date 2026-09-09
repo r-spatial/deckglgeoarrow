@@ -21,7 +21,7 @@ layer types they apply to."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">deckglgeoarrow</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.9010</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -115,6 +115,8 @@ layer types they apply to.</p>
 <li><p>lineWidthMaxPixels = 15</p></li>
 </ul><p><strong>All layers</strong></p><ul><li><p>beforeId = NULL</p></li>
 <li><p>zIndex = 1</p></li>
+<li><p>autoHighlight = FALSE - requires <code>pickable</code> to be TRUE</p></li>
+<li><p>highlightColor = c(0, 0, 128, 128) - only applicable if <code>autoHighlight</code> is TRUE</p></li>
 </ul><p><code>zIndex</code> can be used to set layers order if multiple layers are added to a map.
 Higher values will be plotted on top of lower values.
 It is ignored, if <code>beforeId</code> is supplied.</p>
@@ -202,6 +204,12 @@ It is ignored, if <code>beforeId</code> is supplied.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $zIndex</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $autoHighlight</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $highlightColor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   0   0 128 128</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># modify selected options</span></span></span>
 <span class="r-in"><span><span class="fu">renderOptions</span><span class="op">(</span>radiusUnits <span class="op">=</span> <span class="st">"meters"</span>, radiusScale <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
@@ -282,6 +290,12 @@ It is ignored, if <code>beforeId</code> is supplied.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $zIndex</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $autoHighlight</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $highlightColor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   0   0 128 128</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>

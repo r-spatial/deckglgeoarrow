@@ -1,6 +1,6 @@
 # Changelog
 
-## deckglgeoarrow 0.0.2.9010 (2026-07-14)
+## deckglgeoarrow 0.1.0 (2026-09-09)
 
 ##### ✨ features and improvements
 
@@ -10,12 +10,9 @@
 - **BREAKING:** due to
   [`addSource()`](https://r-spatial.github.io/deckglgeoarrow/reference/addSource.md)
   a new argument `source` has been added to all layers.
-
-##### 🐛 bug fixes
-
-##### 💬 documentation etc
-
-##### 🍬 miscellaneous
+- update `@geoarrow/deck.gl-geoarrow` to version 0.4.2
+- add
+  [`addGeoArrowS2Layer()`](https://r-spatial.github.io/deckglgeoarrow/reference/addGeoArrowS2Layer.md)
 
 ## deckglgeoarrow 0.0.2 (2026-07-01)
 

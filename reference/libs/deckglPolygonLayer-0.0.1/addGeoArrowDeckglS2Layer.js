@@ -1,21 +1,29 @@
 addGeoArrowDeckglS2Layer = function(map, opts) {
 
+  // handle hex highlightColor - only if autoHighlight requested.
+  if (opts.renderOptions.autoHighlight &&
+    isHexColor(opts.renderOptions.highlightColor)) {
+      opts.renderOptions.highlightColor = hexToRGBABitwise(
+        opts.renderOptions.highlightColor
+      );
+    }
+
   // FIXME: turn into function for re-use across layer types
   // first we generate the proper internal layer name using the slot parameter
-  opts.decklayerId = "deck-layer-group-slot:" + opts.layerId
+  opts.decklayerId = "deck-layer-group-slot:" + opts.layerId;
 
   // then, if 'beforeId' is supplied we change accordingly. see
   // https://github.com/visgl/deck.gl/tree/master/modules/mapbox/src/resolve-layer-groups.ts#L13-L20
   if (opts.renderOptions.beforeId !== null) {
-    opts.decklayerId = "deck-layer-group-before:" + opts.renderOptions.beforeId
+    opts.decklayerId = "deck-layer-group-before:" + opts.renderOptions.beforeId;
   }
 
   // FIXME: turn into function for re-use across layer types
   // do we already have a deckgl mapboxoverlay on our map?
-  deckoverlay = map._controls.find((el) => el.hasOwnProperty("_deck"))
+  let deckoverlay = map._controls.find((el) => el.hasOwnProperty("_deck"));
 
   if (deckoverlay === undefined) {
-    deckoverlay = new deck.MapboxOverlay({
+    deckoverlay = new rdeckglgeoarrow.MapboxOverlay({
       id: "geoarrow-deck-layer",
       interleaved: opts.interleaved,
       layers: [],
@@ -45,13 +53,24 @@ addGeoArrowDeckglS2Layer = function(map, opts) {
     })
     .then(arrow_table => {
 
-      let s2layer = s2Layer(map, opts, arrow_table);
+      const s2layers = [];
+      let len = arrow_table.batches.length;
+      let batch = {};
+      let id = [];
+
+      for (let i = 0; i < len; i++) {
+
+        batch = arrow_table.batches[i];
+        id = `${opts.layerId}-${i}`;
+        s2layers.push(s2Layer(map, opts, batch, id));
+
+      }
 
       // does the mapboxoverlay already have layer(s)?
       if (deckoverlay._props.layers.length ===  0) {
-        deckoverlay.setProps({ layers: [s2layer] })
+        deckoverlay.setProps({ layers: s2layers });
       } else {
-        let lrs = deckoverlay._props.layers.concat(s2layer);
+        let lrs = deckoverlay._props.layers.concat(s2layers);
         lrs = lrs.sort(function(a, b) {
           return a.props.zIndex - b.props.zIndex;
         });
@@ -68,8 +87,7 @@ addGeoArrowDeckglS2Layer = function(map, opts) {
 };
 
 
-s2Layer = function(map, opts, table) {
-  let gaDeckLayers = window["@geoarrow/deck"]["gl-layers"];
+s2Layer = function(map, opts, table, id) {
 
   let table_names = table.schema.fields.map(obj => obj.name);
 
@@ -81,32 +99,24 @@ s2Layer = function(map, opts, table) {
     opts.tooltip = table_names;
   }
 
-  let layer = new gaDeckLayers.GeoArrowS2Layer({
-    id: opts.decklayerId,
+  let layer = new rdeckglgeoarrow.gaDeckLayers.GeoArrowS2Layer({
+     id: id,
     data: table,
-    getS2Token: table.getChild(opts.s2_column_name),
-    beforeId: opts.renderOptions.beforeId,
     slot: opts.layerId,
-    zIndex: opts.renderOptions.zIndex,
+    getS2Token: table.getChild(opts.s2_column_name),
 
     // render options
-    filled: opts.renderOptions.filled,
-    stroked: opts.renderOptions.stroked,
-    extruded: opts.renderOptions.extruded,
-    wireframe: opts.renderOptions.wireframe,
-    elevationScale: opts.renderOptions.elevationScale,
-    lineWidthUnits: opts.renderOptions.lineWidthUnits,
-    lineWidthScale: opts.renderOptions.lineWidthScale,
-    lineWidthMinPixels: opts.renderOptions.lineWidthMinPixels,
-    lineWidthMaxPixels: opts.renderOptions.lineWidthMaxPixels,
-    lineJointRounded: opts.renderOptions.lineJointRounded,
-    lineMiterLimit: opts.renderOptions.lineMiterLimit,
-    /*
-    material: opts.renderOptions.material,
-    _normalize: opts.renderOptions._normalize,
-    _windingOrder: opts.renderOptions._windingOrder,
-    //https://deck.gl/docs/developer-guide/performance#supply-attributes-directly
-    */
+    ...opts.renderOptions,
+
+    // interactivity
+    pickable: opts.pickable,
+
+    // GPU parameters (from luma.gl)
+    // see https://luma.gl/docs/api-reference/core/parameters for valid params
+    // this is currently mainly used to set 'depthCompare: "always"' to avoid
+    // z-fighting rendering issues. Passed via ... from R currently.
+    // (see https://github.com/developmentseed/lonboard/issues/1037)
+    parameters: opts.parameters,
 
     // data accessors
     getFillColor: table_names.includes(opts.dataAccessors.getFillColor) ?
@@ -132,16 +142,6 @@ s2Layer = function(map, opts, table) {
       ({ index, data }) => {
         return attributeAccessor(index, data, opts.dataAccessors.getElevation);
       } : opts.dataAccessors.getElevation === null ? 1 : opts.dataAccessors.getElevation,
-
-    // interactivity
-    pickable: opts.pickable,
-
-    // GPU parameters (from luma.gl)
-    // see https://luma.gl/docs/api-reference/core/parameters for valid params
-    // this is currently mainly used to set 'depthCompare: "always"' to avoid
-    // z-fighting rendering issues. Passed via ... from R currently.
-    // (see https://github.com/developmentseed/lonboard/issues/1037)
-    parameters: opts.parameters,
 
     onClick: opts.popup === null ? null : (info, event) => {
         let popup = clickFun(info, event, opts, "popup", opts.map_class);

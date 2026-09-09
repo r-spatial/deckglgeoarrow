@@ -134,41 +134,83 @@ which will plot the current layer underneath
 
 ``` r
 library(wk)
+library(s2)
 library(mapgl)
+
+## global coverage at S2 level 3
+n = 1e5
+
+pts = data.frame(
+  id = seq_len(n)
+  , geometry = xy(
+    x = runif(n, -180, 180)
+    , y = runif(n, -90, 90)
+    , crs = 4326
+  )
+)
+
+pts$s2cell = as_s2_cell(pts$geometry)
+pts$s2parent_l4 = as.character(s2_cell_parent(pts$s2cell, level = 3))
+pts$s2cell = as.character(pts$s2cell)
+
+sbs = pts[!duplicated(pts$s2parent_l4), ]
 
 style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 
 m = maplibre(style = style_positron)
 
-## single wk POLYGON
-pl = wkt("POLYGON ((30 10, 10 30, 40 40, 30 10))")
-
 m |>
-  addGeoArrowPolygonLayer(
-    data = pl
-    , render_options = renderOptions(
-      beforeId = "water"
+  addGeoArrowS2Layer(
+    data = sbs
+    , layer_id = "s2layer"
+    , s2_column_name = "s2parent_l4"
+    , data_accessors = dataAccessors(
+      getFillColor = "#74aa2380"
+      , getLineColor = "#4523bb"
+      , getLineWidth = 2
+    ),
+    render_options = renderOptions(
+      autoHighlight = TRUE
+    )
+  ) |>
+  set_view(c(0, 0), 2) |>
+  add_globe_control() |>
+  add_navigation_control(visualize_pitch = TRUE)
+
+{"x":{"style":"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[],"setCenter":[0,0],"setZoom":2,"globe_control":{"position":"top-right"},"navigation_control":{"show_compass":true,"show_zoom":true,"visualize_pitch":true,"position":"top-right","orientation":"vertical"}},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglS2Layer(map, data);\n      }","data":{"s2_column_name":"s2parent_l4","layerId":"s2layer","popup":null,"tooltip":null,"renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":false,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":null,"zIndex":1,"autoHighlight":true,"highlightColor":[0,0,128,128]},"dataAccessors":{"getRadius":null,"getColor":null,"getFillColor":"#74aa2380","getLineColor":"#4523bb","getLineWidth":2,"getElevation":null,"getWidth":null},"popupOptions":{"anchor":"bottom","className":"deckglgeoarrow-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"deckglgeoarrow-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"parameters":{"depthCompare":"always","cullMode":"back"},"map_class":"maplibregl","interleaved":true,"pickable":true}}]}}
+## S2 hierarchy for one point
+dat = data.frame(
+  token = as.character(
+    s2_cell_parent(
+      as_s2_cell(
+        s2_lnglat(-75.7019612, 45.4186427)
+      )
+      , level = 1:30
     )
   )
+  , elevation = seq(10, 1000, length.out = 30)
+  , fillColor = hcl.colors(30, palette = "inferno", alpha = 0.1)
+)
 
-{"x":{"style":"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[]},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglPolygonLayer(map, data);\n      }","data":{"geom_column_name":"geometry","layerId":"polygon","popup":null,"tooltip":null,"renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":false,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":"water","zIndex":1},"dataAccessors":{"getRadius":null,"getColor":null,"getFillColor":null,"getLineColor":null,"getLineWidth":null,"getElevation":null,"getWidth":null},"popupOptions":{"anchor":"bottom","className":"deckglgeoarrow-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"deckglgeoarrow-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"parameters":{"depthCompare":"always","cullMode":"back"},"map_class":"maplibregl","interleaved":true,"pickable":false}}]}}
-## remote parquet file
-## paste url together so CRAN check doesn't complain
-base_url = "https://raw.githubusercontent.com/geoarrow/"
-data_url = "geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries_native.parquet"
-url = paste0(base_url, data_url)
+m = maplibre()
 
 m |>
-  addGeoArrowPolygonLayer(
-    url = url
-    , geom_column_name = "geometry"
+  addGeoArrowS2Layer(
+    data = dat
+    , layer_id = "s2layer"
+    , s2_column_name = "token"
     , render_options = renderOptions(
-      extruded = FALSE
-      , stroked = TRUE
+      extruded = TRUE
+      , wireframe = TRUE
     )
-    , popup = TRUE
-    , tooltip = TRUE
-  )
+    , data_accessors = dataAccessors(
+      getFillColor = "fillColor"
+      , getElevation = "elevation"
+    )
+  ) |>
+  set_view(c(-45, 45), 1) |>
+  add_globe_control() |>
+  add_navigation_control(visualize_pitch = TRUE)
 
-{"x":{"style":"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[]},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglPolygonLayer(map, data);\n      }","data":{"geom_column_name":"geometry","layerId":"polygon","popup":true,"tooltip":true,"renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":false,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":null,"zIndex":1},"dataAccessors":{"getRadius":null,"getColor":null,"getFillColor":null,"getLineColor":null,"getLineWidth":null,"getElevation":null,"getWidth":null},"popupOptions":{"anchor":"bottom","className":"deckglgeoarrow-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"deckglgeoarrow-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"parameters":{"depthCompare":"always","cullMode":"back"},"map_class":"maplibregl","interleaved":true,"pickable":true}}]}}
+{"x":{"style":"https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json","center":[0,0],"zoom":0,"bearing":0,"pitch":0,"projection":"globe","additional_params":[],"setCenter":[-45,45],"setZoom":1,"globe_control":{"position":"top-right"},"navigation_control":{"show_compass":true,"show_zoom":true,"visualize_pitch":true,"position":"top-right","orientation":"vertical"}},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n        map = this.getMap();\n        addGeoArrowDeckglS2Layer(map, data);\n      }","data":{"s2_column_name":"token","layerId":"s2layer","popup":null,"tooltip":null,"renderOptions":{"radiusUnits":"pixels","radiusScale":1,"lineWidthUnits":"pixels","lineWidthScale":1,"stroked":true,"filled":true,"radiusMinPixels":3,"radiusMaxPixels":15,"lineWidthMinPixels":0,"lineWidthMaxPixels":15,"billboard":false,"antialiasing":false,"extruded":true,"wireframe":true,"elevationScale":1,"lineJointRounded":false,"lineMiterLimit":4,"widthUnits":"pixels","widthScale":1,"widthMinPixels":1,"widthMaxPixels":5,"capRounded":true,"jointRounded":false,"miterLimit":4,"beforeId":null,"zIndex":1,"autoHighlight":false,"highlightColor":[0,0,128,128]},"dataAccessors":{"getRadius":null,"getColor":null,"getFillColor":"fillColor","getLineColor":null,"getLineWidth":null,"getElevation":"elevation","getWidth":null},"popupOptions":{"anchor":"bottom","className":"deckglgeoarrow-popup","closeButton":true,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"tooltipOptions":{"anchor":"top-left","className":"deckglgeoarrow-tooltip","closeButton":false,"closeOnClick":false,"closeOnMove":false,"focusAfterOpen":true,"maxWidth":"none","offset":0,"subpixelPositioning":false},"parameters":{"depthCompare":"always","cullMode":"back"},"map_class":"maplibregl","interleaved":true,"pickable":false}}]}}
 ```

@@ -1,10 +1,12 @@
-# deckglgeoarrow 0.0.2.9010 (2026-07-14)
+# deckglgeoarrow 0.0.2.9022 (2026-09-09)
 
 #### ✨ features and improvements
 
   * new function `addSource()` to add a source that can be shared across layers.
   * **BREAKING:** due to `addSource()` a new argument `source` has been added to
     all layers.
+  * update `@geoarrow/deck.gl-geoarrow` to version 0.4.2
+  * add `addGeoArrowS2Layer()`
 
 #### 🐛 bug fixes
 

@@ -8,7 +8,7 @@ extJSLibs()
 }
 \value{
 A named character vector with the versions of the \code{Deck.gl}
-and \code{geoarrow-deckgl-layers} JavaScript libraries shipped with this package.
+and \verb{@geoarrow/deck.gl-layers} JavaScript libraries shipped with this package.
 }
 \description{
 Names and versions of the external JavaScript libraries used in
@@ -16,7 +16,7 @@ Names and versions of the external JavaScript libraries used in
 }
 \details{
 See e.g. \url{https://cdn.jsdelivr.net/npm/deck.gl/package.json}
-or \url{https://cdn.jsdelivr.net/npm/@geoarrow/deck.gl-layers/package.json}
+or \url{https://cdn.jsdelivr.net/npm/@geoarrow/deck.gl-geoarrow/package.json}
 for more details on the JavaScript depencencies.
 }
 \examples{

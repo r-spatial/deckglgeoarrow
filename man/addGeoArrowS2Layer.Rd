@@ -3,7 +3,7 @@
 \name{addGeoArrowS2Layer}
 \alias{addGeoArrowS2Layer}
 \title{Add Deck.gl S2Layer to a \code{\link[mapgl:maplibre]{mapgl::maplibre()}} or \code{\link[mapgl:mapboxgl]{mapgl::mapboxgl()}} map
-using blazing fast \code{\link[nanoarrow:read_nanoarrow]{nanoarrow::write_nanoarrow()}} data transfer.}
+using blazing fast \code{\link[nanoarrow:write_nanoarrow]{nanoarrow::write_nanoarrow()}} data transfer.}
 \usage{
 addGeoArrowS2Layer(
   map,
@@ -68,7 +68,7 @@ The modified \code{map} object with the added polygon layer.
 }
 \description{
 Add Deck.gl S2Layer to a \code{\link[mapgl:maplibre]{mapgl::maplibre()}} or \code{\link[mapgl:mapboxgl]{mapgl::mapboxgl()}} map
-using blazing fast \code{\link[nanoarrow:read_nanoarrow]{nanoarrow::write_nanoarrow()}} data transfer.
+using blazing fast \code{\link[nanoarrow:write_nanoarrow]{nanoarrow::write_nanoarrow()}} data transfer.
 }
 \details{
 \code{...} can be used to pass additional props and parameters to the deck.gl instance
@@ -86,39 +86,81 @@ See below for an example.
 }
 \examples{
 library(wk)
+library(s2)
 library(mapgl)
+
+## global coverage at S2 level 3
+n = 1e5
+
+pts = data.frame(
+  id = seq_len(n)
+  , geometry = xy(
+    x = runif(n, -180, 180)
+    , y = runif(n, -90, 90)
+    , crs = 4326
+  )
+)
+
+pts$s2cell = as_s2_cell(pts$geometry)
+pts$s2parent_l4 = as.character(s2_cell_parent(pts$s2cell, level = 3))
+pts$s2cell = as.character(pts$s2cell)
+
+sbs = pts[!duplicated(pts$s2parent_l4), ]
 
 style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 
 m = maplibre(style = style_positron)
 
-## single wk POLYGON
-pl = wkt("POLYGON ((30 10, 10 30, 40 40, 30 10))")
-
 m |>
-  addGeoArrowPolygonLayer(
-    data = pl
-    , render_options = renderOptions(
-      beforeId = "water"
+  addGeoArrowS2Layer(
+    data = sbs
+    , layer_id = "s2layer"
+    , s2_column_name = "s2parent_l4"
+    , data_accessors = dataAccessors(
+      getFillColor = "#74aa2380"
+      , getLineColor = "#4523bb"
+      , getLineWidth = 2
+    ),
+    render_options = renderOptions(
+      autoHighlight = TRUE
+    )
+  ) |>
+  set_view(c(0, 0), 2) |>
+  add_globe_control() |>
+  add_navigation_control(visualize_pitch = TRUE)
+
+## S2 hierarchy for one point
+dat = data.frame(
+  token = as.character(
+    s2_cell_parent(
+      as_s2_cell(
+        s2_lnglat(-75.7019612, 45.4186427)
+      )
+      , level = 1:30
     )
   )
+  , elevation = seq(10, 1000, length.out = 30)
+  , fillColor = hcl.colors(30, palette = "inferno", alpha = 0.1)
+)
 
-## remote parquet file
-## paste url together so CRAN check doesn't complain
-base_url = "https://raw.githubusercontent.com/geoarrow/"
-data_url = "geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries_native.parquet"
-url = paste0(base_url, data_url)
+m = maplibre()
 
 m |>
-  addGeoArrowPolygonLayer(
-    url = url
-    , geom_column_name = "geometry"
+  addGeoArrowS2Layer(
+    data = dat
+    , layer_id = "s2layer"
+    , s2_column_name = "token"
     , render_options = renderOptions(
-      extruded = FALSE
-      , stroked = TRUE
+      extruded = TRUE
+      , wireframe = TRUE
     )
-    , popup = TRUE
-    , tooltip = TRUE
-  )
+    , data_accessors = dataAccessors(
+      getFillColor = "fillColor"
+      , getElevation = "elevation"
+    )
+  ) |>
+  set_view(c(-45, 45), 1) |>
+  add_globe_control() |>
+  add_navigation_control(visualize_pitch = TRUE)
 
 }

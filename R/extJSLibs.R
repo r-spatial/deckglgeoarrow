@@ -4,12 +4,12 @@
 #' `deckglgeoarrow`.
 #'
 #' See e.g. \url{https://cdn.jsdelivr.net/npm/deck.gl/package.json}
-#' or \url{https://cdn.jsdelivr.net/npm/@geoarrow/deck.gl-layers/package.json}
+#' or \url{https://cdn.jsdelivr.net/npm/@geoarrow/deck.gl-geoarrow/package.json}
 #' for more details on the JavaScript depencencies.
 #'
 #' @returns
 #'   A named character vector with the versions of the `Deck.gl`
-#'   and `geoarrow-deckgl-layers` JavaScript libraries shipped with this package.
+#'   and `@geoarrow/deck.gl-layers` JavaScript libraries shipped with this package.
 #'
 #' @examples
 #' extJSLibs()
@@ -21,14 +21,25 @@
 #' @export
 extJSLibs = function() {
 
+  deckgl_fldr = system.file(
+    "htmlwidgets/lib/deckgl"
+    , package = "deckglgeoarrow"
+  )
+
+  deckglgeoarrow_fldr = system.file(
+    "htmlwidgets/lib/deckgl-geoarrow"
+    , package = "deckglgeoarrow"
+  )
+
+
   structure(
     c(
-      deckglgeoarrowDependencies()[[1]]$version
-      , deckglDependencies()[[1]]$version
+      readLines(file.path(deckglgeoarrow_fldr, "version.txt"))
+      , readLines(file.path(deckgl_fldr, "version.txt"))
     )
     , names = c(
-      deckglgeoarrowDependencies()[[1]]$name
-      , deckglDependencies()[[1]]$name
+      "@geoarrow/deck.gl-geoarrow"
+      , "Deck.gl"
     )
   )
 

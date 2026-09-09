@@ -1,12 +1,16 @@
 Package: deckglgeoarrow
 Title: Use 'GeoArrow' to Add 'Deck.gl' Layers to a 'maplibregl'/'mapboxgl' Map
-Version: 0.0.2.9010
+Version: 0.0.2.9022
 Authors@R:
     c(person(given = "Tim",
              family = "Appelhans",
              role = c("cre", "aut"),
              email = "tappelhans@tutamail.com",
              comment = c(ORCID = "0000-0002-9824-2707")),
+      person(given = "Kyle",
+             family = "Barron",
+             role = "ctb",
+             comment = "@geoarrow/deck-gl-geoarrow"),
       person("RConsortium", 
              role = "fnd",
              comment = c("https://r-consortium.org/", ROR = "01z833950")))
@@ -36,6 +40,7 @@ Suggests:
     geos,
     mapgl,
     quarto,
+    s2,
     terra,
     tinytest,
     wk
@@ -46,8 +51,8 @@ Roxygen: list(
     packages = "roxut",
     markdown = TRUE, 
     roclets = c("collate", "namespace", "rd", "roxut::tests_roclet"))
-RoxygenNote: 7.3.3
 URL: https://github.com/r-spatial/deckglgeoarrow, https://r-spatial.github.io/deckglgeoarrow/
 BugReports: https://github.com/r-spatial/deckglgeoarrow/issues
 SystemRequirements: Quarto command line tool
     (<https://github.com/quarto-dev/quarto-cli>).
+Config/roxygen2/version: 8.1.0

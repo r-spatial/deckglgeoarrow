@@ -218,6 +218,18 @@ addGeoArrowPathLayer = function(
 
   map$dependencies = c(
     map$dependencies
+    # , importDependencies()
+    # , deckglgeoarrowModuleDependency()
+    , rdeckglgeoarrowDependencies()
+    , helpersDependency()
+  )
+
+  map = geoarrowWidget::attachParquetWasmDependencies(
+    widget = map
+  )
+
+  map$dependencies = c(
+    map$dependencies
     , list(
       htmltools::htmlDependency(
         name = "deckglPathLayer"
@@ -226,15 +238,6 @@ addGeoArrowPathLayer = function(
         , script = "addGeoArrowDeckglPathLayer.js"
       )
     )
-  )
-
-  map$dependencies = c(
-    map$dependencies
-    , if (!inherits(map, "mapdeck")) deckglDependencies()
-  )
-
-  map = geoarrowWidget::attachParquetWasmDependencies(
-    widget = map
   )
 
   if (missing(source)) {
@@ -248,12 +251,6 @@ addGeoArrowPathLayer = function(
   } else {
     layer_id = source
   }
-
-  map$dependencies = c(
-    map$dependencies
-    , deckglgeoarrowDependencies()
-    , helpersDependency()
-  )
 
   if (missing(js_code)) {
     js_code = htmlwidgets::JS(
@@ -287,7 +284,11 @@ addGeoArrowPathLayer = function(
     )
     , map_class = map_class
     , interleaved = TRUE
-    , pickable = any(pickable(popup), pickable(tooltip))
+    , pickable = any(
+      pickable(popup)
+      , pickable(tooltip)
+      , render_options[["autoHighlight"]]
+    )
   )
 
   dot_lst = list(...)

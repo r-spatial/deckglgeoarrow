@@ -20,8 +20,14 @@ Useful links:
 \author{
 \strong{Maintainer}: Tim Appelhans \email{tappelhans@tutamail.com} (\href{https://orcid.org/0000-0002-9824-2707}{ORCID})
 
+Authors:
+\itemize{
+  \item Tim Appelhans \email{tappelhans@tutamail.com} (\href{https://orcid.org/0000-0002-9824-2707}{ORCID})
+}
+
 Other contributors:
 \itemize{
+  \item Kyle Barron (@geoarrow/deck-gl-geoarrow) [contributor]
   \item RConsortium (\href{https://ror.org/01z833950}{ROR}) (https://r-consortium.org/) [funder]
 }
 

@@ -277,25 +277,33 @@ addGeoArrowScatterplotLayer = function(
     , ...
 ) {
 
-  map$dependencies = c(
-    map$dependencies
-    , list(
-      htmltools::htmlDependency(
-        name = "deckglScatterplot"
-        , version = "0.0.1"
-        , src = system.file("htmlwidgets", package = "deckglgeoarrow")
-        , script = "addGeoArrowDeckglScatterplotLayer.js"
-      )
-    )
-  )
+  stopifnot(requireNamespace("geoarrow", quietly = TRUE))
 
   map$dependencies = c(
     map$dependencies
-    , if (!inherits(map, "mapdeck")) deckglDependencies()
+    # , importDependencies()
+    # , deckglgeoarrowModuleDependency()
+    , rdeckglgeoarrowDependencies()
+    , helpersDependency()
   )
 
   map = geoarrowWidget::attachParquetWasmDependencies(
     widget = map
+  )
+
+  map$dependencies = c(
+    map$dependencies
+    , list(
+      htmltools::htmlDependency(
+        name = "deckglgeoarrowScatterplot"
+        , version = "0.0.1"
+        , src = system.file("htmlwidgets", package = "deckglgeoarrow")
+        , script = list(
+          src = "addGeoArrowDeckglScatterplotLayer.js"
+          # , type = "module"
+        )
+      )
+    )
   )
 
   if (missing(source)) {
@@ -310,18 +318,12 @@ addGeoArrowScatterplotLayer = function(
     layer_id = source
   }
 
-  map$dependencies = c(
-    map$dependencies
-    , deckglgeoarrowDependencies()
-    , helpersDependency()
-  )
-
   if (missing(js_code)) {
     js_code = htmlwidgets::JS(
-      "function(el, x, data) {
+      'function(el, x, data) {
         map = this.getMap();
         addGeoArrowDeckglScatterplotLayer(map, data);
-      }"
+      }'
     )
   }
 
@@ -348,7 +350,11 @@ addGeoArrowScatterplotLayer = function(
     )
     , map_class = map_class
     , interleaved = TRUE
-    , pickable = any(pickable(popup), pickable(tooltip))
+    , pickable = any(
+      pickable(popup)
+      , pickable(tooltip)
+      , render_options[["autoHighlight"]]
+    )
   )
 
   dot_lst = list(...)

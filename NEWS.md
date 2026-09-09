@@ -5,8 +5,8 @@
   * new function `addSource()` to add a source that can be shared across layers.
   * **BREAKING:** due to `addSource()` a new argument `source` has been added to
     all layers.
-  * update `deck.gl-geoarrow` to version 0.4.1
-  * add `addGeoArrowS2Layer`
+  * update `@geoarrow/deck.gl-geoarrow` to version 0.4.2
+  * add `addGeoArrowS2Layer()`
 
 #### 🐛 bug fixes
 

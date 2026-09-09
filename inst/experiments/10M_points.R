@@ -29,10 +29,15 @@ dat$lineWidth = sample.int(5, nrow(dat), replace = TRUE)
 options(viewer = NULL)
 
 m = maplibre(style = style_positron)
+m = m |>
+  addSource(
+    id = "points"
+    , data = dat
+  )
 
 m |>
   addGeoArrowScatterplotLayer(
-    data = dat
+    source = "points"
     , layer_id = "scatter"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(
@@ -55,7 +60,7 @@ m |>
     )
   ) |>
   addGeoArrowScatterplotLayer(
-    data = dat
+    source = "points"
     , layer_id = "scatter2"
     , geom_column_name = attr(dat, "sf_column")
     , render_options = renderOptions(

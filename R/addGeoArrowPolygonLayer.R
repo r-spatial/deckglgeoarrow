@@ -223,7 +223,7 @@ addGeoArrowPolygonLayer = function(
     , helpersDependency()
   )
 
-  map = geoarrowWidget::attachParquetWasmDependencies(
+  map = geoarrowWidget::attachGeoParquetWasmDependencies(
     widget = map
   )
 

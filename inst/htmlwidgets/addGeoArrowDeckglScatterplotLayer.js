@@ -47,7 +47,7 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
       if (opts.extension_type === "arrow") {
         return Arrow.tableFromIPC(result);
       } else if (opts.extension_type === "parquet") {
-        return window.parquet2arrow(result);
+        return window.geoparquet2arrow(result);
       } else {
         console.warn("extension type not supported, need 'geoarrow' or 'geoparquet'");
       }

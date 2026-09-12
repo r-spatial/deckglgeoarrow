@@ -15,6 +15,10 @@ parseGeoarrow = function(
     return(data)
   }
 
+  if (inherits(data, "duckspatial_df")) {
+    return(nanoarrow::as_nanoarrow_array_stream(data, native = TRUE))
+  }
+
   if (inherits(data, "SpatVector")) {
     stopifnot(
       "need package 'terra' to handle 'SpatVector'" =

@@ -12,7 +12,7 @@ data source to.}
 
 \item{id}{a unique \code{ID} for the data source.}
 
-\item{data}{a \code{sf}, \code{wk}, \code{geos} or \code{SpatVector} object.}
+\item{data}{a \code{sf}, \code{wk}, \code{geos}, \code{SpatVector} or \code{duckspatial_df} object.}
 
 \item{file}{a valid local file path to a \code{geoarrow} or \code{geoparquet} file to be
 added to the map. Ignored if \code{data} is supplied.}

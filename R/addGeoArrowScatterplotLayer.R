@@ -281,18 +281,8 @@ addGeoArrowScatterplotLayer = function(
 
   map$dependencies = c(
     map$dependencies
-    # , importDependencies()
-    # , deckglgeoarrowModuleDependency()
     , rdeckglgeoarrowDependencies()
     , helpersDependency()
-  )
-
-  map = geoarrowWidget::attachGeoParquetWasmDependencies(
-    widget = map
-  )
-
-  map = geoarrowWidget::attachFlatgeobufWasmDependencies(
-    widget = map
   )
 
   map$dependencies = c(
@@ -304,7 +294,6 @@ addGeoArrowScatterplotLayer = function(
         , src = system.file("htmlwidgets", package = "deckglgeoarrow")
         , script = list(
           src = "addGeoArrowDeckglScatterplotLayer.js"
-          # , type = "module"
         )
       )
     )

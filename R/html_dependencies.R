@@ -37,3 +37,28 @@ helpersDependency = function() {
     )
   )
 }
+
+attachWasmDependencies = function(widget, file_extension) {
+
+  # no wasm dependency needed if (geo)arrow
+  if (file_extension == "arrow") {
+    widget = geoarrowWidget::attachGeoarrowDependencies(
+      widget = widget
+    )
+  }
+
+  if (file_extension == "parquet") {
+    widget = geoarrowWidget::attachGeoParquetWasmDependencies(
+      widget = widget
+    )
+  }
+
+  if (file_extension == "fgb") {
+    widget = geoarrowWidget::attachFlatgeobufWasmDependencies(
+      widget = widget
+    )
+  }
+
+  return(widget)
+
+}

@@ -160,3 +160,16 @@ function guessExtension(filename) {
   }
   return null;
 }
+
+function parse2ArrowTable(res, ext) {
+  if (ext === "arrow") {
+    return Arrow.tableFromIPC(res);
+  } else if (ext === "parquet") {
+    return window.geoparquet2arrow(res);
+  } else if (ext === "fgb") {
+    return window.fgb2arrow(res);
+  } else {
+    console.warn("extension type not supported, need 'geoarrow' or 'geoparquet'");
+    return null;
+  }
+}

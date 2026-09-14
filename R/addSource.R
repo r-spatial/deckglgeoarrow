@@ -79,5 +79,9 @@ addSource = function(
     , name = id
   )
 
+  ## check and apply if we need to attach wasm deps for file/url
+  file_ext = guessFileExtension(data, file, url)
+  map = attachWasmDependencies(map, file_ext)
+
   return(map)
 }

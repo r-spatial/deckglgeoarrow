@@ -77,5 +77,3 @@ m |>
   set_view(c(-45, 45), 1) |>
   add_globe_control() |>
   add_navigation_control(visualize_pitch = TRUE)
-
-m

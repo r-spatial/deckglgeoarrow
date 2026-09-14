@@ -75,6 +75,38 @@ pickable = function(x) {
   isTRUE(x) || is.character(x)
 }
 
+
+
+## helper to guess (remote url) file extension -> moved to JavaScript helpers
+guessFileExtension = function(data, file, url) {
+
+  if (!missing(data)) {
+    ## if data is present, we write .arrow
+    return("arrow")
+  }
+
+  if (!missing(file)) {
+    return(file_extension_map[[tools::file_ext(file)]])
+  }
+
+  if (!missing(url)) {
+    return(file_extension_map[[tools::file_ext(url)]])
+  }
+
+  stop("need 'data', file' or 'url'!", call. = FALSE)
+
+}
+
+file_extension_map = list(
+  "arrow" = "arrow"
+  , "geoarrow" = "arrow"
+  , "arrows" = "arrow"
+  , "parquet" = "parquet"
+  , "geoparquet" = "parquet"
+  , "fgb" = "fgb"
+)
+
+
 # ## helper to write nanoarrow IPC stream to tempfile - deprecated
 # writeGeoarrow = function(
 #     data
@@ -147,33 +179,3 @@ pickable = function(x) {
 #   return(path)
 #
 # }
-
-
-
-# ## helper to guess (remote url) file extension -> moved to JavaScript helpers
-# guessFileExtension = function(data, file, url) {
-#
-#   if (!missing(data)) {
-#     ## if data is present, we write .arrow
-#     return("arrow")
-#   }
-#
-#   if (!missing(file)) {
-#     return(file_extension_map[[tools::file_ext(file)]])
-#   }
-#
-#   if (!missing(url)) {
-#     return(file_extension_map[[tools::file_ext(url)]])
-#   }
-#
-#   stop("need 'data', file' or 'url'!", call. = FALSE)
-#
-# }
-#
-# file_extension_map = list(
-#   "arrow" = "arrow"
-#   , "geoarrow" = "arrow"
-#   , "arrows" = "arrow"
-#   , "parquet" = "parquet"
-#   , "geoparquet" = "parquet"
-# )

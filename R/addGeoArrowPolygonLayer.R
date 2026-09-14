@@ -217,14 +217,8 @@ addGeoArrowPolygonLayer = function(
 
   map$dependencies = c(
     map$dependencies
-    # , importDependencies()
-    # , deckglgeoarrowModuleDependency()
     , rdeckglgeoarrowDependencies()
     , helpersDependency()
-  )
-
-  map = geoarrowWidget::attachGeoParquetWasmDependencies(
-    widget = map
   )
 
   map$dependencies = c(

@@ -28,7 +28,7 @@ addSource(map, id, data, file, url, ...)
 
 - data:
 
-  a `sf`, `wk`, `geos` or `SpatVector` object.
+  a `sf`, `wk`, `geos`, `SpatVector` or `duckspatial_df` object.
 
 - file:
 

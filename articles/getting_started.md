@@ -53,6 +53,14 @@ Putting this together, here’s example showing 1k points using
 
 library(mapgl)
 library(deckglgeoarrow)
+```
+
+    Warning: S3 methods 'addGeoArrowPointCloudLayer.mapboxgl',
+    'addGeoArrowPointCloudLayer.maplibregl' were declared in NAMESPACE but not
+    found
+
+``` r
+
 library(wk)
 
 style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'

@@ -1,5 +1,15 @@
 # Changelog
 
+## deckglgeoarrow 0.1.0.9001 (2026-09-14)
+
+##### ✨ features and improvements
+
+##### 🐛 bug fixes
+
+##### 💬 documentation etc
+
+##### 🍬 miscellaneous
+
 ## deckglgeoarrow 0.1.0 (2026-09-09)
 
 ##### ✨ features and improvements

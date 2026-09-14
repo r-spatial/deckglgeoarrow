@@ -291,6 +291,10 @@ addGeoArrowScatterplotLayer = function(
     widget = map
   )
 
+  map = geoarrowWidget::attachFlatgeobufWasmDependencies(
+    widget = map
+  )
+
   map$dependencies = c(
     map$dependencies
     , list(

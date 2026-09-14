@@ -156,6 +156,7 @@ function guessExtension(filename) {
     case 'arrows': return 'arrow';
     case 'parquet': return 'parquet';
     case 'geoparquet': return 'parquet';
+    case 'fgb': return 'fgb';
   }
   return null;
 }

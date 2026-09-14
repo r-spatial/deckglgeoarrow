@@ -29,10 +29,10 @@ rdeckglgeoarrowDependencies = function() {
 helpersDependency = function() {
   list(
     htmltools::htmlDependency(
-      "deckglgeoarrowHelpers"
+      "rdeckglgeoarrowHelpers"
       , '0.0.1'
       , src = system.file("htmlwidgets", package = "deckglgeoarrow")
-      , script = "deckglgeoarrowHelpers.js"
+      , script = "rdeckglgeoarrowHelpers.js"
       , stylesheet = 'css/deckglgeoarrow.css'
     )
   )

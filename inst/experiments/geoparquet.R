@@ -13,7 +13,8 @@ m = maplibre(style = style_positron)
 # scatter parquet
 m = m |>
   addGeoArrowScatterplotLayer(
-    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
+    url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.fgb"
+    # url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_native.parquet"
     , layer_id = "scatter"
     , geom_column_name = "geometry" # attr(dat, "sf_column")
     , render_options = renderOptions(

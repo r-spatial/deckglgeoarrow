@@ -17,10 +17,13 @@ pts = data.frame(
 )
 
 pts$s2cell = as_s2_cell(pts$geometry)
-pts$s2parent_l4 = as.character(s2_cell_parent(pts$s2cell, level = 3))
+pts$s2parent_l3 = as.character(s2_cell_parent(pts$s2cell, level = 3))
+pts$s2parent_l4 = as.character(s2_cell_parent(pts$s2cell, level = 4))
+pts$s2parent_l5 = as.character(s2_cell_parent(pts$s2cell, level = 5))
+
 pts$s2cell = as.character(pts$s2cell)
 
-sbs = pts[!duplicated(pts$s2parent_l4), ]
+sbs = pts[!duplicated(pts$s2parent_l3), ]
 
 
 options(viewer = NULL)
@@ -28,14 +31,42 @@ options(viewer = NULL)
 m = maplibre(style = style_positron)
 
 m |>
+  addSource(
+    id = "s2cells"
+    , data = sbs
+  ) |>
   addGeoArrowS2Layer(
-    data = sbs
-    , layer_id = "s2layer"
-    , s2_column_name = "s2parent_l4"
+    source = "s2cells"
+    , layer_id = "s2layerl3"
+    , s2_column_name = "s2parent_l3"
     , data_accessors = dataAccessors(
       getFillColor = "#74aa2380"
       , getLineColor = "#4523bb"
       , getLineWidth = 2
+    )
+  ) |>
+  addGeoArrowS2Layer(
+    source = "s2cells"
+    , layer_id = "s2layerl4"
+    , s2_column_name = "s2parent_l4"
+    , data_accessors = dataAccessors(
+      getLineColor = "#990000"
+      , getLineWidth = 4
+    )
+    , render_options = renderOptions(
+      filled = FALSE
+    )
+  ) |>
+  addGeoArrowS2Layer(
+    source = "s2cells"
+    , layer_id = "s2layerl5"
+    , s2_column_name = "s2parent_l5"
+    , data_accessors = dataAccessors(
+      getLineColor = "#000000"
+      , getLineWidth = 2
+    )
+    , render_options = renderOptions(
+      filled = FALSE
     )
   ) |>
   set_view(c(0, 0), 2) |>

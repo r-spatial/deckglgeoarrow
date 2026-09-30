@@ -2,8 +2,6 @@
 
 S3method(addGeoArrowPathLayer,mapboxgl)
 S3method(addGeoArrowPathLayer,maplibregl)
-S3method(addGeoArrowPointCloudLayer,mapboxgl)
-S3method(addGeoArrowPointCloudLayer,maplibregl)
 S3method(addGeoArrowPolygonLayer,mapboxgl)
 S3method(addGeoArrowPolygonLayer,maplibregl)
 S3method(addGeoArrowS2Layer,mapboxgl)

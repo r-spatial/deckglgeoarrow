@@ -2,6 +2,8 @@
 
 #### ✨ features and improvements
 
+  * `nanoarrow_array` and `geoarrow_vctr` now supported.
+
 #### 🐛 bug fixes
 
 #### 💬 documentation etc

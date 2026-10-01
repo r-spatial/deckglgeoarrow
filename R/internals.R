@@ -11,7 +11,13 @@ parseGeoarrow = function(
     return()
   }
 
-  if (inherits(data, "nanoarrow_array_stream")) {
+  if (inherits(data, c("nanoarrow_array_stream", "nanoarrow_array"))) {
+    if (inherits(nanoarrow::infer_nanoarrow_ptype(data), "geoarrow_vctr")) {
+      data = concat_nanoarrow_cols(
+        id = nanoarrow::as_nanoarrow_array(1:data$length)
+        , geometry = data
+      )
+    }
     return(data)
   }
 
@@ -106,6 +112,22 @@ file_extension_map = list(
   , "fgb" = "fgb"
 )
 
+concat_nanoarrow_cols = function(...) {
+  cols = list(...)
+  names_cols = names(cols)
+
+  # Build struct schema from each column's type
+  fields = lapply(cols, function(col) nanoarrow::infer_nanoarrow_schema(col))
+  names(fields) = names_cols
+
+  schema = nanoarrow::na_struct(fields)
+  result = nanoarrow::nanoarrow_array_init(schema)
+  result$children = cols
+  result$length = cols[[1]]$length
+  result$null_count = cols[[1]]$null_count
+
+  return(result)
+}
 
 # ## helper to write nanoarrow IPC stream to tempfile - deprecated
 # writeGeoarrow = function(

@@ -8,7 +8,7 @@ style_positron = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 style_openfreemap = 'https://tiles.openfreemap.org/styles/liberty'
 
 ### points =========================
-n = 5e6
+n = 1e6
 dat = data.frame(
   id = 1:n
   , x = runif(n, -180, 180)
@@ -84,13 +84,6 @@ m |>
   set_view(c(0, 0), 3) |>
   add_globe_control() |>
   add_navigation_control(visualize_pitch = TRUE) |>
-  add_layers_control(
-    collapsible = TRUE
-    , layers = list(
-      "Scatter Layer 1" = "deck-layer-group-before:water"
-      , "Scatter Layer 2" = "deck-layer-group-slot:scatter2"
-    )
-  ) |>
   add_layers_control(
     collapsible = TRUE
     , layers = list(

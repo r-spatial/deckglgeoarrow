@@ -1,4 +1,5 @@
 addGeoArrowDeckglPolygonLayer = function(map, opts) {
+  enableGeoArrowLayerControl(map, opts.layerId);
 
   // handle hex highlightColor - only if autoHighlight requested.
   if (opts.renderOptions.autoHighlight &&
@@ -56,7 +57,9 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
 
         batch = arrow_table.batches[i];
         id = `${opts.layerId}-${i}`;
-        polygonlayers.push(polygonLayer(map, opts, batch, id));
+        polygonlayers.push(
+          applyGeoArrowLayerVisibility(map, opts.layerId, polygonLayer(map, opts, batch, id))
+        );
 
       }
 

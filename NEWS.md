@@ -3,6 +3,9 @@
 #### ✨ features and improvements
 
   * `nanoarrow_array` and `geoarrow_vctr` now supported.
+  * GeoArrow scatterplot, path, polygon, and S2 layers can be toggled from a
+    mapgl layers control with the visibility-provider API by listing their
+    overlay IDs explicitly (`layer_id`, or the source ID when `source` is used).
 
 #### 🐛 bug fixes
 

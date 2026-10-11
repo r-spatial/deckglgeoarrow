@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{generateDeckglLayerId}
 \alias{generateDeckglLayerId}
-\title{Generate proper internal layer IDs}
+\title{Generate internal Deck.gl layer IDs}
 \usage{
 generateDeckglLayerId(layer_id, beforeId = NULL)
 }
@@ -19,9 +19,15 @@ Character vector of internally used layer IDs.
 \description{
 Deck.gl injects layers into maplibre's canvas if \code{interleaved = TRUE} (the
 default in all layer functions provided here). To do so, it generates specific
-layer IDs from the \code{layer_id} provided. This function generates these deck.gl
-specific layer IDs on the R side, so they can be used in other controls, such
-as \code{\link[mapgl]{add_layers_control}}.
+layer IDs from the \code{layer_id} provided. This function generates these
+Deck.gl-specific IDs for controls that target the underlying MapLibre style
+layer groups. With a mapgl version that supports visibility providers, list
+the GeoArrow overlay ID explicitly in \code{mapgl::add_layers_control()} to
+toggle the Deck.gl layer. This ID is \code{layer_id}, unless \code{source} is
+supplied, in which case it is the source ID; GeoArrow layers sharing a
+source therefore share a selector entry. The layers control does not discover
+GeoArrow layers automatically. Use unique IDs so a GeoArrow overlay does not
+shadow a native mapgl style layer with the same ID.
 }
 \examples{
 generateDeckglLayerId("my_scatterplot_layer")

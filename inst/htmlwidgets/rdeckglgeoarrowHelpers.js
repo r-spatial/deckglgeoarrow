@@ -86,6 +86,64 @@ function attributeAccessor(index, data, property) {
   }
 }
 
+// Register GeoArrow's Deck.gl overlay as a visibility provider for mapgl's
+// layer selector. This keeps Deck.gl-specific visibility handling here while
+// mapgl owns the selector and provider dispatch.
+function enableGeoArrowLayerControl(map, layerId) {
+  if (map._geoArrowLayerControlEnabled) {
+    map._geoArrowLayerIds.add(layerId);
+    return;
+  }
+
+  map._geoArrowLayerVisibility = map._geoArrowLayerVisibility || {};
+  map._geoArrowLayerIds = map._geoArrowLayerIds || new Set();
+  map._geoArrowLayerIds.add(layerId);
+  if (!window.MapglLayersControl ||
+      typeof window.MapglLayersControl.registerLayerVisibilityProvider !== "function") {
+    return;
+  }
+
+  map._geoArrowVisibilityProvider = {
+    hasLayer: function (controlMap, id) {
+      return controlMap._geoArrowLayerIds.has(id);
+    },
+    getVisibility: function (controlMap, id) {
+      const states = controlMap._geoArrowLayerVisibility;
+      if (Object.prototype.hasOwnProperty.call(states, id)) {
+        return states[id] ? "visible" : "none";
+      }
+      const overlay = controlMap._controls.find((item) => item.hasOwnProperty("_deck"));
+      const deckLayer = overlay && overlay._props.layers.find(
+        (layer) => layer.props.slot === id
+      );
+      return deckLayer && deckLayer.props.visible === false ? "none" : "visible";
+    },
+    setVisibility: function (controlMap, id, visibility) {
+      const visible = visibility !== "none";
+      controlMap._geoArrowLayerVisibility[id] = visible;
+      const overlay = controlMap._controls.find((item) => item.hasOwnProperty("_deck"));
+      if (!overlay) {
+        return;
+      }
+      overlay.setProps({
+        layers: overlay._props.layers.map((layer) =>
+          layer.props.slot === id ? layer.clone({ visible }) : layer
+        )
+      });
+    }
+  };
+  window.MapglLayersControl.registerLayerVisibilityProvider(
+    map,
+    map._geoArrowVisibilityProvider
+  );
+  map._geoArrowLayerControlEnabled = true;
+}
+
+function applyGeoArrowLayerVisibility(map, layerId, layer) {
+  const visible = map._geoArrowLayerVisibility?.[layerId];
+  return visible === false ? layer.clone({ visible: false }) : layer;
+}
+
 function clickFun (info, event, opts, type, map_class) {
 
   let typeOptions = "popupOptions";

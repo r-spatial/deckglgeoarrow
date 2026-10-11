@@ -1,4 +1,5 @@
 addGeoArrowDeckglScatterplotLayer = function(map, opts) {
+  enableGeoArrowLayerControl(map, opts.layerId);
 
   // handle hex highlightColor - only if autoHighlight requested.
   if (opts.renderOptions.autoHighlight &&
@@ -57,7 +58,9 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
 
         batch = arrow_table.batches[i];
         id = `${opts.layerId}-${i}`;
-        scatterlayers.push(scatterplotLayer(map, opts, batch, id));
+        scatterlayers.push(
+          applyGeoArrowLayerVisibility(map, opts.layerId, scatterplotLayer(map, opts, batch, id))
+        );
 
       }
 

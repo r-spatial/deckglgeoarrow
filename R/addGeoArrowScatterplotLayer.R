@@ -307,8 +307,7 @@ addGeoArrowScatterplotLayer = function(
       , url = url
       , id = layer_id
     )
-  } else {
-    layer_id = source
+    source = layer_id
   }
 
   if (missing(js_code)) {
@@ -330,6 +329,7 @@ addGeoArrowScatterplotLayer = function(
 
   default_lst = list(
     geom_column_name = geom_column_name
+    , sourceId = source
     , layerId = layer_id
     , popup = popup
     , tooltip = tooltip

@@ -192,8 +192,7 @@ addGeoArrowS2Layer = function(
       , url = url
       , id = layer_id
     )
-  } else {
-    layer_id = source
+    source = layer_id
   }
 
   if (missing(js_code)) {
@@ -215,6 +214,7 @@ addGeoArrowS2Layer = function(
 
   default_lst = list(
     s2_column_name = s2_column_name
+    , sourceId = source
     , layerId = layer_id
     , popup = popup
     , tooltip = tooltip

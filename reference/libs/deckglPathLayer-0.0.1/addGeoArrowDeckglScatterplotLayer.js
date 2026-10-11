@@ -38,7 +38,7 @@ addGeoArrowDeckglScatterplotLayer = function(map, opts) {
   }
 
   // find the attached arrow data, fetch and inject into the mapboxoverlay
-  let data_fl = document.getElementById(opts.layerId + '-geoarrowWidget-attachment');
+  let data_fl = document.getElementById(opts.sourceId + '-geoarrowWidget-attachment');
 
   opts.extension_type = guessExtension(data_fl.href);
 

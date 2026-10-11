@@ -30,8 +30,8 @@ addGeoArrowDeckglPathLayer = function(map, opts) {
     map.addControl(deckoverlay);
   }
 
-
-  let data_fl = document.getElementById(opts.layerId + '-geoarrowWidget-attachment');
+  // find the attached arrow data, fetch and inject into the mapboxoverlay
+  let data_fl = document.getElementById(opts.sourceId + '-geoarrowWidget-attachment');
 
   opts.extension_type = guessExtension(data_fl.href);
 

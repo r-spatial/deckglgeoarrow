@@ -41,37 +41,8 @@ addGeoArrowDeckglPolygonLayer = function(map, opts) {
 
   opts.extension_type = guessExtension(data_fl.href);
 
-  fetch(data_fl.href)
-    .then(result => {
-      return parse2ArrowTable(result, opts.extension_type);
-    })
-    .then(arrow_table => {
-
-      const polygonlayers = [];
-      let len = arrow_table.batches.length;
-      let batch = {};
-      let id = [];
-
-      for (let i = 0; i < len; i++) {
-
-        batch = arrow_table.batches[i];
-        id = `${opts.layerId}-${i}`;
-        polygonlayers.push(polygonLayer(map, opts, batch, id));
-
-      }
-
-      // does the mapboxoverlay already have layer(s)?
-      if (deckoverlay._props.layers.length ===  0) {
-        deckoverlay.setProps({ layers: polygonlayers })
-      } else {
-        let lrs = deckoverlay._props.layers.concat(polygonlayers);
-        lrs = lrs.sort(function(a, b) {
-          return a.props.zIndex - b.props.zIndex;
-        });
-        deckoverlay.setProps({ layers: lrs });
-      }
-
-    });
+  loadGeoArrowLayers(deckoverlay, data_fl.href, opts,
+    (batch, id) => polygonLayer(map, opts, batch, id));
 
   map.on("projectiontransition", () => {
     deckoverlay._updateViewState();

@@ -32,7 +32,10 @@ helpersDependency = function() {
       "rdeckglgeoarrowHelpers"
       , '0.0.1'
       , src = system.file("htmlwidgets", package = "deckglgeoarrow")
-      , script = "rdeckglgeoarrowHelpers.js"
+      , script = c(
+        "rdeckglgeoarrowHelpers.js"
+        , "progressiveArrowBatches.js"
+      )
       , stylesheet = 'css/deckglgeoarrow.css'
     )
   )
